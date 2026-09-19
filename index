@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>REP RUSH — il gioco delle reps · sponsorizzato da RIZZITGO</title>
+<meta name="description" content="Compra, ispeziona, vendi. Il gioco di resselle, QC e truffe dal mercato di Guangzhou. Singleplayer, sfida quotidiana e stanze private con codice.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS & RESET ============ */
+:root{
+  --ink:#141210; --ink2:#1B1815; --ink3:#221E1A;
+  --line:#3A342D; --line2:#4A443B;
+  --paper:#F2EDE2; --paper-dim:#E4DDCC; --dim:#9A917F;
+  --orange:#FF5A1E; --orange-deep:#D9430E;
+  --red:#D63A22; --green:#3F9B5F; --green-deep:#2E7D46;
+  --hazard:#FFC53D;
+  --disp:'Anton',sans-serif; --body:'Space Grotesk',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:clip}
+body{
+  background:var(--ink); color:var(--paper); font-family:var(--body);
+  min-height:100vh; font-size:16px; line-height:1.5;
+  padding:8px 0;
+}
+::selection{background:var(--orange);color:var(--ink)}
+button{font-family:inherit;cursor:pointer;user-select:none}
+input{font-family:inherit}
+img,svg,canvas{display:block}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.disp{font-family:var(--disp);text-transform:uppercase;letter-spacing:.02em;font-weight:400}
+.mono{font-family:var(--mono)}
+.dim{color:var(--dim)}
+.ic{width:1.05em;height:1.05em;vertical-align:-.15em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* noise + hazard stripes */
+.noise{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.hz{position:fixed;left:0;right:0;height:8px;z-index:150;pointer-events:none;
+  background:repeating-linear-gradient(45deg,var(--hazard) 0 14px,var(--ink) 14px 28px)}
+.hz.top{top:0}.hz.bottom{bottom:0}
+
+#app{min-height:calc(100vh - 16px)}
+.screen{display:none}
+.screen.active{display:block;animation:scrIn .35s ease both}
+@keyframes scrIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.container{max-width:1180px;margin:0 auto;padding:26px 20px 90px}
+
+/* ============ BOTTONI ============ */
+.btn{
+  font-family:var(--disp);text-transform:uppercase;letter-spacing:.05em;
+  background:transparent;color:var(--paper);border:2px solid var(--paper);
+  padding:12px 20px;font-size:15px;line-height:1;transition:transform .12s,background .15s,color .15s,border-color .15s;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px
+}
+.btn:hover:not(:disabled){transform:translate(-1px,-2px)}
+.btn:active:not(:disabled){transform:translate(1px,1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-orange{background:var(--orange);border-color:var(--orange);color:var(--ink)}
+.btn-orange:hover:not(:disabled){background:var(--orange-deep);border-color:var(--orange-deep);color:var(--paper)}
+.btn-ink{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.btn-icon{background:none;border:2px solid var(--line);color:var(--paper);width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
+.btn-icon svg{width:20px;height:20px}
+
+/* ============ TIMBRI ============ */
+.stamp{
+  font-family:var(--disp);text-transform:uppercase;letter-spacing:.08em;
+  border:3px double currentColor;padding:4px 14px;display:inline-block;
+  transform:rotate(-8deg);opacity:.94;white-space:nowrap
+}
+.stamp-in{animation:stampIn .38s cubic-bezier(.2,2.1,.4,1) both}
+@keyframes stampIn{0%{transform:rotate(-8deg) scale(2.3);opacity:0}60%{transform:rotate(-8deg) scale(.94);opacity:1}100%{transform:rotate(-8deg) scale(1);opacity:.94}}
+
+/* ============ BARCODE / TAPE ============ */
+.barcode{display:flex;gap:2px;height:26px;margin:10px 0 2px;width:max-content;max-width:100%;overflow:hidden}
+.barcode i{background:currentColor;width:2px;flex:none}
+.barcode + .bc-num{font-family:var(--mono);font-size:10px;letter-spacing:.35em;opacity:.7}
+.tape{position:absolute;top:-12px;left:50%;width:92px;height:26px;background:rgba(255,90,30,.88);
+  transform:translateX(-50%) rotate(-2.5deg);box-shadow:0 2px 4px rgba(0,0,0,.35);z-index:2}
+.tape.t2{transform:translateX(-50%) rotate(1.5deg);width:70px}
+
+/* ============ TOAST ============ */
+#toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;width:min(480px,92vw)}
+.toast{background:var(--ink3);border:2px solid var(--orange);color:var(--paper);padding:12px 16px;
+  font-family:var(--mono);font-size:13px;animation:toastIn .25s ease both;box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+.toast.bad{border-color:var(--red)}
+.toast.good{border-color:var(--green)}
+.toast.out{opacity:0;transform:translateY(-8px);transition:.4s}
+@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+
+/* ============ HOME ============ */
+.home-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0 0;max-width:1180px;margin:0 auto}
+.sponsor-chip{display:inline-flex;align-items:center;gap:10px;border:2px solid var(--line);padding:6px 14px 6px 8px;
+  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim)}
+.sponsor-chip b{color:var(--orange);letter-spacing:.14em}
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:40px 0 20px}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--orange);margin-bottom:14px}
+h1.title{font-family:var(--disp);font-size:clamp(70px,12.5vw,148px);line-height:.88;text-transform:uppercase;letter-spacing:.01em}
+h1.title .r2{color:transparent;-webkit-text-stroke:3px var(--orange)}
+@supports not (-webkit-text-stroke:1px black){h1.title .r2{color:var(--orange)}}
+.tagline{font-size:19px;font-weight:500;margin:16px 0 4px}
+.tagline b{color:var(--orange)}
+.hero-sub{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.1em;margin-bottom:26px}
+.nick-row{display:flex;gap:10px;align-items:stretch;margin-bottom:22px;flex-wrap:wrap}
+.nick-row label{align-self:center;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.12em}
+#nick-in{background:var(--ink2);border:2px solid var(--line);color:var(--paper);font-family:var(--mono);
+  font-size:15px;padding:11px 14px;width:230px;letter-spacing:.05em}
+#nick-in::placeholder{color:#5c5548}
+.modes{border:2px solid var(--line)}
+.mode-row{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:none;border:none;
+  color:var(--paper);padding:16px 18px;border-bottom:2px solid var(--line);transition:.15s}
+.mode-row:last-child{border-bottom:none}
+.mode-row .m-arrow{font-family:var(--disp);font-size:22px;color:var(--orange);transition:.15s}
+.mode-row .m-tit{font-family:var(--disp);font-size:20px;letter-spacing:.04em;text-transform:uppercase}
+.mode-row .m-sub{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:2px}
+.mode-row:hover{background:var(--orange);color:var(--ink)}
+.mode-row:hover .m-sub{color:var(--ink)}
+.mode-row:hover .m-arrow{transform:translateX(6px);color:var(--ink)}
+
+/* waybill decorativa hero */
+.wb-deco{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:24px 24px 18px;
+  position:relative;transform:rotate(2deg);box-shadow:10px 10px 0 rgba(0,0,0,.55);animation:bob 7s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-9px)}}
+.wb-deco .wb-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px}
+.wb-deco .wb-head b{font-family:var(--disp);font-size:21px;letter-spacing:.03em}
+.wb-deco .wb-head span{font-family:var(--mono);font-size:10px;letter-spacing:.15em}
+.wb-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:14px 0;font-family:var(--mono)}
+.wb-fields span{display:block;font-size:9.5px;letter-spacing:.14em;color:#6b6152}
+.wb-fields b{font-size:14px;font-weight:700}
+.wb-qr-row{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;margin-top:6px}
+.wb-stamp{position:absolute;right:14px;bottom:66px;color:var(--red);font-size:15px;transform:rotate(-11deg)}
+
+/* manifesto come si gioca */
+.steps-wrap{margin-top:56px}
+.sec-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--orange);margin-bottom:8px}
+.steps{border:2px solid var(--line);background:var(--ink2)}
+.step{display:grid;grid-template-columns:86px 1fr;gap:18px;padding:22px 24px;border-bottom:2px dashed var(--line);align-items:start}
+.step:last-child{border-bottom:none}
+.step .num{font-family:var(--disp);font-size:44px;line-height:1;color:var(--orange)}
+.step h4{font-family:var(--disp);font-size:21px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
+.step p{color:var(--dim);font-size:14.5px;max-width:640px}
+.step p b{color:var(--paper)}
+
+/* footer sponsor */
+.sponsor-foot{margin-top:64px;border:2px solid var(--line);background:var(--ink2);padding:28px 26px;position:relative}
+.sponsor-foot .sp-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.sponsor-foot .sp-name{font-family:var(--disp);font-size:clamp(38px,6vw,64px);line-height:.95;letter-spacing:.02em}
+.sponsor-foot .sp-name em{font-style:normal;color:var(--orange)}
+.sponsor-foot .sp-desc{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.06em;max-width:330px}
+.sponsor-foot .sp-quote{margin-top:14px;font-size:16px;font-weight:500}
+.sponsor-foot .sp-quote b{color:var(--orange)}
+.disclaimer{margin-top:26px;font-family:var(--mono);font-size:10.5px;color:#6b6455;letter-spacing:.04em;max-width:760px}
+
+/* ============ LOBBY ============ */
+.lobby .container{max-width:860px}
+.lobby h2{font-size:clamp(40px,7vw,64px);margin:18px 0 10px}
+.lobby-sub{color:var(--dim);max-width:640px;margin-bottom:28px}
+.lobby-sub b{color:var(--paper)}
+.ticket{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:28px;position:relative;
+  display:grid;grid-template-columns:1.3fr .7fr;gap:24px;box-shadow:10px 10px 0 rgba(0,0,0,.55);transform:rotate(-.4deg)}
+.ticket label{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:#6b6152;display:block;margin-bottom:6px}
+.ticket-row{display:flex;gap:10px;flex-wrap:wrap}
+#room-in{font-family:var(--mono);font-size:clamp(26px,4.5vw,38px);font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+  border:2px solid var(--ink);background:var(--paper-dim);padding:8px 14px;width:250px;color:var(--ink)}
+#room-in::placeholder{color:#a49a86;font-size:20px;letter-spacing:.05em}
+.ticket .btn{border-color:var(--ink);color:var(--ink)}
+.ticket .btn:hover:not(:disabled){background:var(--ink);color:var(--paper)}
+.btn-orange.big{width:100%;margin-top:20px;font-size:19px;padding:16px}
+.ticket-note{font-family:var(--mono);font-size:11px;color:#6b6152;margin-top:12px;letter-spacing:.03em}
+.ticket-fields{display:flex;gap:26px;margin-top:22px;border-top:2px dashed var(--ink);padding-top:14px}
+.ticket-fields span{display:block;font-size:9.5px;letter-spacing:.14em;color:#6b6152}
+.ticket-fields b{font-size:14px}
+.ticket-r{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-left:2px dashed var(--ink);padding-left:10px}
+.ticket-r canvas{width:158px;height:158px;image-rendering:pixelated}
+.ticket-r span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:#6b6152;text-align:center;line-height:1.6}
+#lobby-board{margin-top:34px}
+
+/* ============ GAME ============ */
+.gbar{position:sticky;top:8px;z-index:60;background:var(--ink);border-bottom:2px solid var(--orange);
+  display:flex;align-items:center;gap:14px;padding:10px 16px;flex-wrap:wrap}
+.gbar .g-logo{font-family:var(--disp);font-size:21px;letter-spacing:.03em;white-space:nowrap}
+.gbar .g-logo em{font-style:normal;color:var(--orange)}
+.mode-tag{font-size:10px;letter-spacing:.14em;border:1px solid var(--line2);padding:3px 8px;color:var(--dim);white-space:nowrap}
+.ticker{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 0;order:3;flex-basis:100%}
+.ticker::-webkit-scrollbar{display:none}
+@media(min-width:860px){.ticker{order:0;flex-basis:auto}}
+.tk{white-space:nowrap;font-size:12px;border:1px solid var(--line);padding:5px 11px;flex:none}
+.tk b{letter-spacing:.05em}
+.tk .up{color:#7fd394}.tk .down{color:#e0705a}
+.tk.flash-up{animation:flashUp 1.2s ease}
+.tk.flash-down{animation:flashDown 1.2s ease}
+@keyframes flashUp{0%{background:rgba(63,155,95,.4)}100%{background:transparent}}
+@keyframes flashDown{0%{background:rgba(214,58,34,.4)}100%{background:transparent}}
+.g-cash{font-family:var(--mono);font-weight:700;font-size:18px;white-space:nowrap}
+.g-cash.cash-up{animation:flashUp 1s}
+.g-cash.cash-dn{animation:flashDown 1s}
+
+.game-grid{display:grid;grid-template-columns:1fr 336px;gap:22px;align-items:start;max-width:1180px;margin:0 auto;padding:22px 18px 100px}
+.dayline{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.dayline .d-lab{font-family:var(--disp);font-size:20px;white-space:nowrap}
+.dayline .d-lab em{font-style:normal;color:var(--orange)}
+.segs{flex:1;display:flex;gap:5px}
+.seg{flex:1;height:8px;background:var(--line);transition:.3s}
+.seg.done{background:var(--orange)}
+.seg.now{background:var(--hazard);animation:nowBlink 1.4s ease infinite}
+@keyframes nowBlink{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* bollettino */
+.bulletin{border:2px solid var(--line);background:var(--ink2);padding:20px 22px 18px;position:relative;margin-bottom:20px}
+.b-tag{position:absolute;top:-11px;left:14px;background:var(--hazard);color:var(--ink);font-family:var(--disp);
+  font-size:11px;letter-spacing:.12em;padding:3px 10px}
+.b-tit{font-family:var(--disp);font-size:24px;letter-spacing:.03em;margin-bottom:6px;text-transform:uppercase}
+.b-msg{color:#cfc7b6;font-size:15px;max-width:680px}
+.b-msg b{color:var(--paper)}
+.b-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chip{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border:2px solid}
+.chip-up{color:#7fd394;border-color:var(--green-deep)}
+.chip-down{color:#e0705a;border-color:var(--red)}
+.chip-cost{background:var(--hazard);color:var(--ink);border-color:var(--hazard)}
+.rz-note{display:flex;gap:12px;align-items:flex-start;margin-top:16px;border-top:2px dashed var(--line);padding-top:14px}
+.rz-note div{font-size:13.5px;color:#cfc7b6}
+.rz-note b{color:var(--orange);letter-spacing:.06em}
+
+/* arrivi */
+.arrivals{margin-bottom:20px}
+.sec-title{font-family:var(--disp);font-size:16px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.sec-title .ic{color:var(--orange);width:18px;height:18px}
+.arr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px}
+.arr{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:14px 16px;position:relative}
+.arr .arr-way{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#6b6152;margin-bottom:6px}
+.arr .arr-item{font-family:var(--disp);font-size:19px;letter-spacing:.02em;text-transform:uppercase}
+.arr .arr-val{font-family:var(--mono);font-size:12px;margin-top:8px;font-weight:700}
+.arr .arr-val em{font-style:normal}
+.pos{color:var(--green-deep)}.neg{color:var(--red)}
+.arr .a-stamp{position:absolute;right:10px;top:50%;margin-top:-20px;font-size:17px}
+.arr.scam{background:#F0DCD2}
+.arr.scam .a-stamp{font-size:15px}
+
+/* offerte */
+.offers-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--dim);margin:22px 0 4px}
+.offer{background:var(--paper);color:var(--ink);border:2px solid var(--ink);position:relative;
+  margin:20px 0;transform:rotate(var(--rot,0deg));transition:transform .22s,box-shadow .22s,opacity .2s}
+.offer:hover:not(.decided){transform:rotate(0) translateY(-3px);box-shadow:10px 12px 0 rgba(0,0,0,.5);z-index:3}
+.offer.decided{opacity:.72}
+.offer-in{display:grid;grid-template-columns:1.35fr .95fr;gap:8px 26px;padding:22px 24px 18px}
+.o-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.cat-chip{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink);padding:3px 9px}
+.o-meta .mono{font-size:10.5px;color:#6b6152;letter-spacing:.05em}
+.o-name{font-family:var(--disp);font-size:clamp(22px,3vw,30px);line-height:1.05;letter-spacing:.01em;text-transform:uppercase;font-weight:400}
+.o-name span{color:#5f5749}
+.o-tags{list-style:none;margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
+.o-tags li{font-family:var(--mono);font-size:11.5px;border:1.5px dashed #7a7160;padding:4px 9px;letter-spacing:.02em}
+.o-price{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.p-row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #cfc5ae;padding-bottom:5px}
+.p-row span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:#6b6152}
+.p-row b{font-size:17px}
+.p-row.vendor b{font-size:22px}
+.p-mid{display:flex;justify-content:space-between;align-items:center}
+.p-ratio{font-family:var(--disp);font-size:26px;letter-spacing:.03em}
+.p-note{font-size:10.5px;color:var(--orange-deep);letter-spacing:.08em;font-weight:700}
+.o-actions{display:flex;gap:10px}
+.o-actions .btn{flex:1;font-size:14.5px}
+.btn-buy{background:var(--orange);border-color:var(--ink);color:var(--ink)}
+.btn-buy:hover:not(:disabled){background:var(--ink);color:var(--paper)}
+.btn-buy[data-off]{background:var(--paper-dim);color:#7a7160;cursor:not-allowed}
+.btn-pass{border-color:var(--ink);color:var(--ink)}
+.btn-pass:hover{background:var(--ink);color:var(--paper)}
+.offer.decided .o-actions{pointer-events:none;opacity:.25}
+.offer.rz-target{cursor:pointer;box-shadow:0 0 0 3px var(--orange);animation:rzPulse 1.2s ease infinite}
+.offer.rz-target .o-actions{pointer-events:none;opacity:.35}
+@keyframes rzPulse{0%,100%{box-shadow:0 0 0 3px var(--orange)}50%{box-shadow:0 0 0 7px rgba(255,90,30,.45)}}
+.o-stamp{position:absolute;top:50%;left:50%;margin:-30px 0 0 -90px;width:180px;text-align:center;font-size:32px;z-index:4;pointer-events:none}
+.o-stamp.ok{color:var(--green-deep)}.o-stamp.no{color:var(--red)}
+.rz-quote{background:var(--ink);color:var(--paper);display:flex;gap:12px;align-items:center;padding:12px 18px;border-top:2px solid var(--ink)}
+.rz-quote div{font-size:13.5px}
+.rz-quote .mono{font-size:10.5px;color:var(--dim)}
+
+/* actionbar */
+.actionbar{position:sticky;bottom:14px;z-index:50;background:var(--ink);border:2px solid var(--line);
+  display:flex;gap:12px;padding:12px;margin-top:24px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.btn-rz{flex:1.2;min-width:230px;border:2px solid var(--line);justify-content:flex-start;padding:8px 14px;gap:12px;text-align:left}
+.btn-rz .rz-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
+.btn-rz .rz-txt b{font-size:15px;letter-spacing:.05em}
+.btn-rz .rz-txt em{font-style:normal;font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.08em}
+.btn-rz.armed{border-color:var(--orange)}
+.btn-rz.armed .rz-txt em{color:var(--orange)}
+.btn-rz.used{opacity:.55}
+.btn-next{flex:1;min-width:200px;font-size:17px;border-color:var(--orange);color:var(--orange)}
+.btn-next:hover:not(:disabled){background:var(--orange);color:var(--ink)}
+.btn-next:disabled{border-color:var(--line);color:var(--dim)}
+
+/* stash */
+.stash-panel{position:sticky;top:78px;border:2px dashed var(--line2);background:var(--ink2);padding:16px}
+.stash-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:12px}
+.stash-head h3{font-family:var(--disp);font-size:22px;letter-spacing:.05em}
+.stash-head .mono{font-size:11px;color:var(--dim);letter-spacing:.1em}
+.net-box{border:2px solid var(--line);padding:10px 12px;margin-bottom:14px;background:var(--ink)}
+.net-box .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--dim)}
+.net-val{font-family:var(--mono);font-weight:700;font-size:27px;line-height:1.15}
+.net-sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px;letter-spacing:.02em}
+.stash-empty{font-family:var(--mono);font-size:11.5px;color:var(--dim);text-align:center;padding:26px 10px;border:2px dashed var(--line);letter-spacing:.04em;line-height:1.8}
+.s-item{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:10px 12px;margin-bottom:10px;position:relative}
+.s-item.transit{background:var(--paper-dim);border-style:dashed;border-color:#7a7160}
+.s-top b{font-family:var(--disp);font-size:14.5px;letter-spacing:.02em;text-transform:uppercase;display:block;line-height:1.15}
+.s-top span{font-family:var(--mono);font-size:9.5px;color:#6b6152;letter-spacing:.08em}
+.s-bot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
+.s-bot .tr{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:700}
+.s-val{font-size:14px;font-weight:700}
+.s-val em{font-style:normal;font-size:12px}
+.btn-sell{font-family:var(--disp);background:var(--ink);color:var(--paper);border:none;padding:8px 14px;font-size:12.5px;letter-spacing:.08em;min-height:34px}
+.btn-sell:hover{background:var(--orange);color:var(--ink)}
+.qmini{position:absolute;right:8px;top:-10px;font-family:var(--disp);font-size:10.5px;letter-spacing:.06em;
+  border:2px solid currentColor;padding:1px 6px;transform:rotate(-4deg);background:var(--paper)}
+
+/* ============ RESULTS ============ */
+.results .container{max-width:680px;padding-top:44px}
+.res-stamp{display:block;text-align:center;margin:0 auto 26px;font-size:clamp(30px,6vw,46px);color:var(--orange);
+  border-width:5px;transform:rotate(-4deg);padding:10px 30px;width:max-content;max-width:100%}
+.res-money{font-family:var(--mono);font-weight:700;font-size:clamp(52px,10vw,76px);text-align:center;line-height:1}
+.res-sub{text-align:center;color:var(--dim);font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;margin:10px 0 34px}
+.res-bill{border:2px solid var(--line);background:var(--ink2)}
+.brow-s{display:flex;justify-content:space-between;gap:14px;padding:11px 16px;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:12.5px}
+.brow-s:last-child{border-bottom:none}
+.brow-s span{color:var(--dim);letter-spacing:.05em}
+.brow-s b{text-align:right}
+.share{margin-top:30px;border:2px solid var(--line);padding:18px 18px 16px;background:var(--ink2)}
+.share label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--dim);margin-bottom:10px}
+.share-row{display:flex;gap:10px;flex-wrap:wrap}
+.share-row code{flex:1;min-width:200px;font-family:var(--mono);font-size:12px;word-break:break-all;
+  border:2px dashed var(--line2);padding:10px 12px;color:var(--orange);background:var(--ink)}
+.friend-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
+.friend-row input{flex:1;min-width:200px;background:var(--ink);border:2px solid var(--line);color:var(--paper);
+  font-family:var(--mono);font-size:12px;padding:10px 12px}
+#board-slot{margin-top:30px}
+.board-tit{font-size:20px;letter-spacing:.05em;margin-bottom:4px}
+.board-tit .mono{font-size:10px;letter-spacing:.1em}
+.board{border:2px solid var(--line);background:var(--ink2)}
+.brow{display:grid;grid-template-columns:44px 1fr auto auto;gap:12px;align-items:baseline;padding:11px 16px;border-bottom:1px dashed var(--line);font-size:14px}
+.brow:last-child{border-bottom:none}
+.brow.me{background:rgba(255,90,30,.12)}
+.brow .bpos{font-family:var(--disp);font-size:19px;color:var(--orange)}
+.brow .bname{font-weight:700;word-break:break-word}
+.brow .bscore{font-weight:700}
+.brow .bgrade{font-size:10.5px;letter-spacing:.08em}
+.board-empty{font-size:12px;line-height:1.8;padding:18px;border:2px dashed var(--line);letter-spacing:.03em}
+.res-actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
+.res-actions .btn{flex:1;min-width:170px}
+
+/* ============ RESPONSIVE ============ */
+@media(max-width:980px){
+  .hero{grid-template-columns:1fr;gap:36px}
+  .wb-deco{max-width:420px;margin:0 auto;animation:none}
+  .game-grid{grid-template-columns:1fr}
+  .stash-panel{position:static}
+}
+@media(max-width:720px){
+  .offer-in{grid-template-columns:1fr;gap:16px}
+  .o-actions{flex-direction:row}
+  .o-stamp{margin:-20px 0 0 -80px;width:160px;font-size:26px}
+  .step{grid-template-columns:56px 1fr;padding:18px 14px}
+  .step .num{font-size:32px}
+  .ticket{grid-template-columns:1fr}
+  .ticket-r{border-left:none;border-top:2px dashed var(--ink);padding:18px 0 0}
+  .gbar{gap:10px;padding:8px 12px}
+  .g-cash{font-size:16px}
+  .actionbar{bottom:12px}
+  .btn-rz{min-width:100%}
+  .btn-next{min-width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important}
+}
+</style>
+</head>
+<body>
+<div class="noise" aria-hidden="true"></div>
+<div class="hz top" aria-hidden="true"></div>
+<div class="hz bottom" aria-hidden="true"></div>
+<main id="app">
+  <section id="scr-home" class="screen"></section>
+  <section id="scr-lobby" class="screen"></section>
+  <section id="scr-game" class="screen"></section>
+  <section id="scr-results" class="screen"></section>
+</main>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* ================================================================
+   REP RUSH — Guangzhou Gold Rush
+   Un gioco di reps, QC e resselle. Sponsor: RIZZITGO.
+   Tutto gira in locale: singleplayer, sfida quotidiana (seed dalla
+   data) e stanze private same-seed via codice.
+================================================================ */
+
+/* ---------- utility ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur = n => '€ ' + Math.round(n).toLocaleString('it-IT');
+const round5 = n => Math.max(10, Math.round(n/5)*5);
+const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
+const todayKey = () => new Date().toISOString().slice(0,10);
+const todayIT = () => new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long'});
+
+/* RNG deterministico (xmur3 + mulberry32) */
+function xmur3(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0}}
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function makeRNG(seedStr){
+  const h=xmur3(String(seedStr)); const a=mulberry32(h());
+  const r=()=>a();
+  r.int=n=>Math.floor(a()*n);
+  r.pick=arr=>arr[Math.floor(a()*arr.length)];
+  r.range=(lo,hi)=>lo+a()*(hi-lo);
+  r.chance=p=>a()<p;
+  return r;
+}
+function shuffleR(rng,arr){const x=arr.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+
+/* storage sicuro */
+function getLS(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function setLS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+/* ---------- icone SVG ---------- */
+const IC={
+  box:'<svg class="ic" viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
+  plane:'<svg class="ic" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>',
+  arrow:'<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+  vol:'<svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/></svg>',
+  volOff:'<svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/></svg>',
+  copy:'<svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg>',
+  tag:'<svg class="ic" viewBox="0 0 24 24"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+  plus:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+};
+
+/* avatar-timbro di RizzitGo (SVG con testo circolare) */
+let rzN=0;
+function rzAvatar(size,color){
+  const id='rzp'+(++rzN); color=color||'var(--orange)';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true" style="flex:none">
+    <circle cx="50" cy="50" r="47" fill="none" stroke="${color}" stroke-width="3"/>
+    <circle cx="50" cy="50" r="27" fill="none" stroke="${color}" stroke-width="1.5"/>
+    <path id="${id}" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" fill="none"/>
+    <text fill="${color}" font-size="10.2" font-family="JetBrains Mono,monospace" letter-spacing="2.4"><textPath href="#${id}">RIZZITGO · GUANGZHOU · AGENT ·</textPath></text>
+    <text x="50" y="59" text-anchor="middle" fill="${color}" font-size="27" font-family="Anton,sans-serif">RZ</text>
+  </svg>`;
+}
+
+/* pseudo-QR decorativo deterministico */
+function drawQR(cv,seedStr){
+  const n=21, cell=4; const rng=makeRNG('qr|'+seedStr);
+  cv.width=cv.height=n*cell;
+  const c=cv.getContext('2d');
+  c.fillStyle='#F2EDE2'; c.fillRect(0,0,cv.width,cv.height); c.fillStyle='#141210';
+  const inF=(x,y)=>(x<8&&y<8)||(x>=n-8&&y<8)||(x<8&&y>=n-8);
+  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ if(!inF(x,y)&&rng()<.44) c.fillRect(x*cell,y*cell,cell,cell); }
+  const finder=(x,y)=>{ c.fillStyle='#141210';c.fillRect(x*cell,y*cell,7*cell,7*cell);
+    c.fillStyle='#F2EDE2';c.fillRect((x+1)*cell,(y+1)*cell,5*cell,5*cell);
+    c.fillStyle='#141210';c.fillRect((x+2)*cell,(y+2)*cell,3*cell,3*cell); };
+  finder(0,0); finder(n-7,0); finder(0,n-7);
+}
+function barcode(seedStr,bars){
+  const rng=makeRNG('bc|'+seedStr); let s='';
+  for(let i=0;i<bars;i++){ const w=[2,2,3,4,6][rng.int(5)]; s+=`<i style="width:${w}px"></i>`; }
+  return `<div class="barcode" aria-hidden="true">${s}</div>`;
+}
+
+/* ---------- audio (sintesi WebAudio, nessun file) ---------- */
+const FX={
+  ctx:null, on:(getLS('rr_sound')!==false),
+  init(){ if(!this.ctx){ try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} }
+    if(this.ctx&&this.ctx.state==='suspended') this.ctx.resume(); },
+  t(f,d,type,v,slide){
+    if(!this.on||!this.ctx)return;
+    try{
+      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
+      o.type=type||'square'; o.frequency.setValueAtTime(f,this.ctx.currentTime);
+      if(slide) o.frequency.exponentialRampToValueAtTime(slide,this.ctx.currentTime+d);
+      g.gain.setValueAtTime(v||.06,this.ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+d);
+      o.connect(g); g.connect(this.ctx.destination);
+      o.start(); o.stop(this.ctx.currentTime+d);
+    }catch(e){}
+  },
+  click(){this.t(240,.05,'square',.045)},
+  buy(){this.t(300,.07,'square',.05);setTimeout(()=>this.t(430,.09,'square',.05),70)},
+  cash(){this.t(660,.08,'sine',.07);setTimeout(()=>this.t(990,.1,'sine',.07),80);setTimeout(()=>this.t(1320,.16,'sine',.06),170)},
+  stamp(){this.t(120,.12,'triangle',.2,55)},
+  bad(){this.t(190,.2,'sawtooth',.05,80)},
+  scam(){this.t(320,.4,'sawtooth',.07,60)}
+};
+document.addEventListener('pointerdown',()=>FX.init(),{once:true});
+
+/* ---------- dati di gioco ---------- */
+const CATS=[
+ {id:'sneakers',nome:'SCARPE',lo:90,hi:170,c:'#FF5A1E',
+  brands:['ABIBAS','NYKE','JARDAN','NEW BALANZE','ASIKS','BAPE STA'],
+  models:['Samba OG','Air Force Flee','Retro 4 "Bred"','550 Verde Acido','Gel-Kayano 14','Wave Runner']},
+ {id:'borse',nome:'BORSE',lo:160,hi:320,c:'#D9A441',
+  brands:['CUCCI','LOUIS VITTON','CHENEL','HERMESS','PRADO','MIU MIU°'],
+  models:['Dionysus Mini','Speedy Neverfull','Classic Flap 25','Birkin Togo 25','Re-Nylon 2005','Arcadie']},
+ {id:'street',nome:'STREETWEAR',lo:70,hi:130,c:'#7A8B4F',
+  brands:['SUPRIME','OFF-BLANCHE','PALAZZO','STUSSI','CARPÈ ME','NO LOGO'],
+  models:['Box Logo Hoodie','Hoodie Giallo Fluo','Tri-Ferg Tee','8-Ball Crewneck','Zip Skate Cargo','Tee Heavyweight']},
+ {id:'watch',nome:'OROLOGI',lo:260,hi:520,c:'#C24A33',
+  brands:['ROLEXX','AUDEMARS PIQUET','PATEK PHILIPE','CASIOO','OMEGHA'],
+  models:['Submariner Date','Royal Oak 41mm','Nautilus 5711','G-Shock GA-2100','Seamaster 300','Day-Date 36']},
+ {id:'perfume',nome:'PROFUMI',lo:60,hi:120,c:'#4F7F86',
+  brands:['DIORR','KREED','TOM FJORD','MARGIELAA','CHANELL'],
+  models:['Sauvage EDT 100ml','Aventus 100ml','Tobacco Vanille 50ml','By the Fireplace 100ml','Baccarat Rouge 540']}
+];
+const CATBY=Object.fromEntries(CATS.map(c=>[c.id,c]));
+
+const QUALITIES={
+ mirror:{label:'1:1 MIRROR',cost:1.45,sell:2.8,w:.17},
+ aaa:{label:'AAA',cost:1.25,sell:1.9,w:.28},
+ std:{label:'STANDARD',cost:1.0,sell:1.0,w:.30},
+ flop:{label:'FLOP',cost:0.72,sell:0.25,w:.17},
+ scam:{label:'SMARRITO',cost:0.45,sell:0,w:.08}
+};
+const QVIS={mirror:{label:'1:1 MIRROR',color:'#D9430E'},aaa:{label:'AAA',color:'#2E7D46'},
+ std:{label:'STANDARD',color:'#141210'},flop:{label:'FLOP',color:'#D63A22'},scam:{label:'SMARRITO',color:'#D63A22'}};
+
+const TAGS={
+ good:['QC pics entro 24h','Album clienti: 800+ foto reali','Vendor LV.5 · 1.200 ordini','Dustbag + ricevuta inclusi','Foto reali, niente stock','Consigliato dal canale da 40k membri','Restock diretto dalla fabbrica','Pagamento dopo conferma QC'],
+ bad:['Vendor nuovo · 0 recensioni','Solo foto stock del catalogo','Prezzo -70% sotto la media','Chiede pagamento in gift card','Recensioni tutte dello stesso giorno','SPU ripostata da un altro vendor','Album clienti privato','Spedizione non tracciata','Vendor con 2 account bannati'],
+ neutral:['Spedizione 20-30 giorni','Confezione semplice','Logo con lievi differenze','Batch 2023','Spedito da Guangzhou, CN','Niente scatola originale','Cuciture interne visibili']
+};
+
+const EVENTS=[
+ {peso:3,tipo:'index',pick:'one',delta:-0.26,tit:'RAID A GUANGZHOU',msg:'La polizia sequestra interi magazzini nel distretto degli stock. Il mercato trema.'},
+ {peso:3,tipo:'index',pick:'one',delta:0.30,tit:'EXPLOSION SU TIKTOK',msg:'Un creator da 3M di follower mostra la rep nel suo fit. La community impazzisce e gli indici partono.'},
+ {peso:2,tipo:'index',pick:'all',delta:-0.10,tit:'DOGANA IN ALLERTA',msg:'Controlli più stretti in dogana: le spedizioni rallentano e i listini calano su tutto.'},
+ {peso:2,tipo:'cost',delta:-0.20,tit:'RESTOCK MASSIVO',msg:'Le fabbriche riaprono a pieno regime: i vendor svuotano i magazzini. Prezzi d\'acquisto in sconto, solo oggi.'},
+ {peso:2,tipo:'cost',delta:0.18,tit:'CAPODANNO CINESE',msg:'Le fabbriche chiudono per le feste. Merce rara: i vendor alzano i prezzi d\'acquisto, solo oggi.'},
+ {peso:2,tipo:'index',pick:'watch',delta:0.24,tit:'COLLEZIONISTA DA DUBAI',msg:'Un collezionista svuota il mercato degli orologi rep in un weekend.'},
+ {peso:2,tipo:'index',pick:'all',delta:-0.07,tit:'ONDA DI SCAM',msg:'Un vendor con 10.000 ordini sparisce nel nulla. La fiducia crolla, e con lei gli indici.'},
+ {peso:2,tipo:'index',pick:'sneakers',delta:0.20,tit:'DROP IN ARRIVO',msg:'Anticipato il drop più atteso dell\'anno: tutti cercano sneakers per completare il fit.'},
+ {peso:2,tipo:'index',pick:'all',delta:0.08,tit:'PAGAMENTI PROTETTI',msg:'I vendor passano ai pagamenti con garanzia: la fiducia risale, e con lei gli indici.'},
+ {peso:1,tipo:'index',pick:'perfume',delta:0.26,tit:'CLONE PERFETTO',msg:'Un laboratorio sforna il clone olfattivo più convincente dell\'anno: i profumi rep spopolano.'},
+ {peso:1,tipo:'index',pick:'borse',delta:0.18,tit:'SEQUESTRO AL PORTO',msg:'Container pieni di borse sequestrati a Genova: la merce in giro è poca e il valore sale.'},
+ {peso:1,tipo:'index',pick:'street',delta:0.22,tit:'FIT CHECK VIRALE',msg:'Il look "total rep" spopola sui social. Lo streetwear rep è ovunque.'},
+ {peso:1,tipo:'index',pick:'borse',delta:-0.20,tit:'LUSSO VERO IN SALDO',msg:'Saldi storici sul lusso originale: le rep di borse perdono fascino.'},
+ {peso:1,tipo:'index',pick:'watch',delta:-0.22,tit:'QUARTZGATE',msg:'Un video mostra orologi rep che si fermano dopo 3 giorni. Fiducia a pezzi sugli orologi.'}
+];
+const QUIET=[
+ 'Giornata tranquilla al mercato. RizzitGo sorseggia tè bollente e controlla le spedizioni in partenza.',
+ 'Pioggia a Guangzhou: i tricar sfrecciano tra i magazzini carichi di scatole e nastro adesivo.',
+ 'Oggi niente sorprese: solo il rumore delle etichettatrici e lo sguardo dei vendor.',
+ 'RizzitGo ha trattato tutto il giorno sul prezzo dei cartoni. Risultato: -0,02 ¥ a pacco.',
+ 'Il solito viavai di intermediari davanti ai cancelli degli stabilimenti.',
+ 'RizzitGo: "Mercato stabile, fratello. Ma occhio alle offerte di oggi, non tutte sono buone."',
+ 'Qualcuno ha visto un container di SPU nuovissime lasciare il distretto. Nessuno sa dove sia finito.'
+];
+const RZ_HINT={
+ mirror:'Fidati fratello, questa viene dalla stessa fabbrica dell\'originale. 1:1 pura. Prendila e ringraziami dopo.',
+ aaa:'Bella AAA, si rivende facile. Il mio contatto la compra da due anni senza problemi.',
+ std:'Batch normale, niente di più. Ci sta, ma il margine lo fa solo il mercato.',
+ flop:'Lascia stare: cuciture tremende, materiali tristi. Questa è flop totale.',
+ scam:'Ahh… questo vendor spegne tutto e sparisce col bonifico. Skip. Fidati di RizzitGo.'
+};
+
+/* ---------- generazione partita (tutto pre-computato dal seed) ---------- */
+function pickQuality(rng){
+  const x=rng(); let acc=0;
+  for(const q of ['mirror','aaa','std','flop','scam']){ acc+=QUALITIES[q].w; if(x<acc) return q; }
+  return 'std';
+}
+function pickTags(rng,q){
+  const any=()=>{ const r=rng(); return r<.42?rng.pick(TAGS.good):(r<.72?rng.pick(TAGS.bad):rng.pick(TAGS.neutral)); };
+  let t=[];
+  if(q==='mirror'){ t=[rng.pick(TAGS.good),rng.pick(TAGS.good),any()]; }
+  else if(q==='aaa'){ t=[rng.pick(TAGS.good),(rng.chance(.7)?rng.pick(TAGS.good):rng.pick(TAGS.neutral)),any()]; }
+  else if(q==='std'){ t=[rng.pick(TAGS.neutral),(rng.chance(.5)?rng.pick(TAGS.good):(rng.chance(.55)?rng.pick(TAGS.bad):rng.pick(TAGS.neutral))),any()]; }
+  else if(q==='flop'){ t=[rng.pick(TAGS.bad),(rng.chance(.7)?rng.pick(TAGS.bad):rng.pick(TAGS.neutral)),any()]; }
+  else { t=[rng.pick(TAGS.bad),rng.pick(TAGS.bad),(rng.chance(.6)?rng.pick(TAGS.bad):any())]; }
+  const set=[...new Set(t)];
+  while(set.length<3) set.push(rng.pick(TAGS.neutral));
+  return shuffleR(rng,set).slice(0,3);
+}
+function randCode(rng,n){
+  const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s='';
+  for(let i=0;i<n;i++) s+=A[rng.int(A.length)];
+  return s;
+}
+function genCard(rng){
+  const cat=rng.pick(CATS);
+  const brand=rng.pick(cat.brands), model=rng.pick(cat.models);
+  const listino=round5(rng.range(cat.lo,cat.hi));
+  const quality=pickQuality(rng);
+  const cost=round5(listino*QUALITIES[quality].cost*rng.range(.92,1.08));
+  return {cat:cat.id,brand,model,listino,quality,cost,tags:pickTags(rng,quality),
+    spu:'SPU-'+randCode(rng,4),wb:randCode(rng,7)};
+}
+function pickEvent(rng){
+  const tot=EVENTS.reduce((s,e)=>s+e.peso,0); let x=rng()*tot;
+  for(const e of EVENTS){ x-=e.peso; if(x<0){ const c={...e}; if(c.pick==='one') c.catId=rng.pick(CATS).id; return c; } }
+  return {...EVENTS[0],catId:CATS[0].id};
+}
+function buildRounds(seedStr){
+  const rng=makeRNG('game|'+seedStr);
+  const rounds=[];
+  for(let i=0;i<12;i++){
+    const moves={}; CATS.forEach(c=>moves[c.id]=rng.range(-0.11,0.13));
+    const ev=(i>0&&rng.chance(.58))?pickEvent(rng):null;
+    const rzLot=rng.chance(.07);
+    const rzK=rng.int(3);
+    const cards=[];
+    for(let k=0;k<3;k++){
+      const card=genCard(rng);
+      if(rzLot&&k===rzK){
+        card.quality=rng.chance(.65)?'mirror':'aaa';
+        card.cost=round5(card.listino*QUALITIES[card.quality].cost*rng.range(.92,1.08));
+        card.tags=pickTags(rng,card.quality);
+        card.rzLot=true;
+      }
+      cards.push(card);
+    }
+    rounds.push({idx:i,moves,event:ev,rzLot,cards,
+      costMod:(ev&&ev.tipo==='cost')?ev.delta:0,quiet:rng.pick(QUIET)});
+  }
+  return rounds;
+}
+
+/* ---------- stato ---------- */
+const S={ nick:(getLS('rr_nick')||''), screen:'home', game:null, lobby:{code:''} };
+function ensureNick(){
+  S.nick=(S.nick||'').trim().slice(0,14);
+  if(!S.nick) S.nick='PLAYER'+(100+Math.floor(Math.random()*900));
+  setLS('rr_nick',S.nick);
+  return S.nick;
+}
+
+/* ---------- toasts ---------- */
+function toast(msg,kind){
+  const t=document.createElement('div');
+  t.className='toast '+(kind||'');
+  t.innerHTML=msg;
+  $('#toasts').appendChild(t);
+  setTimeout(()=>t.classList.add('out'),3400);
+  setTimeout(()=>t.remove(),3900);
+}
+function copyText(t){
+  const done=()=>toast('Copiato negli appunti.','good');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t,done));
+  } else fallbackCopy(t,done);
+}
+function fallbackCopy(t,done){
+  const ta=document.createElement('textarea');
+  ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); done(); }catch(e){ toast('Copia manuale: '+t); }
+  ta.remove();
+}
+
+/* ---------- leaderboard stanze + codici risultato ---------- */
+function boardKey(room){ return 'rr_board_'+room; }
+function boardLoad(room){
+  const b=getLS(boardKey(room));
+  return Array.isArray(b)?b:[];
+}
+function boardSave(room,entry){
+  const b=boardLoad(room);
+  const i=b.findIndex(x=>String(x.name).toLowerCase()===String(entry.name).toLowerCase());
+  if(i>=0){ if(entry.score>b[i].score) b[i]=entry; } else b.push(entry);
+  b.sort((a,b)=>b.score-a.score);
+  const out=b.slice(0,20);
+  setLS(boardKey(room),out);
+  return out;
+}
+function resultEncode(e){
+  const p=e.room+'~'+e.name+'~'+Math.round(e.score)+'~'+(e.grade||'');
+  let b;
+  try{ b=btoa(unescape(encodeURIComponent(p))); }catch(err){ return null; }
+  return 'RR1-'+b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function resultDecode(code){
+  try{
+    code=String(code).trim();
+    if(!code.startsWith('RR1-')) return null;
+    let b=code.slice(4).replace(/-/g,'+').replace(/_/g,'/');
+    while(b.length%4) b+='=';
+    const p=decodeURIComponent(escape(atob(b)));
+    const parts=p.split('~');
+    if(parts.length<3) return null;
+    const score=Number(parts[2]);
+    if(!parts[0]||!parts[1]||!isFinite(score)) return null;
+    return {room:parts[0],name:parts[1].slice(0,14),score,grade:(parts[3]||'—').slice(0,20)};
+  }catch(e){ return null; }
+}
+/* sync live tra tab dello stesso browser */
+const bcSubs={};
+function subscribeBoard(room){
+  if(bcSubs[room]||!('BroadcastChannel' in window)) return;
+  try{
+    const ch=new BroadcastChannel('reprush|'+room);
+    ch.onmsg=null;
+    ch.onmessage=e=>{ if(e.data&&e.data.type==='board') refreshBoardIfVisible(room); };
+    bcSubs[room]=ch;
+  }catch(e){}
+}
+function boardBroadcast(room){
+  if(!('BroadcastChannel' in window)) return;
+  try{ const ch=new BroadcastChannel('reprush|'+room); ch.postMessage({type:'board'}); ch.close(); }catch(e){}
+}
+function refreshBoardIfVisible(room){
+  if(S.screen==='results'&&S.game&&S.game.boardRoom===room){
+    const slot=$('#board-slot'); if(slot) renderBoardInto(slot,room);
+  } else if(S.screen==='lobby'&&S.lobby.code===room){
+    const slot=$('#lobby-board'); if(slot) renderBoardInto(slot,room);
+  }
+}
+function boardHTML(room){
+  const b=boardLoad(room);
+  subscribeBoard(room);
+  const tit=room==='DAILY'?'CLASSIFICA QUOTIDIANA':'CLASSIFICA DELLA STANZA';
+  const tag=room==='DAILY'?'OGGI':'CODICE '+esc(room);
+  const head=`<h3 class="board-tit disp">${tit} <span class="mono dim">· ${tag} · questo dispositivo</span></h3>`;
+  if(!b.length) return head+`<p class="board-empty mono dim">Nessun risultato ancora.<br>La classifica si riempie quando chiudi una partita qui — oppure incolla il codice risultato (RR1-…) di un amico.</p>`;
+  const rows=b.map((e,i)=>`<div class="brow ${String(e.name).toLowerCase()===S.nick.toLowerCase()?'me':''}">
+    <span class="bpos disp">${i+1}</span>
+    <span class="bname">${esc(e.name)}</span>
+    <span class="bscore mono">${eur(e.score)}</span>
+    <span class="bgrade mono dim">${esc(e.grade||'—')}</span></div>`).join('');
+  return head+`<div class="board">${rows}</div>`;
+}
+function renderBoardInto(el,room){ el.innerHTML=boardHTML(room); }
+
+/* ---------- schermate ---------- */
+function showScreen(name){
+  S.screen=name;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $('#scr-'+name).classList.add('active');
+  window.scrollTo({top:0});
+}
+
+/* ===== HOME ===== */
+function renderHome(){
+  $('#scr-home').innerHTML=`
+  <div class="home-top">
+    <span class="mono dim" style="font-size:11px;letter-spacing:.18em">MERCATO APERTO · GUANGZHOU, CN</span>
+    <span class="sponsor-chip">${rzAvatar(28)} AGENTE UFFICIALE: <b>RIZZITGO</b></span>
+  </div>
+  <div class="container">
+    <div class="hero">
+      <div>
+        <p class="kicker">IL GIOCO DELLE REP · DA GUANGZHOU AL TUO STASH</p>
+        <h1 class="title">REP <span class="r2">RUSH</span></h1>
+        <p class="tagline">Compra. Aspetta il pacco. Prega che passi il <b>QC</b>. Fletti.</p>
+        <p class="hero-sub">5 MERCATI · 12 GIORNI · € 1.000 DI PARTENZA · 1 AGENTE CINESE LEGGENDARIO</p>
+        <div class="nick-row">
+          <label for="nick-in">SPEDISCE A:</label>
+          <input id="nick-in" maxlength="14" placeholder="IL TUO NICKNAME" value="${esc(S.nick)}" autocomplete="off">
+        </div>
+        <div class="modes">
+          <button class="mode-row" data-action="start-single">
+            <span class="m-arrow">→</span>
+            <span><span class="m-tit">Partita singola</span><br><span class="m-sub">MERCATO CASUALE · SOLO TU CONTRO I VENDOR</span></span>
+          </button>
+          <button class="mode-row" data-action="start-daily">
+            <span class="m-arrow">→</span>
+            <span><span class="m-tit">Sfida quotidiana</span><br><span class="m-sub">OGGI TUTTI GIOCANO LA STESSA PARTITA · ${todayIT().toUpperCase()}</span></span>
+          </button>
+          <button class="mode-row" data-action="open-lobby">
+            <span class="m-arrow">→</span>
+            <span><span class="m-tit">Stanza privata</span><br><span class="m-sub">CREA UN CODICE · STESSA PARTITA PER TUTTI · VINCE IL PATRIMONIO PIÙ ALTO</span></span>
+          </button>
+        </div>
+      </div>
+      <div class="wb-deco">
+        <span class="tape" aria-hidden="true"></span>
+        <div class="wb-head"><b>RIZZITGO EXPRESS</b><span>WAYBILL · PRIORITY</span></div>
+        <div class="wb-fields">
+          <div><span>DA</span><b>GUANGZHOU, CN</b></div>
+          <div><span>A</span><b>IL TUO STASH</b></div>
+          <div><span>CONTENUTO</span><b>1× FORTUNA (FRAGILE)</b></div>
+          <div><span>PESO</span><b>1.000 € / 12 GIORNI</b></div>
+        </div>
+        ${barcode('reprush-hero',36)}
+        <div class="wb-qr-row">
+          <div><canvas id="hero-qr"></canvas><span class="mono" style="font-size:9px;letter-spacing:.2em;color:#6b6152">NON SCANSIONARE (È SOLO BELLO)</span></div>
+          <span class="stamp wb-stamp">REP RUSH</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps-wrap">
+      <p class="sec-kicker">MANIFESTO DI SPEDIZIONE</p>
+      <div class="steps">
+        <div class="step"><span class="num">01</span><div><h4>Leggi il mercato</h4><p>Ogni giorno cinque indici si muovono: <b>scarpe, borse, streetwear, orologi, profumi</b>. Compra quando sono bassi, vendi quando volano.</p></div></div>
+        <div class="step"><span class="num">02</span><div><h4>Valuta le offerte</h4><p>Tre vendor al giorno. Prezzo, rapporto con la stima e <b>indizi</b>: alcuni sono campanelli d'allarme, altri oro puro. Imparali a memoria.</p></div></div>
+        <div class="step"><span class="num">03</span><div><h4>Aspetta il pacco</h4><p>La merce arriva <b>dopo 2 giorni</b> e solo allora scopri la qualità: 1:1 mirror, AAA, standard… o flop. E a volte il vendor sparisce col bonifico.</p></div></div>
+        <div class="step"><span class="num">04</span><div><h4>Chiudi ricco</h4><p>Alla giornata 12 lo stash viene liquidato di colpo. <b>Patrimonio finale = punteggio</b>. Da € 1.000 a CEO di Guangzhou.</p></div></div>
+      </div>
+    </div>
+
+    <div class="sponsor-foot">
+      <span class="tape t2" aria-hidden="true"></span>
+      <p class="sec-kicker">SPONSOR UFFICIALE DELLA SERIE</p>
+      <div class="sp-row">
+        <div class="sp-name">RIZZIT<em>GO</em></div>
+        <p class="sp-desc">IL TUO AGENTE A GUANGZHOU. CONSOLIDAMENTO · QC FOTOGRAFICO · SPEDIZIONI DDP IN TUTTO IL MONDO.</p>
+        ${barcode('rizzitgo-foot',30)}
+      </div>
+      <p class="sp-quote">«Fratello, fidati: una consulenza a partita te la offro <b>io</b>.» <span class="mono dim">— R.</span></p>
+      <p class="disclaimer">REP RUSH è un gioco parodistico. Tutti i marchi, i vendor e i prodotti citati sono invenzioni satiriche. Nessuna merce reale viene venduta, spedita, ispezionata o sequestrata. RIZZITGO è un personaggio immaginario — ma con un ottimo rapporto qualità/prezzo.</p>
+    </div>
+  </div>`;
+  drawQR($('#hero-qr'),'rizzitgo-express-hero');
+}
+
+/* ===== LOBBY ===== */
+function genRoomCode(){
+  const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s='';
+  for(let i=0;i<5;i++) s+=A[Math.floor(Math.random()*A.length)];
+  return s;
+}
+function renderLobby(){
+  $('#scr-lobby').innerHTML=`
+  <div class="container lobby">
+    <button class="btn" data-action="go-home">← TORNA ALLA HOME</button>
+    <h2 class="disp">STANZA PRIVATA</h2>
+    <p class="lobby-sub">Condividi il codice con gli amici: <b>lo stesso codice genera la stessa identica partita</b> — stessi vendor, stessi eventi, stesso mercato. Ognuno gioca sul suo dispositivo, poi si confrontano i patrimoni in classifica. Vince chi chiude più ricco.</p>
+    <div class="ticket">
+      <div>
+        <label for="room-in">CODICE STANZA</label>
+        <div class="ticket-row">
+          <input id="room-in" maxlength="8" placeholder="ES. KX7QM" autocomplete="off">
+          <button class="btn" data-action="gen-code">GENERA</button>
+        </div>
+        <p class="ticket-note">4–8 CARATTERI · IL CODICE DETERMINA LA PARTITA, SU QUALSIASI DISPOSITIVO</p>
+        <button class="btn btn-orange big" data-action="lobby-start" id="lobby-start" disabled>APRI IL MERCATO →</button>
+        <div class="ticket-fields mono">
+          <div><span>MITTENTE</span><b>GUANGZHOU, CN</b></div>
+          <div><span>PACCHI</span><b>3 / GIORNO</b></div>
+          <div><span>DURATA</span><b>12 GIORNI</b></div>
+        </div>
+      </div>
+      <div class="ticket-r">
+        <canvas id="room-qr"></canvas>
+        <span>NON SCANSIONARE<br>(ESTETICA PURA)</span>
+      </div>
+    </div>
+    <div id="lobby-board"></div>
+  </div>`;
+  const inp=$('#room-in');
+  inp.addEventListener('input',()=>{
+    inp.value=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    S.lobby.code=inp.value;
+    updateLobby();
+  });
+  updateLobby();
+}
+function updateLobby(){
+  const code=S.lobby.code;
+  const btn=$('#lobby-start');
+  if(btn) btn.disabled=code.length<4;
+  const qr=$('#room-qr');
+  if(qr) drawQR(qr,'room|'+code);
+  const slot=$('#lobby-board');
+  if(slot){ code.length>=4 ? renderBoardInto(slot,code) : slot.innerHTML=''; }
+}
+
+/* ===== GIOCO ===== */
+function startGame(opts){
+  ensureNick();
+  const seed = opts.mode==='room' ? 'room|'+opts.room
+             : opts.mode==='daily' ? 'daily|'+todayKey()
+             : 'single|'+Math.random().toString(36).slice(2,11);
+  S.game={
+    seed,mode:opts.mode,room:opts.room||null,
+    rounds:buildRounds(seed),roundIdx:0,cash:1000,uid:0,
+    stash:[],decisions:[null,null,null],
+    market:Object.fromEntries(CATS.map(c=>[c.id,1])),tickerDelta:{},
+    rzUsed:false,rzArmed:false,rzHint:null,
+    stats:{bought:0,sold:0,spent:0,earned:0,scam:0,scamLoss:0,bestPl:-1e9,bestFlip:'—'},
+    arrivalNews:[],animateArrivals:false,tickerAnim:false,animateCard:null,
+    prevCash:1000,boardRoom:null
+  };
+  showScreen('game');
+  enterRound(0);
+}
+function buyPrice(card,rnd){ return Math.max(10,Math.round(card.cost*(1+rnd.costMod))); }
+function cardValue(card){
+  return Math.max(0,Math.round(card.listino*QUALITIES[card.quality].sell*S.game.market[card.cat]));
+}
+function applyRoundMarket(rnd){
+  const g=S.game;
+  const prev={...g.market};
+  CATS.forEach(c=>{ g.market[c.id]=clamp(g.market[c.id]+rnd.moves[c.id],0.55,2.5); });
+  const ev=rnd.event;
+  if(ev&&ev.tipo==='index'){
+    const targets=ev.pick==='all'?CATS.map(c=>c.id):[ev.pick==='one'?ev.catId:ev.pick];
+    targets.forEach(id=>{ g.market[id]=clamp(g.market[id]+ev.delta,0.55,2.5); });
+  }
+  CATS.forEach(c=>{ g.tickerDelta[c.id]=g.market[c.id]-prev[c.id]; });
+}
+function enterRound(idx){
+  const g=S.game;
+  g.roundIdx=idx; g.decisions=[null,null,null]; g.rzHint=null; g.rzArmed=false;
+  const rnd=g.rounds[idx];
+  applyRoundMarket(rnd);
+  g.arrivalNews=[];
+  g.stash=g.stash.filter(it=>{
+    if(!it.revealed&&it.arriveRound<=idx){
+      it.revealed=true;
+      g.arrivalNews.push(it);
+      if(it.card.quality==='scam'){ it.scamLost=true; g.stats.scam++; g.stats.scamLoss+=it.paid; return false; }
+    }
+    return true;
+  });
+  g.animateArrivals=true; g.tickerAnim=true;
+  renderGame();
+  g.animateArrivals=false; g.tickerAnim=false;
+  g.arrivalNews.forEach((it,k)=>{
+    setTimeout(()=>{ it.card.quality==='scam'?FX.scam():FX.stamp(); },350+k*480);
+  });
+}
+function renderGame(){
+  const g=S.game; if(!g) return;
+  const rnd=g.rounds[g.roundIdx];
+  const day=g.roundIdx+1;
+  const cashCls=g.cash>g.prevCash?'cash-up':(g.cash<g.prevCash?'cash-dn':'');
+  g.prevCash=g.cash;
+
+  const modeTag=g.mode==='room'?('STANZA '+g.room):(g.mode==='daily'?('QUOTIDIANA · '+todayIT().toUpperCase()):'SINGOLA');
+  const ticker=CATS.map(c=>{
+    const v=g.market[c.id],d=g.tickerDelta[c.id]||0,pct=Math.round(Math.abs(d)*100);
+    const fl=g.tickerAnim&&Math.abs(d)>0.002?(d>0?'flash-up':'flash-down'):'';
+    return `<span class="tk mono ${fl}"><b>${c.nome}</b> ×${v.toFixed(2)} <em class="${d>=0?'up':'down'}">${d>=0?'▲':'▼'}${pct}%</em></span>`;
+  }).join('');
+
+  const segs=Array.from({length:12},(_,i)=>
+    `<span class="seg ${i<g.roundIdx?'done':(i===g.roundIdx?'now':'')}"></span>`).join('');
+
+  const arrivals=(g.arrivalNews.length)?`
+    <section class="arrivals">
+      <h3 class="sec-title">${IC.box} PACCHI ARRIVATI OGGI</h3>
+      <div class="arr-grid">${g.arrivalNews.map(it=>{
+        const q=QVIS[it.card.quality];
+        if(it.card.quality==='scam'){
+          return `<div class="arr scam">
+            <div class="arr-way">WB ${String(it.buyRound+1).padStart(2,'0')} · ${esc(it.card.spu)}</div>
+            <div class="arr-item">${esc(it.card.brand)} ${esc(it.card.model)}</div>
+            <div class="arr-val">BONIFICO PERSO: <em class="neg">−${eur(it.paid).slice(2)}</em> · IL VENDOR HA CHIUSO IL NEGOZIO</div>
+            <span class="stamp a-stamp ${g.animateArrivals?'stamp-in':''}" style="color:var(--red)">SMARRITO</span></div>`;
+        }
+        const v=cardValue(it.card),pl=v-it.paid;
+        return `<div class="arr">
+          <div class="arr-way">WB ${String(it.buyRound+1).padStart(2,'0')} · ${esc(it.card.spu)}</div>
+          <div class="arr-item">${esc(it.card.brand)} ${esc(it.card.model)}</div>
+          <div class="arr-val">VALORE ${eur(v)} · P/L <em class="${pl>=0?'pos':'neg'}">${pl>=0?'+':''}${Math.round(pl)}</em></div>
+          <span class="stamp a-stamp ${g.animateArrivals?'stamp-in':''}" style="color:${q.color}">${q.label}</span></div>`;
+      }).join('')}</div>
+    </section>`:'';
+
+  const ev=rnd.event;
+  let bTit,bMsg,bChips='';
+  if(day===1){
+    bTit='APERTURA DEL MERCATO';
+    bMsg='Benvenuto a Guangzhou: hai <b>€ 1.000</b> e 12 giorni di fronte. Valuta le offerte qui sotto — la merce arriva <b>dopo 2 giorni</b> e solo allora scopri la qualità. Quando vuoi incassare, vendi dallo stash.';
+  } else if(ev){
+    bTit=ev.tit; bMsg=ev.msg;
+    if(ev.tipo==='index'){
+      const targets=ev.pick==='all'?CATS:CATS.filter(c=>c.id===(ev.pick==='one'?ev.catId:ev.pick));
+      bChips=targets.map(c=>`<span class="chip ${ev.delta>0?'chip-up':'chip-down'}">${c.nome} ${ev.delta>0?'+':''}${Math.round(ev.delta*100)}%</span>`).join('');
+    } else {
+      bChips=`<span class="chip chip-cost">PREZZI D'ACQUISTO ${ev.delta>0?'+':''}${Math.round(ev.delta*100)}% SOLO OGGI</span>`;
+    }
+  } else { bTit='MERCATO STABILE'; bMsg=rnd.quiet; }
+
+  const rzNote=rnd.rzLot?`
+    <div class="rz-note">${rzAvatar(30)}<div><b>RIZZITGO SCRIVE:</b> «Uno dei lotti di oggi è garantito AAA+ o 1:1 mirror. Indovina quale — io non te lo dico.» <span class="mono dim">— R.</span></div></div>`:'';
+
+  const rots=[-0.5,0.45,-0.35];
+  const offers=rnd.cards.map((card,i)=>{
+    const dec=g.decisions[i];
+    const price=buyPrice(card,rnd);
+    const ratio=(price/card.listino).toFixed(2);
+    const cat=CATBY[card.cat];
+    const armed=g.rzArmed&&!dec;
+    let stamp='';
+    if(dec==='buy') stamp=`<div class="stamp o-stamp ok ${g.animateCard===i?'stamp-in':''}">ACQUISTATO</div>`;
+    if(dec==='pass') stamp=`<div class="stamp o-stamp no ${g.animateCard===i?'stamp-in':''}">SCARTATO</div>`;
+    const hinted=g.rzHint===i;
+    const off=(g.cash<price||g.stash.length>=6);
+    const bl=g.stash.length>=6?'STASH PIENO':(g.cash<price?'CASH INSUFF.':'COMPRA · '+eur(price));
+    return `<article class="offer ${dec?'decided':''} ${armed?'rz-target':''}" style="--rot:${rots[i]}deg" ${armed?`data-action="rz-card" data-i="${i}"`:''}>
+      <span class="tape" aria-hidden="true"></span>
+      <div class="offer-in">
+        <div class="o-left">
+          <div class="o-meta"><span class="cat-chip" style="background:${cat.c}">${cat.nome}</span><span class="mono">${esc(card.spu)} · WB ${String(day).padStart(2,'0')}-${i+1}</span></div>
+          <h3 class="o-name">${esc(card.brand)} <span>${esc(card.model)}</span></h3>
+          ${barcode(card.wb,30)}
+          <ul class="o-tags">${card.tags.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+        </div>
+        <div class="o-right">
+          <div class="o-price">
+            <div class="p-row"><span>STIMA MERCATO</span><b class="mono">${eur(card.listino)}</b></div>
+            <div class="p-mid"><span class="p-ratio">×${ratio}</span><span class="mono" style="font-size:10px;color:#6b6152">INDICE ${cat.nome} ×${g.market[card.cat].toFixed(2)}</span></div>
+            <div class="p-row vendor"><span>PREZZO VENDOR</span><b class="mono">${eur(price)}</b></div>
+            ${rnd.costMod?`<div class="p-note mono">${rnd.costMod>0?'+':''}${Math.round(rnd.costMod*100)}% EVENTO DI OGGI SUL PREZZO</div>`:''}
+          </div>
+          <div class="o-actions">
+            <button class="btn btn-buy" data-action="buy" data-i="${i}" ${off?'data-off="1"':''}>${bl}</button>
+            <button class="btn btn-pass" data-action="pass" data-i="${i}">PASSA</button>
+          </div>
+        </div>
+      </div>
+      ${hinted?`<div class="rz-quote">${rzAvatar(28)}<div>«${RZ_HINT[card.quality]}» <span class="mono">— RIZZITGO, IN CHIAMATA</span></div></div>`:''}
+      ${stamp}
+    </article>`;
+  }).join('');
+
+  /* stash */
+  const merch=g.stash.filter(i=>i.revealed).reduce((s,i)=>s+cardValue(i.card),0);
+  const transit=g.stash.filter(i=>!i.revealed).reduce((s,i)=>s+i.paid,0);
+  const net=g.cash+merch;
+  const stashRows=g.stash.length?g.stash.map(it=>{
+    if(!it.revealed){
+      const eta=(it.arriveRound===11&&it.buyRound===11)?'LIQUIDAZIONE FINALE':'GIORNO '+(it.arriveRound+1);
+      return `<div class="s-item transit">
+        <div class="s-top"><b>${esc(it.card.brand)} ${esc(it.card.model)}</b><span>${CATBY[it.card.cat].nome} · PAGATO ${eur(it.paid)}</span></div>
+        <div class="s-bot"><span class="tr">${IC.plane} IN TRANSITO</span><span class="mono" style="font-size:10px;color:#6b6152">ARRIVO: ${eta}</span></div>
+      </div>`;
+    }
+    const v=cardValue(it.card),pl=v-it.paid,q=QVIS[it.card.quality];
+    return `<div class="s-item">
+      <span class="qmini" style="color:${q.color}">${q.label}</span>
+      <div class="s-top"><b>${esc(it.card.brand)} ${esc(it.card.model)}</b><span>${CATBY[it.card.cat].nome}</span></div>
+      <div class="s-bot"><span class="s-val mono">${eur(v)} <em class="${pl>=0?'pos':'neg'}">${pl>=0?'+':''}${Math.round(pl)}</em></span>
+      <button class="btn-sell" data-action="sell" data-id="${it.id}">VENDI</button></div>
+    </div>`;
+  }).join(''):`<div class="stash-empty">IL TUO STASH È VUOTO.<br>IL MERCATO NON ASPETTA.</div>`;
+
+  const done=g.decisions.filter(Boolean).length;
+  const last=g.roundIdx===11;
+  const rzState=g.rzUsed?'CONSULENZA USATA':(g.rzArmed?'SCEGLI UN\'OFFERTA…':'1 CONSULENZA GRATUITA · OFFRE LO SPONSOR');
+
+  $('#scr-game').innerHTML=`
+    <header class="gbar">
+      <span class="g-logo">REP<em>RUSH</em></span>
+      <span class="mode-tag mono">${modeTag}</span>
+      <div class="ticker">${ticker}</div>
+      <span class="g-cash ${cashCls}">${eur(g.cash)}</span>
+      <button class="btn-icon" data-action="mute" aria-label="Attiva o disattiva i suoni">${FX.on?IC.vol:IC.volOff}</button>
+    </header>
+    <div class="game-grid">
+      <div>
+        <div class="dayline">
+          <span class="d-lab">GIORNO <em>${day}</em>/12</span>
+          <div class="segs">${segs}</div>
+        </div>
+        ${arrivals}
+        <section class="bulletin">
+          <span class="b-tag">BOLLETTINO · GIORNO ${day}</span>
+          <h3 class="b-tit">${bTit}</h3>
+          <p class="b-msg">${bMsg}</p>
+          ${bChips?`<div class="b-chips">${bChips}</div>`:''}
+          ${rzNote}
+        </section>
+        <p class="offers-label">OFFERTE DEI VENDOR DI OGGI — 3 LOTTI · DECIDERE ENTRO FINE GIORNATA</p>
+        ${offers}
+        <div class="actionbar">
+          <button class="btn btn-rz ${g.rzUsed?'used':''} ${g.rzArmed?'armed':''}" data-action="arm-rz" ${g.rzUsed?'disabled':''}>
+            ${rzAvatar(40)}
+            <span class="rz-txt"><b>CHIEDI A RIZZITGO</b><em>${rzState}</em></span>
+          </button>
+          <button class="btn btn-next" data-action="next" ${done<3?'disabled':''}>
+            ${done<3?`VALUTA LE OFFERTE ${done}/3`:(last?'CHIUDI IL MERCATO':'PROSSIMO GIORNO →')}
+          </button>
+        </div>
+      </div>
+      <aside class="stash-panel">
+        <div class="stash-head"><h3 class="disp">STASH</h3><span class="mono">${g.stash.length}/6 SLOT</span></div>
+        <div class="net-box">
+          <span class="lbl mono">PATRIMONIO STIMATO</span>
+          <div class="net-val">${eur(net)}</div>
+          <div class="net-sub">CASH ${eur(g.cash)} · MERCE ${eur(merch)} · TRANSITO ${eur(transit)}</div>
+        </div>
+        <div id="stash-list">${stashRows}</div>
+      </aside>
+    </div>`;
+}
+
+/* azioni di gioco */
+function decideCard(i,act){
+  const g=S.game; if(!g||g.decisions[i]) return;
+  const rnd=g.rounds[g.roundIdx];
+  const card=rnd.cards[i];
+  if(act==='buy'){
+    const price=buyPrice(card,rnd);
+    if(g.cash<price){ toast('Cash insufficiente per questa offerta.','bad'); FX.bad(); return; }
+    if(g.stash.length>=6){ toast('Stash pieno: vendi qualcosa prima di comprare.','bad'); FX.bad(); return; }
+    const it={id:'it'+(++g.uid),card,paid:price,buyRound:g.roundIdx,
+      arriveRound:Math.min(g.roundIdx+2,11),revealed:false};
+    g.cash-=price; g.stats.spent+=price; g.stats.bought++;
+    g.stash.push(it); g.decisions[i]='buy'; g.animateCard=i;
+    FX.buy();
+    toast(`${IC.box} Ordine inviato: <b>${esc(card.brand)} ${esc(card.model)}</b> — ${eur(price)}. Arrivo previsto: ${it.arriveRound===11&&g.roundIdx===11?'liquidazione finale':'giorno '+(it.arriveRound+1)}.`);
+  } else {
+    g.decisions[i]='pass'; g.animateCard=i; FX.click();
+  }
+  renderGame();
+  g.animateCard=null;
+}
+function sellItem(id){
+  const g=S.game; if(!g) return;
+  const it=g.stash.find(x=>x.id===id);
+  if(!it||!it.revealed) return;
+  const v=cardValue(it.card),pl=v-it.paid;
+  g.cash+=v; g.stats.earned+=v; g.stats.sold++;
+  if(pl>g.stats.bestPl){ g.stats.bestPl=pl; g.stats.bestFlip=it.card.brand+' '+it.card.model; }
+  g.stash=g.stash.filter(x=>x.id!==id);
+  FX.cash();
+  toast(`Venduto <b>${esc(it.card.brand)} ${esc(it.card.model)}</b> a ${eur(v)} <span class="${pl>=0?'pos':'neg'}">(${pl>=0?'+':''}${Math.round(pl)} €)</span>`,pl>=0?'good':'bad');
+  renderGame();
+}
+function toggleRz(){
+  const g=S.game; if(!g||g.rzUsed) return;
+  g.rzArmed=!g.rzArmed; FX.click(); renderGame();
+}
+function rzOnCard(i){
+  const g=S.game; if(!g||g.rzUsed||g.decisions[i]) return;
+  g.rzUsed=true; g.rzArmed=false; g.rzHint=i;
+  FX.buy();
+  const q=g.rounds[g.roundIdx].cards[i].quality;
+  toast(`${rzAvatar(20,'')} RizzitGo: «${RZ_HINT[q]}»`);
+  renderGame();
+}
+function nextRound(){
+  const g=S.game; if(!g) return;
+  if(g.decisions.filter(Boolean).length<3) return;
+  FX.click();
+  if(g.roundIdx===11){ endGame(); return; }
+  enterRound(g.roundIdx+1);
+}
+function gradeOf(v){
+  if(v<600) return ['SCAMMATO','Il mercato ti ha mangiato vivo.'];
+  if(v<1000) return ['FLOP BUYER','Almeno ci hai provato.'];
+  if(v<1600) return ['HUSTLER','Cominci a capire il gioco.'];
+  if(v<2500) return ['RESELLER','Occhio clinico rispettabile.'];
+  if(v<4000) return ['REPGOD','I vendor ti temono.'];
+  return ['CEO DI GUANGZHOU','Leggenda del mercato.'];
+}
+function endGame(){
+  const g=S.game;
+  g.stash.forEach(it=>{
+    if(!it.revealed){
+      it.revealed=true;
+      if(it.card.quality==='scam'){ it.scamLost=true; g.stats.scam++; g.stats.scamLoss+=it.paid; }
+    }
+  });
+  g.stash=g.stash.filter(it=>!it.scamLost);
+  const liquid=g.stash.reduce((s,it)=>s+cardValue(it.card),0);
+  g.liquid=liquid; g.final=g.cash+liquid;
+  const [grade,gradeSub]=gradeOf(g.final);
+  g.grade=grade; g.gradeSub=gradeSub;
+  g.boardRoom=g.mode==='room'?g.room:(g.mode==='daily'?'DAILY':null);
+  if(g.boardRoom){
+    boardSave(g.boardRoom,{name:S.nick,score:g.final,grade,ts:Date.now()});
+    boardBroadcast(g.boardRoom);
+  }
+  renderResults();
+  showScreen('results');
+}
+
+/* ===== RESULTS ===== */
+function renderResults(){
+  const g=S.game;
+  const mult=(g.final/1000).toFixed(2);
+  const code=g.boardRoom?resultEncode({room:g.boardRoom,name:S.nick,score:g.final,grade:g.grade}):null;
+  const st=g.stats;
+  const rows=[
+    ['OFFERTE COMPRATE',st.bought],
+    ['PACCHI VENDUTI',st.sold],
+    ['SPESO TOTALE',eur(st.spent)],
+    ['INCASSATO IN VENDITE',eur(st.earned)],
+    ['LIQUIDAZIONE FINALE STASH','+'+eur(g.liquid).slice(2)],
+    ['PACCHI SMARRITI (SCAM)',st.scam?st.scam+' · −'+eur(st.scamLoss).slice(2):'0'],
+    ['FLIP MIGLIORE',st.bestPl>-1e9?esc(st.bestFlip)+' · +'+Math.round(st.bestPl)+' €':'—'],
+    ['CONSULENZA RIZZITGO',g.rzUsed?'USATA':'NON USATA (TIMIDO…)']
+  ].map(r=>`<div class="brow-s"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
+
+  const share=g.boardRoom?`
+    <div class="share">
+      <label>CODICE RISULTATO — CONDIVIDILO: CHI LO INCOLLA IN QUESTA STANZA TI VEDE IN CLASSIFICA</label>
+      <div class="share-row">
+        <code id="rescode">${esc(code||'')}</code>
+        <button class="btn" data-action="copy-result">${IC.copy} COPIA</button>
+      </div>
+      <div class="friend-row">
+        <input id="friend-code" placeholder="Incolla qui RR1-… di un amico" autocomplete="off">
+        <button class="btn" data-action="add-friend">${IC.plus} AGGIUNGI</button>
+      </div>
+    </div>`:'';
+
+  const board=g.boardRoom?`<div id="board-slot"></div>`:'';
+
+  const modeTag=g.mode==='room'?'STANZA '+esc(g.room):(g.mode==='daily'?'SFIDA QUOTIDIANA':'PARTITA SINGOLA');
+  $('#scr-results').innerHTML=`
+  <div class="container results">
+    <p class="sec-kicker" style="text-align:center">GIORNO 12 · MERCATO CHIUSO · ${modeTag}</p>
+    <div class="res-stamp stamp">${esc(g.grade)}</div>
+    <div class="res-money">${eur(g.final)}</div>
+    <p class="res-sub">DA € 1.000 IN 12 GIORNI · ×${mult} — ${esc(g.gradeSub).toUpperCase()}</p>
+    <div class="res-bill">${rows}</div>
+    ${share}
+    ${board}
+    <div class="res-actions">
+      <button class="btn btn-orange" data-action="replay">RIGIOCA</button>
+      <button class="btn" data-action="go-home">HOME</button>
+    </div>
+  </div>`;
+  if(g.boardRoom){ renderBoardInto($('#board-slot'),g.boardRoom); }
+  FX.cash();
+}
+
+/* ---------- delegation eventi ---------- */
+document.getElementById('app').addEventListener('click',e=>{
+  const el=e.target.closest('[data-action]');
+  if(!el) return;
+  const a=el.dataset.action;
+  switch(a){
+    case 'start-single': FX.click(); startGame({mode:'single'}); break;
+    case 'start-daily': FX.click(); startGame({mode:'daily'}); break;
+    case 'open-lobby': FX.click(); S.lobby.code=''; renderLobby(); showScreen('lobby'); break;
+    case 'go-home': FX.click(); renderHome(); showScreen('home'); break;
+    case 'gen-code':{
+      FX.click();
+      const inp=$('#room-in');
+      if(inp){ inp.value=genRoomCode(); S.lobby.code=inp.value; updateLobby(); }
+      break;
+    }
+    case 'lobby-start':{
+      const code=(S.lobby.code||'').trim();
+      if(code.length<4){ toast('Il codice stanza serve di almeno 4 caratteri.','bad'); break; }
+      FX.click(); startGame({mode:'room',room:code});
+      break;
+    }
+    case 'buy': case 'pass':{
+      if(el.dataset.off){ toast('Stash pieno o cash insufficiente.','bad'); FX.bad(); break; }
+      decideCard(+el.dataset.i,a); break;
+    }
+    case 'rz-card': rzOnCard(+el.dataset.i); break;
+    case 'arm-rz': toggleRz(); break;
+    case 'sell': sellItem(el.dataset.id); break;
+    case 'next': nextRound(); break;
+    case 'mute':{
+      FX.on=!FX.on; setLS('rr_sound',FX.on);
+      FX.init(); if(FX.on) FX.click();
+      const b=$('.btn-icon[data-action="mute"]');
+      if(b) b.innerHTML=FX.on?IC.vol:IC.volOff;
+      break;
+    }
+    case 'copy-result':{
+      const g=S.game;
+      const code=$('#rescode')?$('#rescode').textContent:'';
+      const where=g.mode==='room'?'STANZA '+g.room:'SFIDA QUOTIDIANA';
+      copyText(`REP RUSH · ${where} · ${S.nick} chiude a ${eur(g.final)} (${g.grade}) — batti questo: ${code}`);
+      break;
+    }
+    case 'add-friend':{
+      const g=S.game; if(!g||!g.boardRoom) break;
+      const inp=$('#friend-code');
+      const d=resultDecode(inp?inp.value:'');
+      if(!d){ toast('Codice risultato non valido.','bad'); FX.bad(); break; }
+      if(d.room.toUpperCase()!==g.boardRoom.toUpperCase()){
+        toast(`Questo risultato appartiene alla stanza <b>${esc(d.room)}</b>.`,'bad'); FX.bad(); break;
+      }
+      boardSave(g.boardRoom,{name:d.name,score:d.score,grade:d.grade,ts:Date.now()});
+      boardBroadcast(g.boardRoom);
+      renderBoardInto($('#board-slot'),g.boardRoom);
+      inp.value='';
+      toast(`Aggiunto in classifica: <b>${esc(d.name)}</b> · ${eur(d.score)}`,'good');
+      FX.cash();
+      break;
+    }
+    case 'replay':{
+      FX.click();
+      const g=S.game;
+      if(g.mode==='room') startGame({mode:'room',room:g.room});
+      else if(g.mode==='daily') startGame({mode:'daily'});
+      else startGame({mode:'single'});
+      break;
+    }
+  }
+});
+document.getElementById('app').addEventListener('input',e=>{
+  if(e.target&&e.target.id==='nick-in'){
+    S.nick=e.target.value.slice(0,14);
+    setLS('rr_nick',S.nick);
+  }
+});
+document.getElementById('app').addEventListener('keydown',e=>{
+  if(e.target&&e.target.id==='friend-code'&&e.key==='Enter'){
+    const b=document.querySelector('[data-action="add-friend"]');
+    if(b) b.click();
+  }
+});
+
+/* ---------- avvio ---------- */
+renderHome();
+showScreen('home');
+</script>
+</body>
+</html>
