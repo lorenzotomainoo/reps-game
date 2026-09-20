@@ -1,1310 +1,1146 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>REP RUSH — il gioco delle reps · sponsorizzato da RIZZITGO</title>
-<meta name="description" content="Compra, ispeziona, vendi. Il gioco di resselle, QC e truffe dal mercato di Guangzhou. Singleplayer, sfida quotidiana e stanze private con codice.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c7a065">
+<title>RIZZITGO · Reps Agent Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
 <style>
-/* ============ TOKENS & RESET ============ */
 :root{
-  --ink:#141210; --ink2:#1B1815; --ink3:#221E1A;
-  --line:#3A342D; --line2:#4A443B;
-  --paper:#F2EDE2; --paper-dim:#E4DDCC; --dim:#9A917F;
-  --orange:#FF5A1E; --orange-deep:#D9430E;
-  --red:#D63A22; --green:#3F9B5F; --green-deep:#2E7D46;
-  --hazard:#FFC53D;
-  --disp:'Anton',sans-serif; --body:'Space Grotesk',sans-serif; --mono:'JetBrains Mono',monospace;
+  --kraft:#c7a065; --kraft-d:#a9814e; --paper:#f7f1e3; --paper-d:#e9dfc8;
+  --ink:#1c1610; --ink-soft:#4a4236;
+  --stamp:#c0391b; --tape:#28477e; --tape-d:#1b3260;
+  --ok:#2f7d4f; --warn:#a8700a; --bad:#b3261e;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{overflow-x:clip}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
 body{
-  background:var(--ink); color:var(--paper); font-family:var(--body);
-  min-height:100vh; font-size:16px; line-height:1.5;
-  padding:8px 0;
+  font-family:'Archivo',sans-serif;color:var(--ink);min-height:100vh;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, rgba(255,255,255,.22), transparent 60%),
+    repeating-linear-gradient(93deg, rgba(0,0,0,.045) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(3deg, rgba(255,255,255,.05) 0 3px, transparent 3px 9px),
+    var(--kraft);
+  background-attachment:fixed;
+  padding-bottom:44px;
 }
-::selection{background:var(--orange);color:var(--ink)}
-button{font-family:inherit;cursor:pointer;user-select:none}
-input{font-family:inherit}
-img,svg,canvas{display:block}
-:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
-.disp{font-family:var(--disp);text-transform:uppercase;letter-spacing:.02em;font-weight:400}
-.mono{font-family:var(--mono)}
-.dim{color:var(--dim)}
-.ic{width:1.05em;height:1.05em;vertical-align:-.15em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-
-/* noise + hazard stripes */
-.noise{position:fixed;inset:0;z-index:200;pointer-events:none;opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
-.hz{position:fixed;left:0;right:0;height:8px;z-index:150;pointer-events:none;
-  background:repeating-linear-gradient(45deg,var(--hazard) 0 14px,var(--ink) 14px 28px)}
-.hz.top{top:0}.hz.bottom{bottom:0}
-
-#app{min-height:calc(100vh - 16px)}
-.screen{display:none}
-.screen.active{display:block;animation:scrIn .35s ease both}
-@keyframes scrIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.container{max-width:1180px;margin:0 auto;padding:26px 20px 90px}
-
-/* ============ BOTTONI ============ */
-.btn{
-  font-family:var(--disp);text-transform:uppercase;letter-spacing:.05em;
-  background:transparent;color:var(--paper);border:2px solid var(--paper);
-  padding:12px 20px;font-size:15px;line-height:1;transition:transform .12s,background .15s,color .15s,border-color .15s;
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px
-}
-.btn:hover:not(:disabled){transform:translate(-1px,-2px)}
-.btn:active:not(:disabled){transform:translate(1px,1px)}
+body.shake{animation:shk .3s}
+@keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,3px)}}
+.mono{font-family:'Space Mono',monospace}
+button{font-family:inherit;cursor:pointer}
+/* ---------- HUD ---------- */
+#hud{position:sticky;top:0;z-index:40;background:var(--paper);border-bottom:2px solid var(--ink);
+  display:flex;align-items:center;gap:10px;padding:8px 12px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+#hud .wordmark{font-weight:900;font-size:19px;letter-spacing:-.5px;line-height:1}
+#hud .wordmark small{display:block;font-family:'Space Mono';font-weight:400;font-size:8px;letter-spacing:2px;color:var(--stamp)}
+.hstat{display:flex;align-items:center;gap:6px;font-family:'Space Mono';font-size:12px;font-weight:700;
+  background:var(--paper-d);border:1.5px solid var(--ink);padding:4px 9px;border-radius:4px;white-space:nowrap}
+.hstat svg{width:14px;height:14px}
+.hstat.neg{color:var(--bad)}
+.hbtn{margin-left:auto;display:flex;gap:8px}
+.ibtn{width:38px;height:38px;border:2px solid var(--ink);background:var(--paper);border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative}
+.ibtn svg{width:18px;height:18px}
+.ibtn:active{transform:translateY(2px)}
+.ibtn .bdg{position:absolute;top:-6px;right:-6px;background:var(--stamp);color:#fff;font-family:'Space Mono';font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--ink)}
+@media(max-width:620px){#hud{gap:6px;padding:6px 8px}#hud .wordmark{font-size:15px}.hstat{font-size:10px;padding:3px 6px}.hstat .lbl{display:none}#hud{flex-wrap:wrap}}
+/* ---------- LAYOUT ---------- */
+#wrap{max-width:1060px;margin:0 auto;padding:14px 12px 26px;display:grid;grid-template-columns:1fr 330px;gap:14px}
+@media(max-width:920px){#wrap{grid-template-columns:1fr}}
+/* ---------- STEPPER ---------- */
+#stepper{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+#stepper::-webkit-scrollbar{display:none}
+.step{flex:0 0 auto;display:flex;align-items:center;gap:6px;font-family:'Space Mono';font-size:10px;font-weight:700;
+  padding:5px 9px;border:1.5px solid var(--ink);background:var(--paper-d);color:var(--ink-soft);border-radius:4px;letter-spacing:.5px}
+.step svg{width:12px;height:12px}
+.step.done{background:var(--paper);color:var(--ok)}
+.step.done svg{color:var(--ok)}
+.step.cur{background:var(--tape);color:#fff;border-color:var(--tape-d);box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+/* ---------- PANELS ---------- */
+.panel{background:var(--paper);border:2px solid var(--ink);border-radius:8px;position:relative;
+  box-shadow:5px 5px 0 rgba(0,0,0,.22);overflow:hidden;margin-bottom:14px}
+.panel .tapebar{background:var(--tape);color:#fff;font-family:'Space Mono';font-size:10px;font-weight:700;letter-spacing:2px;
+  padding:5px 0;overflow:hidden;white-space:nowrap;border-bottom:2px solid var(--tape-d)}
+.panel .tapebar span{display:inline-block;animation:mq 14s linear infinite}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.pbody{padding:14px}
+@media(max-width:560px){.pbody{padding:10px}}
+.ph{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.ph h2{font-weight:900;font-size:clamp(19px,4.5vw,26px);letter-spacing:-.5px;text-transform:uppercase}
+.ph .sub{font-family:'Space Mono';font-size:11px;color:var(--ink-soft)}
+.corner{position:absolute;width:44px;height:16px;background:rgba(40,71,126,.28);border:1px solid rgba(27,50,96,.4);z-index:1}
+.corner.tl{top:-6px;left:-14px;transform:rotate(-38deg)}
+.corner.br{bottom:-6px;right:-14px;transform:rotate(-38deg)}
+/* ---------- BUTTONS / CHIPS ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:900;text-transform:uppercase;letter-spacing:.5px;
+  font-size:14px;padding:11px 18px;background:var(--ink);color:var(--paper);border:2px solid var(--ink);border-radius:6px;
+  box-shadow:3px 3px 0 rgba(0,0,0,.3);transition:transform .08s}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.btn.red{background:var(--stamp);border-color:#7e2410;color:#fff}
+.btn.ghost{background:var(--paper);color:var(--ink)}
+.btn.sm{font-size:11px;padding:7px 11px;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-orange{background:var(--orange);border-color:var(--orange);color:var(--ink)}
-.btn-orange:hover:not(:disabled){background:var(--orange-deep);border-color:var(--orange-deep);color:var(--paper)}
-.btn-ink{background:var(--ink);border-color:var(--ink);color:var(--paper)}
-.btn-icon{background:none;border:2px solid var(--line);color:var(--paper);width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center}
-.btn-icon svg{width:20px;height:20px}
-
-/* ============ TIMBRI ============ */
-.stamp{
-  font-family:var(--disp);text-transform:uppercase;letter-spacing:.08em;
-  border:3px double currentColor;padding:4px 14px;display:inline-block;
-  transform:rotate(-8deg);opacity:.94;white-space:nowrap
+.btn svg{width:15px;height:15px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:'Space Mono';font-size:10px;font-weight:700;
+  border:1.5px solid var(--ink);border-radius:4px;padding:3px 7px;background:var(--paper-d);letter-spacing:.5px}
+.chip.req{background:#f6e3b4;border-color:var(--warn);color:#7a5205}
+.chip.ok{background:#d9ecd9;border-color:var(--ok);color:var(--ok)}
+.chip.bad{background:#f4d7d3;border-color:var(--bad);color:var(--bad)}
+.chip svg{width:11px;height:11px}
+.tag{font-family:'Space Mono';font-size:9px;font-weight:700;letter-spacing:1px;padding:2px 6px;border-radius:3px;color:#fff}
+.tag.low{background:#8a6a3d}.tag.mid{background:var(--tape)}.tag.top{background:var(--stamp)}
+/* ---------- STAMPS ---------- */
+.stampbox{display:inline-block;border:3px solid var(--stamp);color:var(--stamp);font-weight:900;text-transform:uppercase;
+  letter-spacing:1px;padding:6px 12px;border-radius:5px;transform:rotate(-7deg);font-size:15px;
+  -webkit-mask-image:radial-gradient(circle at 30% 30%, #000 96%, transparent 100%),radial-gradient(circle at 70% 65%, #000 94%, transparent 100%);
+  mask-image:radial-gradient(circle at 25% 25%, #000 97%, transparent 100%);position:relative}
+.stampbox.in{animation:stampIn .45s cubic-bezier(.2,2.2,.4,1) both}
+@keyframes stampIn{from{transform:rotate(-16deg) scale(2.6);opacity:0}to{transform:rotate(-7deg) scale(1);opacity:1}}
+/* ---------- ITEMS ---------- */
+.itemrow{display:flex;gap:12px;align-items:center;border:1.5px solid var(--ink);border-radius:8px;background:#fff9ec;padding:10px;margin-bottom:10px;position:relative}
+.itemrow .art{flex:0 0 96px;background:var(--paper-d);border:1.5px solid var(--ink);border-radius:6px;padding:4px}
+.itemrow .art svg{display:block;width:100%;height:auto}
+.itemrow .nm{font-weight:900;font-size:14px;line-height:1.15}
+.itemrow .bd{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);margin-top:2px}
+.budgetbar{height:22px;border:2px solid var(--ink);border-radius:5px;background:var(--paper-d);overflow:hidden;position:relative;margin:6px 0 2px}
+.budgetbar i{display:block;height:100%;background:repeating-linear-gradient(45deg,var(--tape) 0 8px,var(--tape-d) 8px 16px);transition:width .4s}
+.budgetbar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono';font-size:10px;font-weight:700}
+/* ---------- CLIENT HEAD ---------- */
+.cli{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.avat{width:52px;height:52px;border-radius:50%;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;
+  font-weight:900;font-size:18px;color:#fff;box-shadow:2px 2px 0 rgba(0,0,0,.25)}
+.cli .un{font-weight:900;font-size:17px}
+.cli .geo{font-family:'Space Mono';font-size:10px;color:var(--ink-soft)}
+/* ---------- SELLER CARDS ---------- */
+.seller{border:2px solid var(--ink);border-radius:8px;padding:10px;margin-bottom:8px;background:#fff9ec;display:flex;gap:10px;align-items:center;cursor:pointer;transition:transform .06s}
+.seller:active{transform:scale(.99)}
+.seller.sel{background:#dfe8f4;box-shadow:3px 3px 0 var(--tape)}
+.seller .pr{font-family:'Space Mono';font-weight:700;font-size:16px;margin-left:auto;text-align:right}
+.seller .pr small{display:block;font-size:9px;font-weight:400;color:var(--ink-soft)}
+.seller .snm{font-weight:900;font-size:13px}
+.seller .sbl{font-size:11px;color:var(--ink-soft);line-height:1.25;margin-top:2px}
+/* ---------- QC ---------- */
+.qcwrap{position:relative;border:2px solid var(--ink);border-radius:8px;background:
+  linear-gradient(var(--paper-d) 1px,transparent 1px),linear-gradient(90deg,var(--paper-d) 1px,transparent 1px);
+  background-size:22px 22px;background-color:#fbf6ea;padding:8px;min-height:190px;display:flex;align-items:center;justify-content:center}
+.qcwrap .art{width:min(300px,80%)}
+.hotspot{position:absolute;width:34px;height:34px;border-radius:50%;border:2.5px solid var(--stamp);background:rgba(247,241,227,.92);
+  font-family:'Space Mono';font-weight:700;font-size:12px;color:var(--stamp);display:flex;align-items:center;justify-content:center;
+  animation:pls 1.6s infinite;box-shadow:0 0 0 3px rgba(192,57,27,.18);z-index:3}
+@keyframes pls{0%,100%{box-shadow:0 0 0 2px rgba(192,57,27,.25)}50%{box-shadow:0 0 0 8px rgba(192,57,27,.08)}}
+.hotspot.done{border-color:var(--ok);color:var(--ok);animation:none;background:#e2f0e2}
+.hotspot.bad{border-color:var(--bad);background:#f7ddd7;color:var(--bad);animation:none}
+.qcres{font-family:'Space Mono';font-size:11px;margin-top:8px;border-left:3px solid var(--ok);padding:5px 8px;background:#e2f0e2;border-radius:3px}
+.qcres.bad{border-color:var(--bad);background:#f7ddd7}
+/* ---------- SERVICES ---------- */
+.svc{display:flex;align-items:center;gap:10px;border:1.5px solid var(--ink);border-radius:8px;padding:9px 11px;margin-bottom:8px;background:#fff9ec}
+.svc .sw{margin-left:auto;width:52px;height:28px;border:2px solid var(--ink);border-radius:16px;background:var(--paper-d);position:relative;flex:0 0 auto}
+.svc .sw i{position:absolute;top:2px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--paper);border:1.5px solid var(--ink);transition:left .15s}
+.svc.on .sw{background:var(--ok)}
+.svc.on .sw i{left:25px;background:#fff}
+.svc .tk{font-weight:900;font-size:13px}
+.svc .tk .chip{margin-left:6px}
+.svc .ds{font-size:11px;color:var(--ink-soft)}
+/* ---------- PACK ---------- */
+.boxopt{border:2px solid var(--ink);border-radius:8px;padding:9px;text-align:center;cursor:pointer;background:#fff9ec}
+.boxopt.sel{background:#dfe8f4;box-shadow:3px 3px 0 var(--tape)}
+.boxopt .bs{font-weight:900;font-size:18px}
+.boxopt .bv{font-family:'Space Mono';font-size:10px;color:var(--ink-soft)}
+.packviz{border:2.5px dashed var(--ink);border-radius:8px;min-height:120px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;background:#fbf6ea;position:relative}
+.packviz .mini{width:52px;border:1.5px solid var(--ink);border-radius:5px;background:var(--paper-d);padding:3px}
+.packviz.over{border-color:var(--bad);animation:shk .3s}
+.fillbar{height:14px;border:2px solid var(--ink);border-radius:4px;background:var(--paper-d);overflow:hidden}
+.fillbar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+/* ---------- LINES ---------- */
+.line{border:2px solid var(--ink);border-radius:8px;padding:9px 11px;margin-bottom:8px;background:#fff9ec;cursor:pointer;display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center}
+.line.sel{background:#dfe8f4;box-shadow:3px 3px 0 var(--tape)}
+.line.dis{opacity:.45;cursor:not-allowed}
+.line .lnm{font-weight:900;font-size:14px}
+.line .ldt{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap;font-family:'Space Mono';font-size:10px}
+.risk{display:inline-flex;gap:2px;align-items:center}
+.risk b{width:7px;height:11px;background:var(--paper-d);border:1px solid var(--ink);display:inline-block;border-radius:1px}
+.risk b.on{background:var(--stamp)}
+/* ---------- CHAT ---------- */
+#chatcol{display:flex;flex-direction:column;gap:10px}
+#chatbox{background:var(--paper);border:2px solid var(--ink);border-radius:8px;box-shadow:5px 5px 0 rgba(0,0,0,.22);
+  display:flex;flex-direction:column;overflow:hidden;position:sticky;top:64px}
+#chathead{background:var(--tape);color:#fff;padding:8px 12px;font-weight:900;font-size:13px;display:flex;gap:8px;align-items:center;border-bottom:2px solid var(--tape-d)}
+#chathead svg{width:15px;height:15px}
+#chatlog{height:min(52vh,480px);overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;background:
+  repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0 2px, transparent 2px 26px),var(--paper-d)}
+.msg{max-width:86%;padding:7px 10px;border-radius:9px;font-size:12.5px;line-height:1.35;border:1.5px solid var(--ink);animation:fu .25s both}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg .who{display:block;font-family:'Space Mono';font-size:8.5px;font-weight:700;letter-spacing:1px;color:var(--ink-soft);margin-bottom:2px}
+.msg.cl{align-self:flex-start;background:#fffdf4;border-bottom-left-radius:2px}
+.msg.ag{align-self:flex-end;background:#d9ecd9;border-bottom-right-radius:2px}
+.msg.sys{align-self:center;background:var(--paper);font-family:'Space Mono';font-size:10px;color:var(--ink-soft);border-style:dashed;max-width:96%}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:9px 11px;background:#fffdf4;border:1.5px solid var(--ink);border-radius:9px;border-bottom-left-radius:2px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--ink-soft);animation:tp 1s infinite}
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+@keyframes tp{0%,100%{opacity:.25;transform:none}50%{opacity:1;transform:translateY(-3px)}}
+@media(max-width:920px){
+ #chatcol{position:fixed;inset:auto 0 44px 0;z-index:60;transform:translateY(110%);transition:transform .28s;padding:0 10px 10px;pointer-events:none}
+ #chatcol.open{transform:none;pointer-events:auto}
+ #chatbox{box-shadow:0 -6px 24px rgba(0,0,0,.3)}
+ #chatlog{height:54vh}
+ #chatFab{position:fixed;right:14px;bottom:58px;z-index:61;width:52px;height:52px;border-radius:50%;background:var(--stamp);color:#fff;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 rgba(0,0,0,.35)}
+ #chatFab svg{width:23px;height:23px}
 }
-.stamp-in{animation:stampIn .38s cubic-bezier(.2,2.1,.4,1) both}
-@keyframes stampIn{0%{transform:rotate(-8deg) scale(2.3);opacity:0}60%{transform:rotate(-8deg) scale(.94);opacity:1}100%{transform:rotate(-8deg) scale(1);opacity:.94}}
-
-/* ============ BARCODE / TAPE ============ */
-.barcode{display:flex;gap:2px;height:26px;margin:10px 0 2px;width:max-content;max-width:100%;overflow:hidden}
-.barcode i{background:currentColor;width:2px;flex:none}
-.barcode + .bc-num{font-family:var(--mono);font-size:10px;letter-spacing:.35em;opacity:.7}
-.tape{position:absolute;top:-12px;left:50%;width:92px;height:26px;background:rgba(255,90,30,.88);
-  transform:translateX(-50%) rotate(-2.5deg);box-shadow:0 2px 4px rgba(0,0,0,.35);z-index:2}
-.tape.t2{transform:translateX(-50%) rotate(1.5deg);width:70px}
-
-/* ============ TOAST ============ */
-#toasts{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:300;display:flex;flex-direction:column;gap:8px;width:min(480px,92vw)}
-.toast{background:var(--ink3);border:2px solid var(--orange);color:var(--paper);padding:12px 16px;
-  font-family:var(--mono);font-size:13px;animation:toastIn .25s ease both;box-shadow:6px 6px 0 rgba(0,0,0,.5)}
-.toast.bad{border-color:var(--red)}
-.toast.good{border-color:var(--green)}
-.toast.out{opacity:0;transform:translateY(-8px);transition:.4s}
-@keyframes toastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-
-/* ============ HOME ============ */
-.home-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0 0;max-width:1180px;margin:0 auto}
-.sponsor-chip{display:inline-flex;align-items:center;gap:10px;border:2px solid var(--line);padding:6px 14px 6px 8px;
-  font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--dim)}
-.sponsor-chip b{color:var(--orange);letter-spacing:.14em}
-.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center;padding:40px 0 20px}
-.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.22em;color:var(--orange);margin-bottom:14px}
-h1.title{font-family:var(--disp);font-size:clamp(70px,12.5vw,148px);line-height:.88;text-transform:uppercase;letter-spacing:.01em}
-h1.title .r2{color:transparent;-webkit-text-stroke:3px var(--orange)}
-@supports not (-webkit-text-stroke:1px black){h1.title .r2{color:var(--orange)}}
-.tagline{font-size:19px;font-weight:500;margin:16px 0 4px}
-.tagline b{color:var(--orange)}
-.hero-sub{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.1em;margin-bottom:26px}
-.nick-row{display:flex;gap:10px;align-items:stretch;margin-bottom:22px;flex-wrap:wrap}
-.nick-row label{align-self:center;font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.12em}
-#nick-in{background:var(--ink2);border:2px solid var(--line);color:var(--paper);font-family:var(--mono);
-  font-size:15px;padding:11px 14px;width:230px;letter-spacing:.05em}
-#nick-in::placeholder{color:#5c5548}
-.modes{border:2px solid var(--line)}
-.mode-row{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:none;border:none;
-  color:var(--paper);padding:16px 18px;border-bottom:2px solid var(--line);transition:.15s}
-.mode-row:last-child{border-bottom:none}
-.mode-row .m-arrow{font-family:var(--disp);font-size:22px;color:var(--orange);transition:.15s}
-.mode-row .m-tit{font-family:var(--disp);font-size:20px;letter-spacing:.04em;text-transform:uppercase}
-.mode-row .m-sub{font-family:var(--mono);font-size:11.5px;color:var(--dim);margin-top:2px}
-.mode-row:hover{background:var(--orange);color:var(--ink)}
-.mode-row:hover .m-sub{color:var(--ink)}
-.mode-row:hover .m-arrow{transform:translateX(6px);color:var(--ink)}
-
-/* waybill decorativa hero */
-.wb-deco{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:24px 24px 18px;
-  position:relative;transform:rotate(2deg);box-shadow:10px 10px 0 rgba(0,0,0,.55);animation:bob 7s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:rotate(2deg) translateY(0)}50%{transform:rotate(2deg) translateY(-9px)}}
-.wb-deco .wb-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:8px}
-.wb-deco .wb-head b{font-family:var(--disp);font-size:21px;letter-spacing:.03em}
-.wb-deco .wb-head span{font-family:var(--mono);font-size:10px;letter-spacing:.15em}
-.wb-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin:14px 0;font-family:var(--mono)}
-.wb-fields span{display:block;font-size:9.5px;letter-spacing:.14em;color:#6b6152}
-.wb-fields b{font-size:14px;font-weight:700}
-.wb-qr-row{display:flex;gap:16px;align-items:flex-end;justify-content:space-between;margin-top:6px}
-.wb-stamp{position:absolute;right:14px;bottom:66px;color:var(--red);font-size:15px;transform:rotate(-11deg)}
-
-/* manifesto come si gioca */
-.steps-wrap{margin-top:56px}
-.sec-kicker{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--orange);margin-bottom:8px}
-.steps{border:2px solid var(--line);background:var(--ink2)}
-.step{display:grid;grid-template-columns:86px 1fr;gap:18px;padding:22px 24px;border-bottom:2px dashed var(--line);align-items:start}
-.step:last-child{border-bottom:none}
-.step .num{font-family:var(--disp);font-size:44px;line-height:1;color:var(--orange)}
-.step h4{font-family:var(--disp);font-size:21px;letter-spacing:.04em;text-transform:uppercase;margin-bottom:4px}
-.step p{color:var(--dim);font-size:14.5px;max-width:640px}
-.step p b{color:var(--paper)}
-
-/* footer sponsor */
-.sponsor-foot{margin-top:64px;border:2px solid var(--line);background:var(--ink2);padding:28px 26px;position:relative}
-.sponsor-foot .sp-row{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
-.sponsor-foot .sp-name{font-family:var(--disp);font-size:clamp(38px,6vw,64px);line-height:.95;letter-spacing:.02em}
-.sponsor-foot .sp-name em{font-style:normal;color:var(--orange)}
-.sponsor-foot .sp-desc{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.06em;max-width:330px}
-.sponsor-foot .sp-quote{margin-top:14px;font-size:16px;font-weight:500}
-.sponsor-foot .sp-quote b{color:var(--orange)}
-.disclaimer{margin-top:26px;font-family:var(--mono);font-size:10.5px;color:#6b6455;letter-spacing:.04em;max-width:760px}
-
-/* ============ LOBBY ============ */
-.lobby .container{max-width:860px}
-.lobby h2{font-size:clamp(40px,7vw,64px);margin:18px 0 10px}
-.lobby-sub{color:var(--dim);max-width:640px;margin-bottom:28px}
-.lobby-sub b{color:var(--paper)}
-.ticket{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:28px;position:relative;
-  display:grid;grid-template-columns:1.3fr .7fr;gap:24px;box-shadow:10px 10px 0 rgba(0,0,0,.55);transform:rotate(-.4deg)}
-.ticket label{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:#6b6152;display:block;margin-bottom:6px}
-.ticket-row{display:flex;gap:10px;flex-wrap:wrap}
-#room-in{font-family:var(--mono);font-size:clamp(26px,4.5vw,38px);font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-  border:2px solid var(--ink);background:var(--paper-dim);padding:8px 14px;width:250px;color:var(--ink)}
-#room-in::placeholder{color:#a49a86;font-size:20px;letter-spacing:.05em}
-.ticket .btn{border-color:var(--ink);color:var(--ink)}
-.ticket .btn:hover:not(:disabled){background:var(--ink);color:var(--paper)}
-.btn-orange.big{width:100%;margin-top:20px;font-size:19px;padding:16px}
-.ticket-note{font-family:var(--mono);font-size:11px;color:#6b6152;margin-top:12px;letter-spacing:.03em}
-.ticket-fields{display:flex;gap:26px;margin-top:22px;border-top:2px dashed var(--ink);padding-top:14px}
-.ticket-fields span{display:block;font-size:9.5px;letter-spacing:.14em;color:#6b6152}
-.ticket-fields b{font-size:14px}
-.ticket-r{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-left:2px dashed var(--ink);padding-left:10px}
-.ticket-r canvas{width:158px;height:158px;image-rendering:pixelated}
-.ticket-r span{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:#6b6152;text-align:center;line-height:1.6}
-#lobby-board{margin-top:34px}
-
-/* ============ GAME ============ */
-.gbar{position:sticky;top:8px;z-index:60;background:var(--ink);border-bottom:2px solid var(--orange);
-  display:flex;align-items:center;gap:14px;padding:10px 16px;flex-wrap:wrap}
-.gbar .g-logo{font-family:var(--disp);font-size:21px;letter-spacing:.03em;white-space:nowrap}
-.gbar .g-logo em{font-style:normal;color:var(--orange)}
-.mode-tag{font-size:10px;letter-spacing:.14em;border:1px solid var(--line2);padding:3px 8px;color:var(--dim);white-space:nowrap}
-.ticker{flex:1;min-width:0;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:4px 0;order:3;flex-basis:100%}
-.ticker::-webkit-scrollbar{display:none}
-@media(min-width:860px){.ticker{order:0;flex-basis:auto}}
-.tk{white-space:nowrap;font-size:12px;border:1px solid var(--line);padding:5px 11px;flex:none}
-.tk b{letter-spacing:.05em}
-.tk .up{color:#7fd394}.tk .down{color:#e0705a}
-.tk.flash-up{animation:flashUp 1.2s ease}
-.tk.flash-down{animation:flashDown 1.2s ease}
-@keyframes flashUp{0%{background:rgba(63,155,95,.4)}100%{background:transparent}}
-@keyframes flashDown{0%{background:rgba(214,58,34,.4)}100%{background:transparent}}
-.g-cash{font-family:var(--mono);font-weight:700;font-size:18px;white-space:nowrap}
-.g-cash.cash-up{animation:flashUp 1s}
-.g-cash.cash-dn{animation:flashDown 1s}
-
-.game-grid{display:grid;grid-template-columns:1fr 336px;gap:22px;align-items:start;max-width:1180px;margin:0 auto;padding:22px 18px 100px}
-.dayline{display:flex;align-items:center;gap:14px;margin-bottom:18px}
-.dayline .d-lab{font-family:var(--disp);font-size:20px;white-space:nowrap}
-.dayline .d-lab em{font-style:normal;color:var(--orange)}
-.segs{flex:1;display:flex;gap:5px}
-.seg{flex:1;height:8px;background:var(--line);transition:.3s}
-.seg.done{background:var(--orange)}
-.seg.now{background:var(--hazard);animation:nowBlink 1.4s ease infinite}
-@keyframes nowBlink{0%,100%{opacity:1}50%{opacity:.45}}
-
-/* bollettino */
-.bulletin{border:2px solid var(--line);background:var(--ink2);padding:20px 22px 18px;position:relative;margin-bottom:20px}
-.b-tag{position:absolute;top:-11px;left:14px;background:var(--hazard);color:var(--ink);font-family:var(--disp);
-  font-size:11px;letter-spacing:.12em;padding:3px 10px}
-.b-tit{font-family:var(--disp);font-size:24px;letter-spacing:.03em;margin-bottom:6px;text-transform:uppercase}
-.b-msg{color:#cfc7b6;font-size:15px;max-width:680px}
-.b-msg b{color:var(--paper)}
-.b-chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.chip{font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:4px 10px;border:2px solid}
-.chip-up{color:#7fd394;border-color:var(--green-deep)}
-.chip-down{color:#e0705a;border-color:var(--red)}
-.chip-cost{background:var(--hazard);color:var(--ink);border-color:var(--hazard)}
-.rz-note{display:flex;gap:12px;align-items:flex-start;margin-top:16px;border-top:2px dashed var(--line);padding-top:14px}
-.rz-note div{font-size:13.5px;color:#cfc7b6}
-.rz-note b{color:var(--orange);letter-spacing:.06em}
-
-/* arrivi */
-.arrivals{margin-bottom:20px}
-.sec-title{font-family:var(--disp);font-size:16px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:12px}
-.sec-title .ic{color:var(--orange);width:18px;height:18px}
-.arr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:12px}
-.arr{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:14px 16px;position:relative}
-.arr .arr-way{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#6b6152;margin-bottom:6px}
-.arr .arr-item{font-family:var(--disp);font-size:19px;letter-spacing:.02em;text-transform:uppercase}
-.arr .arr-val{font-family:var(--mono);font-size:12px;margin-top:8px;font-weight:700}
-.arr .arr-val em{font-style:normal}
-.pos{color:var(--green-deep)}.neg{color:var(--red)}
-.arr .a-stamp{position:absolute;right:10px;top:50%;margin-top:-20px;font-size:17px}
-.arr.scam{background:#F0DCD2}
-.arr.scam .a-stamp{font-size:15px}
-
-/* offerte */
-.offers-label{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--dim);margin:22px 0 4px}
-.offer{background:var(--paper);color:var(--ink);border:2px solid var(--ink);position:relative;
-  margin:20px 0;transform:rotate(var(--rot,0deg));transition:transform .22s,box-shadow .22s,opacity .2s}
-.offer:hover:not(.decided){transform:rotate(0) translateY(-3px);box-shadow:10px 12px 0 rgba(0,0,0,.5);z-index:3}
-.offer.decided{opacity:.72}
-.offer-in{display:grid;grid-template-columns:1.35fr .95fr;gap:8px 26px;padding:22px 24px 18px}
-.o-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
-.cat-chip{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--ink);padding:3px 9px}
-.o-meta .mono{font-size:10.5px;color:#6b6152;letter-spacing:.05em}
-.o-name{font-family:var(--disp);font-size:clamp(22px,3vw,30px);line-height:1.05;letter-spacing:.01em;text-transform:uppercase;font-weight:400}
-.o-name span{color:#5f5749}
-.o-tags{list-style:none;margin-top:10px;display:flex;flex-wrap:wrap;gap:7px}
-.o-tags li{font-family:var(--mono);font-size:11.5px;border:1.5px dashed #7a7160;padding:4px 9px;letter-spacing:.02em}
-.o-price{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-.p-row{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #cfc5ae;padding-bottom:5px}
-.p-row span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:#6b6152}
-.p-row b{font-size:17px}
-.p-row.vendor b{font-size:22px}
-.p-mid{display:flex;justify-content:space-between;align-items:center}
-.p-ratio{font-family:var(--disp);font-size:26px;letter-spacing:.03em}
-.p-note{font-size:10.5px;color:var(--orange-deep);letter-spacing:.08em;font-weight:700}
-.o-actions{display:flex;gap:10px}
-.o-actions .btn{flex:1;font-size:14.5px}
-.btn-buy{background:var(--orange);border-color:var(--ink);color:var(--ink)}
-.btn-buy:hover:not(:disabled){background:var(--ink);color:var(--paper)}
-.btn-buy[data-off]{background:var(--paper-dim);color:#7a7160;cursor:not-allowed}
-.btn-pass{border-color:var(--ink);color:var(--ink)}
-.btn-pass:hover{background:var(--ink);color:var(--paper)}
-.offer.decided .o-actions{pointer-events:none;opacity:.25}
-.offer.rz-target{cursor:pointer;box-shadow:0 0 0 3px var(--orange);animation:rzPulse 1.2s ease infinite}
-.offer.rz-target .o-actions{pointer-events:none;opacity:.35}
-@keyframes rzPulse{0%,100%{box-shadow:0 0 0 3px var(--orange)}50%{box-shadow:0 0 0 7px rgba(255,90,30,.45)}}
-.o-stamp{position:absolute;top:50%;left:50%;margin:-30px 0 0 -90px;width:180px;text-align:center;font-size:32px;z-index:4;pointer-events:none}
-.o-stamp.ok{color:var(--green-deep)}.o-stamp.no{color:var(--red)}
-.rz-quote{background:var(--ink);color:var(--paper);display:flex;gap:12px;align-items:center;padding:12px 18px;border-top:2px solid var(--ink)}
-.rz-quote div{font-size:13.5px}
-.rz-quote .mono{font-size:10.5px;color:var(--dim)}
-
-/* actionbar */
-.actionbar{position:sticky;bottom:14px;z-index:50;background:var(--ink);border:2px solid var(--line);
-  display:flex;gap:12px;padding:12px;margin-top:24px;flex-wrap:wrap;box-shadow:0 10px 30px rgba(0,0,0,.5)}
-.btn-rz{flex:1.2;min-width:230px;border:2px solid var(--line);justify-content:flex-start;padding:8px 14px;gap:12px;text-align:left}
-.btn-rz .rz-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.25}
-.btn-rz .rz-txt b{font-size:15px;letter-spacing:.05em}
-.btn-rz .rz-txt em{font-style:normal;font-family:var(--mono);font-size:9.5px;color:var(--dim);letter-spacing:.08em}
-.btn-rz.armed{border-color:var(--orange)}
-.btn-rz.armed .rz-txt em{color:var(--orange)}
-.btn-rz.used{opacity:.55}
-.btn-next{flex:1;min-width:200px;font-size:17px;border-color:var(--orange);color:var(--orange)}
-.btn-next:hover:not(:disabled){background:var(--orange);color:var(--ink)}
-.btn-next:disabled{border-color:var(--line);color:var(--dim)}
-
-/* stash */
-.stash-panel{position:sticky;top:78px;border:2px dashed var(--line2);background:var(--ink2);padding:16px}
-.stash-head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:12px}
-.stash-head h3{font-family:var(--disp);font-size:22px;letter-spacing:.05em}
-.stash-head .mono{font-size:11px;color:var(--dim);letter-spacing:.1em}
-.net-box{border:2px solid var(--line);padding:10px 12px;margin-bottom:14px;background:var(--ink)}
-.net-box .lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;color:var(--dim)}
-.net-val{font-family:var(--mono);font-weight:700;font-size:27px;line-height:1.15}
-.net-sub{font-family:var(--mono);font-size:10px;color:var(--dim);margin-top:2px;letter-spacing:.02em}
-.stash-empty{font-family:var(--mono);font-size:11.5px;color:var(--dim);text-align:center;padding:26px 10px;border:2px dashed var(--line);letter-spacing:.04em;line-height:1.8}
-.s-item{background:var(--paper);color:var(--ink);border:2px solid var(--ink);padding:10px 12px;margin-bottom:10px;position:relative}
-.s-item.transit{background:var(--paper-dim);border-style:dashed;border-color:#7a7160}
-.s-top b{font-family:var(--disp);font-size:14.5px;letter-spacing:.02em;text-transform:uppercase;display:block;line-height:1.15}
-.s-top span{font-family:var(--mono);font-size:9.5px;color:#6b6152;letter-spacing:.08em}
-.s-bot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;gap:8px}
-.s-bot .tr{font-family:var(--mono);font-size:10px;letter-spacing:.1em;font-weight:700}
-.s-val{font-size:14px;font-weight:700}
-.s-val em{font-style:normal;font-size:12px}
-.btn-sell{font-family:var(--disp);background:var(--ink);color:var(--paper);border:none;padding:8px 14px;font-size:12.5px;letter-spacing:.08em;min-height:34px}
-.btn-sell:hover{background:var(--orange);color:var(--ink)}
-.qmini{position:absolute;right:8px;top:-10px;font-family:var(--disp);font-size:10.5px;letter-spacing:.06em;
-  border:2px solid currentColor;padding:1px 6px;transform:rotate(-4deg);background:var(--paper)}
-
-/* ============ RESULTS ============ */
-.results .container{max-width:680px;padding-top:44px}
-.res-stamp{display:block;text-align:center;margin:0 auto 26px;font-size:clamp(30px,6vw,46px);color:var(--orange);
-  border-width:5px;transform:rotate(-4deg);padding:10px 30px;width:max-content;max-width:100%}
-.res-money{font-family:var(--mono);font-weight:700;font-size:clamp(52px,10vw,76px);text-align:center;line-height:1}
-.res-sub{text-align:center;color:var(--dim);font-family:var(--mono);font-size:12.5px;letter-spacing:.1em;margin:10px 0 34px}
-.res-bill{border:2px solid var(--line);background:var(--ink2)}
-.brow-s{display:flex;justify-content:space-between;gap:14px;padding:11px 16px;border-bottom:1px dashed var(--line);font-family:var(--mono);font-size:12.5px}
-.brow-s:last-child{border-bottom:none}
-.brow-s span{color:var(--dim);letter-spacing:.05em}
-.brow-s b{text-align:right}
-.share{margin-top:30px;border:2px solid var(--line);padding:18px 18px 16px;background:var(--ink2)}
-.share label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;color:var(--dim);margin-bottom:10px}
-.share-row{display:flex;gap:10px;flex-wrap:wrap}
-.share-row code{flex:1;min-width:200px;font-family:var(--mono);font-size:12px;word-break:break-all;
-  border:2px dashed var(--line2);padding:10px 12px;color:var(--orange);background:var(--ink)}
-.friend-row{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap}
-.friend-row input{flex:1;min-width:200px;background:var(--ink);border:2px solid var(--line);color:var(--paper);
-  font-family:var(--mono);font-size:12px;padding:10px 12px}
-#board-slot{margin-top:30px}
-.board-tit{font-size:20px;letter-spacing:.05em;margin-bottom:4px}
-.board-tit .mono{font-size:10px;letter-spacing:.1em}
-.board{border:2px solid var(--line);background:var(--ink2)}
-.brow{display:grid;grid-template-columns:44px 1fr auto auto;gap:12px;align-items:baseline;padding:11px 16px;border-bottom:1px dashed var(--line);font-size:14px}
-.brow:last-child{border-bottom:none}
-.brow.me{background:rgba(255,90,30,.12)}
-.brow .bpos{font-family:var(--disp);font-size:19px;color:var(--orange)}
-.brow .bname{font-weight:700;word-break:break-word}
-.brow .bscore{font-weight:700}
-.brow .bgrade{font-size:10.5px;letter-spacing:.08em}
-.board-empty{font-size:12px;line-height:1.8;padding:18px;border:2px dashed var(--line);letter-spacing:.03em}
-.res-actions{display:flex;gap:12px;margin-top:34px;flex-wrap:wrap}
-.res-actions .btn{flex:1;min-width:170px}
-
-/* ============ RESPONSIVE ============ */
-@media(max-width:980px){
-  .hero{grid-template-columns:1fr;gap:36px}
-  .wb-deco{max-width:420px;margin:0 auto;animation:none}
-  .game-grid{grid-template-columns:1fr}
-  .stash-panel{position:static}
-}
-@media(max-width:720px){
-  .offer-in{grid-template-columns:1fr;gap:16px}
-  .o-actions{flex-direction:row}
-  .o-stamp{margin:-20px 0 0 -80px;width:160px;font-size:26px}
-  .step{grid-template-columns:56px 1fr;padding:18px 14px}
-  .step .num{font-size:32px}
-  .ticket{grid-template-columns:1fr}
-  .ticket-r{border-left:none;border-top:2px dashed var(--ink);padding:18px 0 0}
-  .gbar{gap:10px;padding:8px 12px}
-  .g-cash{font-size:16px}
-  .actionbar{bottom:12px}
-  .btn-rz{min-width:100%}
-  .btn-next{min-width:100%}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.001s !important;transition-duration:.001s !important}
-}
+@media(min-width:921px){#chatFab{display:none}}
+/* ---------- FOOTER ---------- */
+#sponsor{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--ink);color:var(--paper);
+  display:flex;align-items:center;gap:10px;padding:4px 12px;font-family:'Space Mono';font-size:10px;letter-spacing:1px}
+#sponsor img{width:26px;height:26px;border:2px solid var(--paper);background:#fff;image-rendering:pixelated;cursor:pointer}
+#sponsor b{color:#f0b34d}
+#sponsor .sp{margin-left:auto;color:#9a8f7c}
+@media(max-width:560px){#sponsor .sp{display:none}}
+/* ---------- OVERLAYS ---------- */
+.ovl{position:fixed;inset:0;z-index:80;background:rgba(28,22,16,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.ovl .card{background:var(--paper);border:2.5px solid var(--ink);border-radius:10px;box-shadow:8px 8px 0 rgba(0,0,0,.35);
+  max-width:640px;width:100%;max-height:92vh;overflow-y:auto;position:relative}
+.ovl .card .pbody{padding:20px}
+.qrcard{display:flex;gap:14px;align-items:center;border:2px dashed var(--ink);border-radius:8px;padding:12px;background:#fffdf4}
+.qrcard img{width:104px;height:104px;border:2px solid var(--ink);background:#fff;image-rendering:pixelated;flex:0 0 auto}
+.qrcard .qt{font-weight:900;font-size:14px}
+.qrcard .qs{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);margin-top:4px;line-height:1.5}
+.revrow{border:1.5px solid var(--ink);border-radius:8px;padding:10px;margin-bottom:9px;background:#fff9ec;animation:fu .4s both}
+.stars{display:inline-flex;gap:2px;vertical-align:middle}
+.stars svg{width:15px;height:15px}
+.stars .f{fill:#e8a020;color:#e8a020}
+.stars .e{color:#b9ad95}
+.bigtitle{font-weight:900;font-size:clamp(26px,7vw,44px);line-height:.95;text-transform:uppercase;letter-spacing:-1px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-family:'Space Mono';font-size:12px;padding:5px 0;border-bottom:1px dashed rgba(0,0,0,.2)}
+.kv b{font-weight:700}
+/* ---------- FX ---------- */
+#fx{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:rgba(28,22,16,.78)}
+#fx.on{display:flex}
+#fx .stage{position:relative;width:min(480px,88vw);aspect-ratio:1.15;display:flex;align-items:center;justify-content:center}
+#fx .fxbox{width:72%;filter:drop-shadow(6px 8px 0 rgba(0,0,0,.35))}
+#fx .tapeline{position:absolute;left:-15%;right:-15%;top:46%;height:58px;background:var(--tape);border-top:3px solid var(--tape-d);border-bottom:3px solid var(--tape-d);
+  display:flex;align-items:center;overflow:hidden;transform:translateX(-130%) rotate(-3deg)}
+#fx .tapeline.go{transition:transform .5s cubic-bezier(.3,1.4,.5,1);transform:translateX(0) rotate(-3deg)}
+#fx .tapeline b{font-family:'Space Mono';color:#fff;font-size:15px;letter-spacing:3px;white-space:nowrap;animation:mq 9s linear infinite}
+#fx .bigstamp{position:absolute;top:16%;left:50%;transform:translateX(-50%) rotate(-10deg);font-size:30px}
+#fx .bigstamp.in{animation:stampIn .4s cubic-bezier(.2,2.4,.4,1) both}
+#fx .lab{background:var(--paper);border:2px solid var(--ink);padding:14px 16px;width:min(340px,84vw);border-radius:4px;
+  transform:translateY(-120%);transition:transform .45s cubic-bezier(.2,1.3,.4,1);box-shadow:5px 6px 0 rgba(0,0,0,.4)}
+#fx .lab.go{transform:none}
+/* ---------- TRANSIT ---------- */
+.road{position:relative;border-top:3px dashed var(--ink);margin-top:6px;height:96px;overflow:hidden}
+.truck{position:absolute;bottom:6px;left:-140px;width:120px;transition:left 2.6s linear}
+.truck.go{left:calc(100% - 124px)}
+.wheel{animation:spin 1s linear infinite;transform-box:fill-box;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ---------- TOAST ---------- */
+#toasts{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:120;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(94vw,420px)}
+.toast{background:var(--ink);color:var(--paper);font-family:'Space Mono';font-size:11.5px;padding:9px 14px;border-radius:6px;
+  border:2px solid var(--paper);box-shadow:3px 3px 0 rgba(0,0,0,.4);animation:fu .25s both;text-align:center}
+.toast.bad{background:var(--stamp);color:#fff;border-color:#7e2410}
+.toast.ok{background:var(--ok);color:#fff;border-color:#1d5636}
+ul.rules{list-style:none;font-size:12.5px;line-height:1.55}
+ul.rules li{display:flex;gap:9px;margin-bottom:9px;align-items:flex-start}
+ul.rules svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--stamp)}
+.hr{border:none;border-top:2px dashed var(--ink);opacity:.35;margin:12px 0}
+.note{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);line-height:1.5}
+.flashtag{background:var(--stamp);color:#fff;font-weight:900;padding:3px 10px;border-radius:4px;font-size:11px;letter-spacing:1px;display:inline-flex;align-items:center;gap:6px}
+.flashtag svg{width:13px;height:13px}
 </style>
 </head>
 <body>
-<div class="noise" aria-hidden="true"></div>
-<div class="hz top" aria-hidden="true"></div>
-<div class="hz bottom" aria-hidden="true"></div>
-<main id="app">
-  <section id="scr-home" class="screen"></section>
-  <section id="scr-lobby" class="screen"></section>
-  <section id="scr-game" class="screen"></section>
-  <section id="scr-results" class="screen"></section>
-</main>
-<div id="toasts" aria-live="polite"></div>
+
+<header id="hud">
+  <div class="wordmark">RIZZITGO<small>AGENT TERMINAL</small></div>
+  <div class="hstat" id="hDay"><i data-lucide="calendar"></i><span class="lbl">GIORNO&nbsp;</span><b id="vDay">1/7</b></div>
+  <div class="hstat"><i data-lucide="alarm-clock"></i><b id="vHrs">12h</b></div>
+  <div class="hstat" id="hMoney"><i data-lucide="coins"></i><b id="vMoney">¥0</b></div>
+  <div class="hbtn">
+    <button class="ibtn" onclick="openGuide()" title="Guida"><i data-lucide="info"></i></button>
+    <button class="ibtn" onclick="toggleMute()" title="Audio"><i data-lucide="volume-2" id="icoSnd"></i></button>
+    <button class="ibtn" id="btnClose" onclick="closeDay()" title="Chiudi giornata"><i data-lucide="moon"></i></button>
+  </div>
+</header>
+
+<div id="wrap">
+  <main>
+    <div id="stepper"></div>
+    <div id="panel"></div>
+  </main>
+  <aside id="chatcol">
+    <div id="chatbox">
+      <div id="chathead"><i data-lucide="message-square"></i> RIZZITGO CHAT — clienti & agent</div>
+      <div id="chatlog"></div>
+    </div>
+  </aside>
+</div>
+
+<button id="chatFab" onclick="toggleChat()"><i data-lucide="message-square"></i><span class="bdg" id="unreadBdg" style="display:none">0</span></button>
+
+<footer id="sponsor">
+  <img src="https://z-cdn-media.chatglm.cn/files/16426538-1a7c-4926-ba28-7d6b319616ae.png?auth_key=1889841687-08e242a199474ccd84a236f00a0ae13c-0-0324c596081e14c914d35d3debbf1abe" alt="QR affiliato" onclick="openQR()">
+  <span>SPONSOR: <b>RIZZITGO</b> — reps agent ufficiale · <u style="cursor:pointer" onclick="openQR()">inquadra il QR</u></span>
+  <span class="sp">v1.0 · Guangzhou, CN</span>
+</footer>
+
+<div id="toasts"></div>
+<div id="fx"></div>
+<div id="ovl"></div>
 
 <script>
+/* =========================================================
+   RIZZITGO — REPS AGENT SIMULATOR · gioco completo
+   ========================================================= */
 'use strict';
-/* ================================================================
-   REP RUSH — Guangzhou Gold Rush
-   Un gioco di reps, QC e resselle. Sponsor: RIZZITGO.
-   Tutto gira in locale: singleplayer, sfida quotidiana (seed dalla
-   data) e stanze private same-seed via codice.
-================================================================ */
-
-/* ---------- utility ---------- */
-const $ = s => document.querySelector(s);
-const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const eur = n => '€ ' + Math.round(n).toLocaleString('it-IT');
-const round5 = n => Math.max(10, Math.round(n/5)*5);
-const clamp = (v,a,b) => Math.min(b, Math.max(a,v));
-const todayKey = () => new Date().toISOString().slice(0,10);
-const todayIT = () => new Date().toLocaleDateString('it-IT',{day:'numeric',month:'long'});
-
-/* RNG deterministico (xmur3 + mulberry32) */
-function xmur3(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19}return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0}}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>'¥'+Math.round(n).toLocaleString('it-IT');
+const fmtH=h=>{const m=Math.round(h*60);return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')};
+let SEED=Date.now()%2147483647;
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
-function makeRNG(seedStr){
-  const h=xmur3(String(seedStr)); const a=mulberry32(h());
-  const r=()=>a();
-  r.int=n=>Math.floor(a()*n);
-  r.pick=arr=>arr[Math.floor(a()*arr.length)];
-  r.range=(lo,hi)=>lo+a()*(hi-lo);
-  r.chance=p=>a()<p;
-  return r;
-}
-function shuffleR(rng,arr){const x=arr.slice();for(let i=x.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x}
+const R=mulberry32(SEED);
+const ri=(a,b)=>a+Math.floor(R()*(b-a+1));
+const pick=a=>a[Math.floor(R()*a.length)];
 
-/* storage sicuro */
-function getLS(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
-function setLS(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-
-/* ---------- icone SVG ---------- */
-const IC={
-  box:'<svg class="ic" viewBox="0 0 24 24"><path d="M3 8l9-5 9 5v8l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></svg>',
-  plane:'<svg class="ic" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>',
-  arrow:'<svg class="ic" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
-  vol:'<svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 010 7M19 5a9 9 0 010 14"/></svg>',
-  volOff:'<svg class="ic" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/></svg>',
-  copy:'<svg class="ic" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12"/><path d="M5 15V3h12"/></svg>',
-  tag:'<svg class="ic" viewBox="0 0 24 24"><path d="M20 12l-8 8-9-9V3h8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
-  plus:'<svg class="ic" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>'
+/* ---------- AUDIO (WebAudio synth, no asset) ---------- */
+const AU={ctx:null,on:true,
+  c(){if(!this.ctx){try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}return this.ctx},
+  tone(f,d,t,vol=.15,slide=0){const c=this.c();if(!c||!this.on)return;const o=c.createOscillator(),g=c.createGain();o.type=t||'square';o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(40,f+slide),c.currentTime+d);g.gain.value=vol;g.gain.exponentialRampToValueAtTime(.001,c.currentTime+d);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+d)},
+  noise(d,fq,vol=.25){const c=this.c();if(!c||!this.on)return;const n=c.sampleRate*d,b=c.createBuffer(1,n,c.sampleRate),ch=b.getChannelData(0);for(let i=0;i<n;i++)ch[i]=(Math.random()*2-1)*(1-i/n);const s=c.createBufferSource();s.buffer=b;const f=c.createBiquadFilter();f.type='bandpass';f.frequency.value=fq;const g=c.createGain();g.gain.value=vol;s.connect(f);f.connect(g);g.connect(c.destination);s.start()},
+  click(){this.tone(900,.05,'square',.06)},
+  ok(){this.tone(660,.08,'square',.08);setTimeout(()=>this.tone(990,.12,'square',.08),80)},
+  bad(){this.tone(220,.18,'sawtooth',.1)},
+  chime(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>this.tone(f,.16,'triangle',.1),i*90))},
+  stamp(){this.noise(.12,300,.5);this.tone(90,.12,'sine',.3,-40)},
+  tape(){this.noise(.3,2200,.12)},
+  truck(){this.tone(70,.7,'sawtooth',.06,30)}
 };
+function toggleMute(){AU.on=!AU.on;const i=$('#icoSnd');if(i){i.setAttribute('data-lucide',AU.on?'volume-2':'volume-x');if(window.lucide)lucide.createIcons()}toast(AU.on?'Audio attivo':'Audio disattivato')}
 
-/* avatar-timbro di RizzitGo (SVG con testo circolare) */
-let rzN=0;
-function rzAvatar(size,color){
-  const id='rzp'+(++rzN); color=color||'var(--orange)';
-  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true" style="flex:none">
-    <circle cx="50" cy="50" r="47" fill="none" stroke="${color}" stroke-width="3"/>
-    <circle cx="50" cy="50" r="27" fill="none" stroke="${color}" stroke-width="1.5"/>
-    <path id="${id}" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" fill="none"/>
-    <text fill="${color}" font-size="10.2" font-family="JetBrains Mono,monospace" letter-spacing="2.4"><textPath href="#${id}">RIZZITGO · GUANGZHOU · AGENT ·</textPath></text>
-    <text x="50" y="59" text-anchor="middle" fill="${color}" font-size="27" font-family="Anton,sans-serif">RZ</text>
-  </svg>`;
-}
-
-/* pseudo-QR decorativo deterministico */
-function drawQR(cv,seedStr){
-  const n=21, cell=4; const rng=makeRNG('qr|'+seedStr);
-  cv.width=cv.height=n*cell;
-  const c=cv.getContext('2d');
-  c.fillStyle='#F2EDE2'; c.fillRect(0,0,cv.width,cv.height); c.fillStyle='#141210';
-  const inF=(x,y)=>(x<8&&y<8)||(x>=n-8&&y<8)||(x<8&&y>=n-8);
-  for(let y=0;y<n;y++)for(let x=0;x<n;x++){ if(!inF(x,y)&&rng()<.44) c.fillRect(x*cell,y*cell,cell,cell); }
-  const finder=(x,y)=>{ c.fillStyle='#141210';c.fillRect(x*cell,y*cell,7*cell,7*cell);
-    c.fillStyle='#F2EDE2';c.fillRect((x+1)*cell,(y+1)*cell,5*cell,5*cell);
-    c.fillStyle='#141210';c.fillRect((x+2)*cell,(y+2)*cell,3*cell,3*cell); };
-  finder(0,0); finder(n-7,0); finder(0,n-7);
-}
-function barcode(seedStr,bars){
-  const rng=makeRNG('bc|'+seedStr); let s='';
-  for(let i=0;i<bars;i++){ const w=[2,2,3,4,6][rng.int(5)]; s+=`<i style="width:${w}px"></i>`; }
-  return `<div class="barcode" aria-hidden="true">${s}</div>`;
-}
-
-/* ---------- audio (sintesi WebAudio, nessun file) ---------- */
-const FX={
-  ctx:null, on:(getLS('rr_sound')!==false),
-  init(){ if(!this.ctx){ try{this.ctx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){} }
-    if(this.ctx&&this.ctx.state==='suspended') this.ctx.resume(); },
-  t(f,d,type,v,slide){
-    if(!this.on||!this.ctx)return;
-    try{
-      const o=this.ctx.createOscillator(),g=this.ctx.createGain();
-      o.type=type||'square'; o.frequency.setValueAtTime(f,this.ctx.currentTime);
-      if(slide) o.frequency.exponentialRampToValueAtTime(slide,this.ctx.currentTime+d);
-      g.gain.setValueAtTime(v||.06,this.ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(.0001,this.ctx.currentTime+d);
-      o.connect(g); g.connect(this.ctx.destination);
-      o.start(); o.stop(this.ctx.currentTime+d);
-    }catch(e){}
-  },
-  click(){this.t(240,.05,'square',.045)},
-  buy(){this.t(300,.07,'square',.05);setTimeout(()=>this.t(430,.09,'square',.05),70)},
-  cash(){this.t(660,.08,'sine',.07);setTimeout(()=>this.t(990,.1,'sine',.07),80);setTimeout(()=>this.t(1320,.16,'sine',.06),170)},
-  stamp(){this.t(120,.12,'triangle',.2,55)},
-  bad(){this.t(190,.2,'sawtooth',.05,80)},
-  scam(){this.t(320,.4,'sawtooth',.07,60)}
-};
-document.addEventListener('pointerdown',()=>FX.init(),{once:true});
-
-/* ---------- dati di gioco ---------- */
-const CATS=[
- {id:'sneakers',nome:'SCARPE',lo:90,hi:170,c:'#FF5A1E',
-  brands:['ABIBAS','NYKE','JARDAN','NEW BALANZE','ASIKS','BAPE STA'],
-  models:['Samba OG','Air Force Flee','Retro 4 "Bred"','550 Verde Acido','Gel-Kayano 14','Wave Runner']},
- {id:'borse',nome:'BORSE',lo:160,hi:320,c:'#D9A441',
-  brands:['CUCCI','LOUIS VITTON','CHENEL','HERMESS','PRADO','MIU MIU°'],
-  models:['Dionysus Mini','Speedy Neverfull','Classic Flap 25','Birkin Togo 25','Re-Nylon 2005','Arcadie']},
- {id:'street',nome:'STREETWEAR',lo:70,hi:130,c:'#7A8B4F',
-  brands:['SUPRIME','OFF-BLANCHE','PALAZZO','STUSSI','CARPÈ ME','NO LOGO'],
-  models:['Box Logo Hoodie','Hoodie Giallo Fluo','Tri-Ferg Tee','8-Ball Crewneck','Zip Skate Cargo','Tee Heavyweight']},
- {id:'watch',nome:'OROLOGI',lo:260,hi:520,c:'#C24A33',
-  brands:['ROLEXX','AUDEMARS PIQUET','PATEK PHILIPE','CASIOO','OMEGHA'],
-  models:['Submariner Date','Royal Oak 41mm','Nautilus 5711','G-Shock GA-2100','Seamaster 300','Day-Date 36']},
- {id:'perfume',nome:'PROFUMI',lo:60,hi:120,c:'#4F7F86',
-  brands:['DIORR','KREED','TOM FJORD','MARGIELAA','CHANELL'],
-  models:['Sauvage EDT 100ml','Aventus 100ml','Tobacco Vanille 50ml','By the Fireplace 100ml','Baccarat Rouge 540']}
+/* ---------- CATALOGO (brand parodiati) ---------- */
+const CATALOG=[
+ {id:'af1',   brand:'MIKE',        name:'Air Force Low "White on White"', type:'sneaker', price:{low:260,mid:420,top:650}, wt:1.4, vol:9, deboxable:true, blurb:'Il classico che non sbaglia mai.'},
+ {id:'jorjan',brand:'JORJAN',      name:'Retro High 1 "Bred Toe"',        type:'sneaker', price:{low:300,mid:480,top:700}, wt:1.5, vol:10,deboxable:true, blurb:'Rosso e nero, haters degni di nota.'},
+ {id:'samba', brand:'ABIBAS',      name:'Samba OG "White/Black"',         type:'sneaker2',price:{low:220,mid:350,top:520}, wt:1.2, vol:8, deboxable:true, blurb:'Ilcolpo di stato del 2023, ancora in vigore.'},
+ {id:'nb550', brand:'BALENCE',     name:'550 Retro "White/Green"',        type:'sneaker', price:{low:240,mid:380,top:560}, wt:1.3, vol:9, deboxable:true, blurb:'Basket anni 80, vibes da nonno figo.'},
+ {id:'slide', brand:'YEEZI',       name:'Slide "Bone"',                   type:'slide',   price:{low:90, mid:150,top:220}, wt:0.5, vol:3, deboxable:true, blurb:'Ciabatta canonica dello stay-at-home flexer.'},
+ {id:'suprene',brand:'SUPRENE',    name:'Box Logo Hoodie "Red"',          type:'hoodie',  price:{low:180,mid:300,top:450}, wt:0.9, vol:4, soft:true, blurb:'Il Box Logo. Lo conoscono tutti. Anzi: quasi.'},
+ {id:'bame',  brand:'BAME',        name:'Shark Hoodie "Green Camo"',      type:'shark',   price:{low:220,mid:360,top:520}, wt:1.0, vol:4.5, soft:true, blurb:'Cappuccio squalo: quando entri, ENTRI.'},
+ {id:'chromo',brand:'CHROMO HART', name:'Cross Patch Hoodie "Black"',     type:'hoodie2', price:{low:200,mid:330,top:500}, wt:0.9, vol:4, soft:true, blurb:'Croci ovunque. In tutti i sensi.'},
+ {id:'lv',    brand:'LUOIS VITTON',name:'Speedy 30 "Monogram"',           type:'bagLV',   price:{low:380,mid:620,top:980}, wt:1.1, vol:9, soft:false,blurb:'La borsa che urla "sto vincendo" (forse).'},
+ {id:'chanele',brand:'CHANELE',    name:'Classic Flap "Black/Gold"',      type:'bagFlap', price:{low:420,mid:680,top:1050},wt:0.9, vol:6, soft:false,blurb:'Eleganza parigina, produzione flessibile.'},
+ {id:'diorr', brand:'DIORR',       name:'Sauvage EDP 100ml',              type:'perfume', price:{low:120,mid:200,top:320}, wt:0.7, vol:1.5, liquid:true, fragile:true, blurb:'Liquido + vetro: la dogana lo adora.'},
+ {id:'roleks',brand:'ROLEKS',      name:'Submariner "No-Date"',           type:'watch',   price:{low:260,mid:450,top:850}, wt:0.4, vol:0.6, fragile:true, highValue:true, blurb:'Perde 3 minuti al giorno. Come l\'originale, ma più.'},
+ {id:'rayben',brand:'RAY-BEN',     name:'Aviator "Gold/Green"',           type:'glasses', price:{low:90, mid:160,top:260}, wt:0.3, vol:0.8, fragile:true, blurb:'Piloti, poliziotti e papà del 1987 approvano.'},
+ {id:'monkler',brand:'MONKLER',    name:'Maya Down Jacket "Black"',       type:'puffer',  price:{low:480,mid:760,top:1150},wt:1.6, vol:6, soft:true, blurb:'Piumino seria. Termico anche solo a guardarla.'},
+ {id:'feco',  brand:'NORTH FECO',  name:'1996 Puffer "Black"',            type:'puffer',  price:{low:320,mid:520,top:780}, wt:1.3, vol:5, soft:true, blurb:'Pacco voluminoso? Sottovuoto, amico.'},
+ {id:'labobo',brand:'LABOBO',      name:'The Monsters — Vinyl Figura',    type:'figure',  price:{low:60, mid:110,top:180}, wt:0.4, vol:1.2, fragile:true, blurb:'Il gobelin che domina le scrivanie del pianeta.'},
+ {id:'airpads',brand:'AIRPADS',    name:'Pro 2 "USB-C"',                  type:'buds',    price:{low:180,mid:300,top:480}, wt:0.35,vol:0.5, battery:true, blurb:'Batterie al litio: qualche linea farà storie.'},
 ];
-const CATBY=Object.fromEntries(CATS.map(c=>[c.id,c]));
-
-const QUALITIES={
- mirror:{label:'1:1 MIRROR',cost:1.45,sell:2.8,w:.17},
- aaa:{label:'AAA',cost:1.25,sell:1.9,w:.28},
- std:{label:'STANDARD',cost:1.0,sell:1.0,w:.30},
- flop:{label:'FLOP',cost:0.72,sell:0.25,w:.17},
- scam:{label:'SMARRITO',cost:0.45,sell:0,w:.08}
-};
-const QVIS={mirror:{label:'1:1 MIRROR',color:'#D9430E'},aaa:{label:'AAA',color:'#2E7D46'},
- std:{label:'STANDARD',color:'#141210'},flop:{label:'FLOP',color:'#D63A22'},scam:{label:'SMARRITO',color:'#D63A22'}};
-
-const TAGS={
- good:['QC pics entro 24h','Album clienti: 800+ foto reali','Vendor LV.5 · 1.200 ordini','Dustbag + ricevuta inclusi','Foto reali, niente stock','Consigliato dal canale da 40k membri','Restock diretto dalla fabbrica','Pagamento dopo conferma QC'],
- bad:['Vendor nuovo · 0 recensioni','Solo foto stock del catalogo','Prezzo -70% sotto la media','Chiede pagamento in gift card','Recensioni tutte dello stesso giorno','SPU ripostata da un altro vendor','Album clienti privato','Spedizione non tracciata','Vendor con 2 account bannati'],
- neutral:['Spedizione 20-30 giorni','Confezione semplice','Logo con lievi differenze','Batch 2023','Spedito da Guangzhou, CN','Niente scatola originale','Cuciture interne visibili']
-};
-
-const EVENTS=[
- {peso:3,tipo:'index',pick:'one',delta:-0.26,tit:'RAID A GUANGZHOU',msg:'La polizia sequestra interi magazzini nel distretto degli stock. Il mercato trema.'},
- {peso:3,tipo:'index',pick:'one',delta:0.30,tit:'EXPLOSION SU TIKTOK',msg:'Un creator da 3M di follower mostra la rep nel suo fit. La community impazzisce e gli indici partono.'},
- {peso:2,tipo:'index',pick:'all',delta:-0.10,tit:'DOGANA IN ALLERTA',msg:'Controlli più stretti in dogana: le spedizioni rallentano e i listini calano su tutto.'},
- {peso:2,tipo:'cost',delta:-0.20,tit:'RESTOCK MASSIVO',msg:'Le fabbriche riaprono a pieno regime: i vendor svuotano i magazzini. Prezzi d\'acquisto in sconto, solo oggi.'},
- {peso:2,tipo:'cost',delta:0.18,tit:'CAPODANNO CINESE',msg:'Le fabbriche chiudono per le feste. Merce rara: i vendor alzano i prezzi d\'acquisto, solo oggi.'},
- {peso:2,tipo:'index',pick:'watch',delta:0.24,tit:'COLLEZIONISTA DA DUBAI',msg:'Un collezionista svuota il mercato degli orologi rep in un weekend.'},
- {peso:2,tipo:'index',pick:'all',delta:-0.07,tit:'ONDA DI SCAM',msg:'Un vendor con 10.000 ordini sparisce nel nulla. La fiducia crolla, e con lei gli indici.'},
- {peso:2,tipo:'index',pick:'sneakers',delta:0.20,tit:'DROP IN ARRIVO',msg:'Anticipato il drop più atteso dell\'anno: tutti cercano sneakers per completare il fit.'},
- {peso:2,tipo:'index',pick:'all',delta:0.08,tit:'PAGAMENTI PROTETTI',msg:'I vendor passano ai pagamenti con garanzia: la fiducia risale, e con lei gli indici.'},
- {peso:1,tipo:'index',pick:'perfume',delta:0.26,tit:'CLONE PERFETTO',msg:'Un laboratorio sforna il clone olfattivo più convincente dell\'anno: i profumi rep spopolano.'},
- {peso:1,tipo:'index',pick:'borse',delta:0.18,tit:'SEQUESTRO AL PORTO',msg:'Container pieni di borse sequestrati a Genova: la merce in giro è poca e il valore sale.'},
- {peso:1,tipo:'index',pick:'street',delta:0.22,tit:'FIT CHECK VIRALE',msg:'Il look "total rep" spopola sui social. Lo streetwear rep è ovunque.'},
- {peso:1,tipo:'index',pick:'borse',delta:-0.20,tit:'LUSSO VERO IN SALDO',msg:'Saldi storici sul lusso originale: le rep di borse perdono fascino.'},
- {peso:1,tipo:'index',pick:'watch',delta:-0.22,tit:'QUARTZGATE',msg:'Un video mostra orologi rep che si fermano dopo 3 giorni. Fiducia a pezzi sugli orologi.'}
+const SELLERS=['Golden Dragon Kicks','Mr. Yu Factory Store','PK God Warehouse','Coco Direct','Boss Chen Basement','TopBatch Union','Heyday Footwear Co.','Dragon Mart 88','Hu\'s Sneaker Lab','Wanbao Plaza 3F'];
+const TIERS=[
+ {k:'low', tag:'BUDGET', risk:.45, wrong:.10, blurb:'"best price best price" — QC del seller: "trust me".'},
+ {k:'mid', tag:'MID',    risk:.22, wrong:.03, blurb:'Il punto dolce. Qualche piccola pecca possibile.'},
+ {k:'top', tag:'TOP',    risk:.08, wrong:.01, blurb:'Batch top dichiarato PK/LJR. Photography-grade.'}
 ];
-const QUIET=[
- 'Giornata tranquilla al mercato. RizzitGo sorseggia tè bollente e controlla le spedizioni in partenza.',
- 'Pioggia a Guangzhou: i tricar sfrecciano tra i magazzini carichi di scatole e nastro adesivo.',
- 'Oggi niente sorprese: solo il rumore delle etichettatrici e lo sguardo dei vendor.',
- 'RizzitGo ha trattato tutto il giorno sul prezzo dei cartoni. Risultato: -0,02 ¥ a pacco.',
- 'Il solito viavai di intermediari davanti ai cancelli degli stabilimenti.',
- 'RizzitGo: "Mercato stabile, fratello. Ma occhio alle offerte di oggi, non tutte sono buone."',
- 'Qualcuno ha visto un container di SPU nuovissime lasciare il distretto. Nessuno sa dove sia finito.'
-];
-const RZ_HINT={
- mirror:'Fidati fratello, questa viene dalla stessa fabbrica dell\'originale. 1:1 pura. Prendila e ringraziami dopo.',
- aaa:'Bella AAA, si rivende facile. Il mio contatto la compra da due anni senza problemi.',
- std:'Batch normale, niente di più. Ci sta, ma il margine lo fa solo il mercato.',
- flop:'Lascia stare: cuciture tremende, materiali tristi. Questa è flop totale.',
- scam:'Ahh… questo vendor spegne tutto e sparisce col bonifico. Skip. Fidati di RizzitGo.'
+
+/* ---------- SERVIZI ---------- */
+const SERVICES={
+ photoStd:{t:'Foto QC standard',cost:0,fee:25,h:.2,ic:'camera',ds:'Galleria foto in chat: il cliente pretende di guardare prima della spedizione.'},
+ photoHD:{t:'Foto QC HD + video',cost:10,fee:45,h:.3,ic:'video',ds:'Macro, video 360°. I qc-nerd vivono di questo.'},
+ debox:{t:'Rimozione scatole scarpe',cost:0,fee:12,h:.3,ic:'package-open',ds:'Via le box originali: -volume, -peso, -sospetto doganale.'},
+ vacuum:{t:'Sottovuoto',cost:8,fee:20,h:.3,ic:'wind',ds:'Capotti e felpe compressi: il volume crolla.'},
+ protect:{t:'Protezione extra',cost:15,fee:35,h:.3,ic:'shield-check',ds:'Bolla + angolari. I fragili ringraziano in silenzio.'},
+ detag:{t:'Rimuovi etichette CN',cost:0,fee:8,h:.2,ic:'scissors',ds:'Addio cartellini "Made in Guangzhou". Dogana più rilassata.'},
 };
 
-/* ---------- generazione partita (tutto pre-computato dal seed) ---------- */
-function pickQuality(rng){
-  const x=rng(); let acc=0;
-  for(const q of ['mirror','aaa','std','flop','scam']){ acc+=QUALITIES[q].w; if(x<acc) return q; }
-  return 'std';
-}
-function pickTags(rng,q){
-  const any=()=>{ const r=rng(); return r<.42?rng.pick(TAGS.good):(r<.72?rng.pick(TAGS.bad):rng.pick(TAGS.neutral)); };
-  let t=[];
-  if(q==='mirror'){ t=[rng.pick(TAGS.good),rng.pick(TAGS.good),any()]; }
-  else if(q==='aaa'){ t=[rng.pick(TAGS.good),(rng.chance(.7)?rng.pick(TAGS.good):rng.pick(TAGS.neutral)),any()]; }
-  else if(q==='std'){ t=[rng.pick(TAGS.neutral),(rng.chance(.5)?rng.pick(TAGS.good):(rng.chance(.55)?rng.pick(TAGS.bad):rng.pick(TAGS.neutral))),any()]; }
-  else if(q==='flop'){ t=[rng.pick(TAGS.bad),(rng.chance(.7)?rng.pick(TAGS.bad):rng.pick(TAGS.neutral)),any()]; }
-  else { t=[rng.pick(TAGS.bad),rng.pick(TAGS.bad),(rng.chance(.6)?rng.pick(TAGS.bad):any())]; }
-  const set=[...new Set(t)];
-  while(set.length<3) set.push(rng.pick(TAGS.neutral));
-  return shuffleR(rng,set).slice(0,3);
-}
-function randCode(rng,n){
-  const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s='';
-  for(let i=0;i<n;i++) s+=A[rng.int(A.length)];
-  return s;
-}
-function genCard(rng){
-  const cat=rng.pick(CATS);
-  const brand=rng.pick(cat.brands), model=rng.pick(cat.models);
-  const listino=round5(rng.range(cat.lo,cat.hi));
-  const quality=pickQuality(rng);
-  const cost=round5(listino*QUALITIES[quality].cost*rng.range(.92,1.08));
-  return {cat:cat.id,brand,model,listino,quality,cost,tags:pickTags(rng,quality),
-    spu:'SPU-'+randCode(rng,4),wb:randCode(rng,7)};
-}
-function pickEvent(rng){
-  const tot=EVENTS.reduce((s,e)=>s+e.peso,0); let x=rng()*tot;
-  for(const e of EVENTS){ x-=e.peso; if(x<0){ const c={...e}; if(c.pick==='one') c.catId=rng.pick(CATS).id; return c; } }
-  return {...EVENTS[0],catId:CATS[0].id};
-}
-function buildRounds(seedStr){
-  const rng=makeRNG('game|'+seedStr);
-  const rounds=[];
-  for(let i=0;i<12;i++){
-    const moves={}; CATS.forEach(c=>moves[c.id]=rng.range(-0.11,0.13));
-    const ev=(i>0&&rng.chance(.58))?pickEvent(rng):null;
-    const rzLot=rng.chance(.07);
-    const rzK=rng.int(3);
-    const cards=[];
-    for(let k=0;k<3;k++){
-      const card=genCard(rng);
-      if(rzLot&&k===rzK){
-        card.quality=rng.chance(.65)?'mirror':'aaa';
-        card.cost=round5(card.listino*QUALITIES[card.quality].cost*rng.range(.92,1.08));
-        card.tags=pickTags(rng,card.quality);
-        card.rzLot=true;
-      }
-      cards.push(card);
-    }
-    rounds.push({idx:i,moves,event:ev,rzLot,cards,
-      costMod:(ev&&ev.tipo==='cost')?ev.delta:0,quiet:rng.pick(QUIET)});
-  }
-  return rounds;
-}
+/* ---------- LINEE DI SPEDIZIONE ---------- */
+const LINES=[
+ {id:'gd',  n:'GD-EUB Standard', rate:80, base:25, days:6, liq:false,batt:false,risk:.10, note:'La linea del popolo: lenta ma onesta.'},
+ {id:'yan', n:'Yanween Express', rate:115,base:35, days:4, liq:true, batt:false,risk:.18, note:' Equilibrata. Liquidi sì, batterie no.'},
+ {id:'dle', n:'DLE Priority',    rate:185,base:45, days:2, liq:false,batt:true, risk:.38, note:'Velocissima, ma DICHIARA tutto alla dogana.'},
+ {id:'salt',n:'SaltLine Stealth',rate:155,base:55, days:3, liq:true, batt:true, risk:.04, max:8, note:'La linea che non fa domande. Max 8kg.'},
+ {id:'sea', n:'Sea Freight Eco', rate:38, base:20, days:14,liq:true, batt:true, risk:.07, min:4, note:'Container. Min 4kg billabili. Tanto pazienza.'},
+];
+const BOXES=[{s:'S',vol:2,wt:.25},{s:'M',vol:8,wt:.5},{s:'L',vol:18,wt:.9},{s:'XL',vol:30,wt:1.4}];
 
-/* ---------- stato ---------- */
-const S={ nick:(getLS('rr_nick')||''), screen:'home', game:null, lobby:{code:''} };
-function ensureNick(){
-  S.nick=(S.nick||'').trim().slice(0,14);
-  if(!S.nick) S.nick='PLAYER'+(100+Math.floor(Math.random()*900));
-  setLS('rr_nick',S.nick);
-  return S.nick;
-}
+/* ---------- CLIENTI ---------- */
+const CLIENTS={
+ nonna:{u:'@nonna.resell',geo:'ITALIA · IT',pers:'chill',av:'NR',col:'#8a6a3d',notice:.45,
+   greet:'Buongiorno agent! Ordine pagato ✓ Prendi quello in lista, senza stress. Qualità media va benissimo: è per tutti i giorni.'},
+ marco:{u:'@marco_fuoco90',geo:'ITALIA · IT',pers:'newbie',av:'MF',col:'#2f7d4f',notice:.55,
+   greet:'Ciao!! primo ordine mai, ho seguito la guida sul subreddit. Metto la lista, dimmi tu! (non voglio problemi con la dogana pls)'},
+ nerd:{u:'xX_qc_nerd_Xx',geo:'GERMANIA · DE',pers:'qcnerd',av:'QN',col:'#28477e',notice:.95,
+   greet:'Order paid. Voglio il TOP batch, intesi? Foto QC in macro: controllo ogni filo col righello. E toglili dalle scatole, pagamento note allegate.'},
+ flex:{u:'@flex.scaler',geo:'USA · US',pers:'flexer',av:'FS',col:'#c0391b',notice:.7,
+   greet:'Paid in full. Voglio roba TOP: la Mostro su IG. Spedizione VELOCITÀ (DLE Priority). Ah: spedisci in STUDIO, non a casa. Mia moglie non deve vedere.'},
+ yumi:{u:'@yumi.drip',geo:'GIAPPONE · JP',pers:'collector',av:'YD',col:'#b06a9e',notice:.7,
+   greet:'こんにちは agent! Lista pagata. Per le batterie mi serve una linea che le accetti, ma senza spendere come DLE. Imballo MORBIDO per la figura, onegai.'},
+ clout:{u:'@clout.chaser',geo:'USA · US',pers:'flexer',av:'CC',col:'#8f43c2',notice:.7,
+   greet:'Paid. Voglio top batch per entrambi, e spedizione DLE Priority: serve per un fit-check venerdì. Sottovuota tutto, odio pacchi gonfi.'},
+ trevolta:{u:'@trevolta_hauls',geo:'UK · GB',pers:'reseller',av:'TH',col:'#1d3260',notice:.85,
+   greet:'Big haul paid. Batch MID basta — i margini sono margini — ma voglio DLE Priority, serve per un drop. DEBOX + SOTTOVUOTO + PROTEZIONE: nota bene. Ship to THE STUDIO address, non a casa.'},
+ thrifty:{u:'@thrifty.tia',geo:'FRANCIA · FR',pers:'broke',av:'TT',col:'#a8700a',notice:.5,
+   greet:'Salut! Pagato il minimo sindacale ahah. Batch economico, linea GD, foto standard. Siamo poveri ma belli.'},
+ mom:{u:'@haulmom_of2',geo:'FRANCIA · FR',pers:'chill',av:'HM',col:'#2f7d4f',notice:.45,
+   greet:'Coucou! Regalo per mio figlio. Occhiali stylos, batch basso ok. Un po\' di protezione nel pacco, sono fragili eh.'},
+};
 
-/* ---------- toasts ---------- */
-function toast(msg,kind){
-  const t=document.createElement('div');
-  t.className='toast '+(kind||'');
-  t.innerHTML=msg;
-  $('#toasts').appendChild(t);
-  setTimeout(()=>t.classList.add('out'),3400);
-  setTimeout(()=>t.remove(),3900);
-}
-function copyText(t){
-  const done=()=>toast('Copiato negli appunti.','good');
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(done).catch(()=>fallbackCopy(t,done));
-  } else fallbackCopy(t,done);
-}
-function fallbackCopy(t,done){
-  const ta=document.createElement('textarea');
-  ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); done(); }catch(e){ toast('Copia manuale: '+t); }
-  ta.remove();
-}
+/* ---------- SCENARI SETTIMANA ---------- */
+const SCEN=[
+ {cli:'nonna', items:['samba'], expect:'mid', serv:['photoStd'], pref:'gd',  addr:1},
+ {cli:'marco', items:['suprene'],expect:'mid', serv:['vacuum','photoHD'], pref:'gd', addr:1, flash:'slide'},
+ {cli:'nerd',  items:['jorjan'], expect:'top', serv:['debox','photoHD','detag'], pref:'salt', addr:1},
+ {cli:'flex',  items:['roleks','rayben'], expect:'top', serv:['protect','photoHD'], pref:'dle', addr:2, req:1, anote:'ship to STUDIO'},
+ {cli:'yumi',  items:['labobo','airpads'], expect:'mid', serv:['protect','photoStd'], pref:'salt', addr:1, flash:'rayben'},
+ {cli:'clout', items:['bame','chromo'], expect:'top', serv:['vacuum','photoHD'], pref:'dle', addr:1},
+ {cli:'trevolta',items:['monkler','feco','af1','lv'], expect:'mid', serv:['vacuum','debox','protect','photoHD'], pref:'dle', addr:2, req:1, anote:'STUDIO, non casa'},
+];
+const FLASH={slide:'thrifty',rayben:'mom'};
 
-/* ---------- leaderboard stanze + codici risultato ---------- */
-function boardKey(room){ return 'rr_board_'+room; }
-function boardLoad(room){
-  const b=getLS(boardKey(room));
-  return Array.isArray(b)?b:[];
-}
-function boardSave(room,entry){
-  const b=boardLoad(room);
-  const i=b.findIndex(x=>String(x.name).toLowerCase()===String(entry.name).toLowerCase());
-  if(i>=0){ if(entry.score>b[i].score) b[i]=entry; } else b.push(entry);
-  b.sort((a,b)=>b.score-a.score);
-  const out=b.slice(0,20);
-  setLS(boardKey(room),out);
-  return out;
-}
-function resultEncode(e){
-  const p=e.room+'~'+e.name+'~'+Math.round(e.score)+'~'+(e.grade||'');
-  let b;
-  try{ b=btoa(unescape(encodeURIComponent(p))); }catch(err){ return null; }
-  return 'RR1-'+b.replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
-}
-function resultDecode(code){
-  try{
-    code=String(code).trim();
-    if(!code.startsWith('RR1-')) return null;
-    let b=code.slice(4).replace(/-/g,'+').replace(/_/g,'/');
-    while(b.length%4) b+='=';
-    const p=decodeURIComponent(escape(atob(b)));
-    const parts=p.split('~');
-    if(parts.length<3) return null;
-    const score=Number(parts[2]);
-    if(!parts[0]||!parts[1]||!isFinite(score)) return null;
-    return {room:parts[0],name:parts[1].slice(0,14),score,grade:(parts[3]||'—').slice(0,20)};
-  }catch(e){ return null; }
-}
-/* sync live tra tab dello stesso browser */
-const bcSubs={};
-function subscribeBoard(room){
-  if(bcSubs[room]||!('BroadcastChannel' in window)) return;
-  try{
-    const ch=new BroadcastChannel('reprush|'+room);
-    ch.onmsg=null;
-    ch.onmessage=e=>{ if(e.data&&e.data.type==='board') refreshBoardIfVisible(room); };
-    bcSubs[room]=ch;
-  }catch(e){}
-}
-function boardBroadcast(room){
-  if(!('BroadcastChannel' in window)) return;
-  try{ const ch=new BroadcastChannel('reprush|'+room); ch.postMessage({type:'board'}); ch.close(); }catch(e){}
-}
-function refreshBoardIfVisible(room){
-  if(S.screen==='results'&&S.game&&S.game.boardRoom===room){
-    const slot=$('#board-slot'); if(slot) renderBoardInto(slot,room);
-  } else if(S.screen==='lobby'&&S.lobby.code===room){
-    const slot=$('#lobby-board'); if(slot) renderBoardInto(slot,room);
-  }
-}
-function boardHTML(room){
-  const b=boardLoad(room);
-  subscribeBoard(room);
-  const tit=room==='DAILY'?'CLASSIFICA QUOTIDIANA':'CLASSIFICA DELLA STANZA';
-  const tag=room==='DAILY'?'OGGI':'CODICE '+esc(room);
-  const head=`<h3 class="board-tit disp">${tit} <span class="mono dim">· ${tag} · questo dispositivo</span></h3>`;
-  if(!b.length) return head+`<p class="board-empty mono dim">Nessun risultato ancora.<br>La classifica si riempie quando chiudi una partita qui — oppure incolla il codice risultato (RR1-…) di un amico.</p>`;
-  const rows=b.map((e,i)=>`<div class="brow ${String(e.name).toLowerCase()===S.nick.toLowerCase()?'me':''}">
-    <span class="bpos disp">${i+1}</span>
-    <span class="bname">${esc(e.name)}</span>
-    <span class="bscore mono">${eur(e.score)}</span>
-    <span class="bgrade mono dim">${esc(e.grade||'—')}</span></div>`).join('');
-  return head+`<div class="board">${rows}</div>`;
-}
-function renderBoardInto(el,room){ el.innerHTML=boardHTML(room); }
+/* ---------- HOTSPOT QC + DIFETTI ---------- */
+const SPOTS={
+ sneaker:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:50,y:30},{k:'stitch',l:'CUCITURE',x:22,y:26},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:80,y:22}],
+ sneaker2:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'STRISPE',x:30,y:28},{k:'stitch',l:'CUCITURE',x:70,y:24},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:82,y:30}],
+ slide:[{k:'order',l:'CONFRONTO ORDINE'},{k:'strap',l:'STRAP',x:55,y:40},{k:'sole',l:'SUOLA',x:50,y:80},{k:'color',l:'COLORE',x:25,y:30},{k:'mold',l:'STAMPAGGIO',x:80,y:55}],
+ hoodie:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO STAMPATO',x:52,y:48},{k:'stitch',l:'CUCITURE',x:22,y:30},{k:'fabric',l:'TESSUTO',x:78,y:62},{k:'color',l:'COLORE',x:50,y:24}],
+ hoodie2:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'RICAMO CROCI',x:52,y:48},{k:'stitch',l:'CUCITURE',x:22,y:30},{k:'fabric',l:'TESSUTO',x:78,y:62},{k:'color',l:'COLORE',x:50,y:24}],
+ shark:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'CAMO',x:30,y:55},{k:'stitch',l:'CUCITURE',x:75,y:30},{k:'fabric',l:'TESSUTO',x:60,y:70},{k:'color',l:'COLORE',x:25,y:25}],
+ bagLV:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MONOGRAM',x:45,y:55},{k:'handle',l:'MANICI',x:55,y:20},{k:'hardware',l:'HARDWARE',x:80,y:45},{k:'stitch',l:'CUCITURE',x:20,y:70}],
+ bagFlap:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'DOPPIA C',x:55,y:38},{k:'handle',l:'CATENA',x:35,y:20},{k:'hardware',l:'HARDWARE',x:78,y:60},{k:'stitch',l:'CUCITURE',x:25,y:70}],
+ perfume:[{k:'order',l:'CONFRONTO ORDINE'},{k:'bottle',l:'FLACONE',x:50,y:60},{k:'cap',l:'TAPPO·POMPA',x:50,y:22},{k:'label',l:'ETICHETTA',x:62,y:55},{k:'boxq',l:'SCATOLA',x:20,y:40}],
+ watch:[{k:'order',l:'CONFRONTO ORDINE'},{k:'dial',l:'QUADRANTE',x:50,y:50},{k:'glass',l:'VETRO',x:50,y:32},{k:'strap',l:'BRACCIALE',x:50,y:82},{k:'move',l:'MOVIMENTO',x:78,y:50}],
+ glasses:[{k:'order',l:'CONFRONTO ORDINE'},{k:'lens',l:'LENTI',x:30,y:55},{k:'frame',l:'ASTE',x:78,y:30},{k:'hardware',l:'PONTICELLO',x:50,y:32},{k:'color',l:'FINITURA',x:70,y:70}],
+ puffer:[{k:'order',l:'CONFRONTO ORDINE'},{k:'zip',l:'ZIP·HARDWARE',x:50,y:52},{k:'stitch',l:'QUILTING',x:25,y:55},{k:'fill',l:'PIUMINO',x:75,y:35},{k:'color',l:'COLORE',x:50,y:22}],
+ figure:[{k:'order',l:'CONFRONTO ORDINE'},{k:'paint',l:'VERNICE',x:72,y:30},{k:'face',l:'FACCIA',x:50,y:45},{k:'joint',l:'ARTICOLAZIONI',x:30,y:70},{k:'boxq',l:'SCATOLA',x:20,y:28}],
+ buds:[{k:'order',l:'CONFRONTO ORDINE'},{k:'caseq',l:'CASE',x:50,y:72},{k:'budsq',l:'AURICOLARI',x:30,y:30},{k:'sound',l:'PAIRING AUDIO',x:72,y:28},{k:'battery',l:'BATTERIA',x:55,y:45}],
+};
+const DEF={
+ order:['Hanno spedito il MODELLO SBAGLIATO: versione Low invece di High.','Item diverso dal listing: colorway completamente altra.'],
+ logo:['Il logo è storto di 2mm. Lo noterebbe anche mia nonna.','Ricamo con filo doppio: non si vedeva dal 2015.','Le lettere sbavate: "MIKE" sembra "MlKE".'],
+ stitch:['Cucitura del tallone fuori linea di 3mm.','Un punto mancante sulla linguetta.','Filo sporgente sul pannello laterale.'],
+ sole:['Colla in eccesso sulla suola: appiccica il pavimento.','Suole asimmetriche: la sinistra è più corta di 4mm.','Aloni di colla sul midsole.'],
+ color:['Il "bianco" è più crema-dentifricio che bianco.','Colore mezzo tono più scuro del listing.','Sfumatura diversa dal campione in foto.'],
+ fabric:['Il cotone è più ruvido del previsto.','Pilling già presente sull\'interno cappuccio.','Grammatura leggera: traspara sotto i flash.'],
+ pattern:['Il monogramma ha due "LV" attaccati: davanti c\'è un bacio.','Il camo si ripete in modo troppo regolare: pattern blocco.'],
+ handle:['Manico sinistro più corto: la borsa pendola.','La catena ha una maglia "cantante" (allentata).'],
+ hardware:['Zip dura come un cancello di campagna.','Doratura della fibbia già opaca su un angolo.'],
+ bottle:['Bolla d\'aria nel vetro del flacone.','Il liquido è leggermente torbido.'],
+ cap:['La pompa spruzza di lato: profumo negli occhi.','Tappo allentato: rischia di aprirsi in transito.'],
+ label:['Etichetta storta e leggermente sbiadita.','Stampa "DIORR" con la R finale tagliata.'],
+ boxq:['Scatola ammaccata su un angolo.','La box ha un odore sospetto di magazzino umido.'],
+ dial:['Indici delle ore leggermente disallineati alle 4.','Lancetta dei secondi attritata: scatti nervosi.'],
+ glass:['Vetro con micro-graffio circolare.','Un alone opaco sul cristallo (brutto, su un orologio).'],
+ strap:['Bracciale con maglia graffiata.','Chiusura con gioco eccessivo: apre da sola.'],
+ move:['Perde 4 minuti al giorno. L\'originale ne perde 3.','Batteria scarica: parte già fermo.'],
+ lens:['Lente sinistra con distorsione ai bordi.','Un graffio a goccia sulla lente destra.'],
+ frame:['Asta sinistra allentata: scivola dal viso.','Ponta in plastica (non metallo) sul lato destro.'],
+ zip:['Zip della giacca che sale storta.','Aprendola fa "zzz-zz-ZOK" a metà percorso.'],
+ fill:['Piumino distribuito male: un_panel più gonfio.','Imbottitura che fuoriesce da una cucitura.'],
+ paint:['Vernice sbavata sull\'angolo di un\'orecchia.','Un micro-dint nel nasone.'],
+ face:['Occhi stampati asimmetrici: guarda due direzioni.','Denti della "smile" con una punta scolorita.'],
+ joint:['Testa che ruota troppo liberamente: bobble-head.','Braccio destro bloccato.'],
+ caseq:['Case con graffio sul coperchio.','Cerniera del case rumorosa.'],
+ budsq:['Un auricolare più giallino dell\'altro.','Griglia speaker storta su un lato.'],
+ sound:['Canale destro più basso del sinistro.','Il pairing funziona... ogni tanto. Tipo quando vuole.'],
+ battery,['Durata dichiarata 6h, reale: 2h e un preavviso.']:null,
+ strap:['Strap con bordo tagliente non rifinito.'],
+ mold:['Bordo stampato con sbavatura di gomma.'],
+};
+DEF.battery=['Durata dichiarata 6h, reale: 2h e un preavviso.'];
 
-/* ---------- schermate ---------- */
-function showScreen(name){
-  S.screen=name;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  $('#scr-'+name).classList.add('active');
-  window.scrollTo({top:0});
+/* ---------- SVG PRODOTTI ---------- */
+const INK='#1c1610';
+function svP(id,extra=''){
+ const it=CATALOG.find(x=>x.id===id);const t=it.type;
+ const L=(d,f)=>`<path d="${d}" fill="${f||'none'}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`;
+ let s='';
+ if(t==='sneaker'||t==='sneaker2'){
+   const bred=t==='sneaker'&&id==='jorjan';
+   s+=L('M16 66 L22 46 Q26 38 36 36 L46 30 Q55 24 62 28 L76 36 Q94 40 100 52 L104 62 L104 66 Z', bred?'#201d22':'#f2efe6');
+   s+=L('M16 66 Q60 58 104 66 L104 74 Q104 78 98 78 L22 78 Q16 78 16 72 Z', bred?'#f2efe6':'#efe9d8');
+   if(t==='sneaker2'){s+=`<path d="M30 38 L38 56 M37 36 L45 56 M44 34 L52 54" stroke="${bred?'#c0391b':'#201d22'}" stroke-width="4" fill="none"/>`}
+   else{s+=`<path d="M50 56 Q68 44 88 58" stroke="${bred?'#c0391b':'#8a8374'}" stroke-width="5" fill="none"/>`}
+   s+=`<path d="M44 36 L52 32 M48 40 L58 34 M52 44 L64 38" stroke="${INK}" stroke-width="2" fill="none"/>`;
+   s+=`<text x="88" y="74" font-family="Space Mono" font-size="6" fill="${INK}" opacity=".65">${it.brand.split(' ')[0]}</text>`;
+ }
+ if(t==='slide'){
+   s+=L('M18 68 L102 68 L102 80 Q102 86 94 86 L26 86 Q18 86 18 78 Z','#e8ddc6');
+   s+=L('M42 68 C48 44 78 46 86 64 L84 68 Z','#e3d3b5');
+   s+=`<circle cx="34" cy="78" r="1.3" fill="${INK}"/><circle cx="44" cy="79" r="1.3" fill="${INK}"/><circle cx="54" cy="79" r="1.3" fill="${INK}"/><circle cx="64" cy="79" r="1.3" fill="${INK}"/><circle cx="74" cy="79" r="1.3" fill="${INK}"/><circle cx="84" cy="78" r="1.3" fill="${INK}"/>`;
+ }
+ if(t==='hoodie'||t==='hoodie2'||t==='shark'){
+   const base=t==='shark'?'#3f5a3a':(id==='suprene'?'#c0391b':'#201d22');
+   const pid='pt'+id;
+   if(t==='shark'){s+=`<defs><pattern id="${pid}" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#3f5a3a"/><path d="M2 4 Q6 0 9 4 Q12 8 15 3 Q16 10 9 12 Q4 14 2 8 Z" fill="#556e4a"/><circle cx="13" cy="12" r="2" fill="#2f4629"/></pattern></defs>`}
+   s+=`<path d="M38 34 L30 40 L22 44 L18 62 L28 60 L28 86 L92 86 L92 60 L102 62 L98 44 L90 40 L82 34 Q60 42 38 34 Z" fill="${t==='shark'?`url(#${pid})`:base}" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M46 32 Q60 18 74 32 Q60 40 46 32 Z" fill="${t==='shark'?'#2f4629':'#151015'}" stroke="${INK}" stroke-width="2"/>`;
+   s+=L('M48 68 L72 68 L74 84 L46 84 Z', t==='shark'?'#2f4629':'rgba(0,0,0,.15)');
+   s+=`<path d="M54 38 L54 52 M66 38 L66 52" stroke="${INK}" stroke-width="2"/>`;
+   if(id==='suprene')s+=`<rect x="49" y="44" width="22" height="9" fill="#f2efe6" stroke="${INK}" stroke-width="1.5"/><text x="51.5" y="51" font-family="Space Mono" font-size="6" font-weight="700" fill="#c0391b">SUPRENE</text>`;
+   if(id==='chromo')s+=`<g stroke="${INK}" stroke-width="1.5"><path d="M52 46 L57 41 L62 46 L67 41" fill="none"/><path d="M52 53 L57 48 L62 53 L67 48" fill="none"/></g>`;
+ }
+ if(t==='bagLV'){
+   s+=`<defs><pattern id="lv${id}" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#a97036"/><text x="1" y="9" font-family="Space Mono" font-size="7" font-weight="700" fill="#6b4419">LV</text><text x="8" y="15" font-family="Space Mono" font-size="7" font-weight="700" fill="#6b4419">LV</text></pattern></defs>`;
+   s+=`<path d="M34 44 L86 44 L92 80 L28 80 Z" fill="url(#lv${id})" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M40 44 C40 26 80 26 80 44" fill="none" stroke="${INK}" stroke-width="4"/>`;
+   s+=`<path d="M30 50 L90 50" stroke="#6b4419" stroke-width="2"/><rect x="56" y="48" width="8" height="6" fill="#c9a227" stroke="${INK}" stroke-width="1.5"/>`;
+ }
+ if(t==='bagFlap'){
+   s+=`<path d="M34 38 L86 38 L92 82 L28 82 Z" fill="#1a1a1f" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M34 38 L86 38 L88 52 L32 52 Z" fill="#26262e" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M36 38 C36 20 84 20 84 38" fill="none" stroke="#c9a227" stroke-width="3"/>`;
+   s+=`<circle cx="36" cy="41" r="3" fill="#c9a227" stroke="${INK}" stroke-width="1"/><circle cx="84" cy="41" r="3" fill="#c9a227" stroke="${INK}" stroke-width="1"/>`;
+   s+=`<g stroke="#c9a227" stroke-width="2" fill="none"><path d="M56 60 a4 4 0 1 1 8 0"/><path d="M64 60 a4 4 0 1 1 -8 0"/></g>`;
+ }
+ if(t==='perfume'){
+   s+=`<defs><linearGradient id="pg${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d3d5c"/><stop offset="1" stop-color="#14141f"/></linearGradient></defs>`;
+   s+=`<rect x="40" y="46" width="40" height="42" rx="4" fill="url(#pg${id})" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<rect x="53" y="30" width="14" height="15" rx="2" fill="#c9c9d1" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<rect x="56" y="26" width="8" height="5" rx="1" fill="#8f8f99" stroke="${INK}" stroke-width="1.5"/>`;
+   s+=`<rect x="46" y="56" width="28" height="20" rx="2" fill="#f2efe6" stroke="${INK}" stroke-width="1.5"/>`;
+   s+=`<text x="51" y="64" font-family="Space Mono" font-size="7" font-weight="700" fill="${INK}">DIORR</text><text x="48.5" y="72" font-family="Space Mono" font-size="5" fill="${INK}" opacity=".7">SAUVAGE</text>`;
+ }
+ if(t==='watch'){
+   s+=`<rect x="50" y="12" width="20" height="24" rx="5" fill="#28477e" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<rect x="50" y="84" width="20" height="24" rx="5" fill="#28477e" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<circle cx="60" cy="60" r="19" fill="#e9e4d2" stroke="${INK}" stroke-width="3"/>`;
+   s+=`<circle cx="60" cy="60" r="19" fill="none" stroke="#c9a227" stroke-width="2.5"/>`;
+   s+=`<g stroke="${INK}" stroke-width="1.5"><line x1="60" y1="43" x2="60" y2="47"/><line x1="60" y1="73" x2="60" y2="77"/><line x1="43" y1="60" x2="47" y2="60"/><line x1="73" y1="60" x2="77" y2="60"/></g>`;
+   s+=`<circle cx="60" cy="52" r="1" fill="${INK}"/><circle cx="68" cy="60" r="1" fill="${INK}"/><circle cx="60" cy="68" r="1" fill="${INK}"/><circle cx="52" cy="60" r="1" fill="${INK}"/>`;
+   s+=`<line x1="60" y1="60" x2="53" y2="54" stroke="${INK}" stroke-width="2.5"/><line x1="60" y1="60" x2="66" y2="47" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<text x="49" y="85" font-family="Space Mono" font-size="4.5" fill="${INK}" transform="translate(6,-14)">ROLEKS</text><rect x="74" y="57" width="5" height="6" rx="1" fill="#c9c9d1" stroke="${INK}" stroke-width="1"/>`;
+ }
+ if(t==='glasses'){
+   s+=`<g fill="#5d6b52" opacity=".85" stroke="#c9a227" stroke-width="2.5"><path d="M24 42 C24 62 36 72 46 69 C55 66 56 50 54 42 Z"/><path d="M96 42 C96 62 84 72 74 69 C65 66 64 50 66 42 Z"/></g>`;
+   s+=`<path d="M54 46 Q60 40 66 46 M50 40 Q60 34 70 40" fill="none" stroke="#c9a227" stroke-width="2.5"/>`;
+   s+=`<path d="M24 44 L12 38 M96 44 L108 38" stroke="#c9a227" stroke-width="3"/>`;
+ }
+ if(t==='puffer'){
+   const base=id==='monkler'?'#1a1a1f':'#23303c';
+   s+=`<path d="M38 30 L26 38 L22 56 L30 55 L30 82 L90 82 L90 55 L98 56 L94 38 L82 30 Q60 26 38 30 Z" fill="${base}" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<g stroke="${INK}" stroke-width="1.5" opacity=".7"><path d="M31 40 L89 40"/><path d="M31 48 L89 48"/><path d="M31 56 L89 56"/><path d="M31 64 L89 64"/><path d="M31 72 L89 72"/></g>`;
+   s+=`<path d="M48 28 Q60 22 72 28 L72 35 Q60 31 48 35 Z" fill="${base}" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M60 34 L60 82" stroke="#c9c9d1" stroke-width="2.5"/>`;
+   s+=`<g><rect x="66" y="42" width="9" height="3" fill="#c0391b"/><rect x="66" y="45" width="9" height="3" fill="#f2efe6"/><rect x="66" y="48" width="9" height="3" fill="#28477e"/></g>`;
+ }
+ if(t==='figure'){
+   s+=`<path d="M46 36 L49 12 L60 32 Z" fill="#9aa89f" stroke="${INK}" stroke-width="2"/><path d="M74 36 L71 12 L60 32 Z" fill="#9aa89f" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<ellipse cx="60" cy="50" rx="23" ry="20" fill="#9aa89f" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<ellipse cx="52" cy="46" rx="5.5" ry="7" fill="#fff" stroke="${INK}" stroke-width="1.5"/><ellipse cx="68" cy="46" rx="5.5" ry="7" fill="#fff" stroke="${INK}" stroke-width="1.5"/>`;
+   s+=`<circle cx="53" cy="48" r="2.4" fill="${INK}"/><circle cx="67" cy="48" r="2.4" fill="${INK}"/>`;
+   s+=`<path d="M48 58 Q60 68 72 58 L72 62 Q60 73 48 62 Z" fill="#fff" stroke="${INK}" stroke-width="1.5"/><path d="M54 60 L54 67 M60 61 L60 70 M66 60 L66 67" stroke="${INK}" stroke-width="1"/>`;
+   s+=`<rect x="50" y="68" width="20" height="18" rx="7" fill="#8a9a90" stroke="${INK}" stroke-width="2"/>`;
+ }
+ if(t==='buds'){
+   s+=`<rect x="34" y="56" width="52" height="34" rx="11" fill="#f2efe6" stroke="${INK}" stroke-width="2"/>`;
+   s+=`<path d="M34 68 L86 68" stroke="${INK}" stroke-width="1.5"/><circle cx="79" cy="62" r="2" fill="#2f7d4f"/>`;
+   s+=`<g stroke="${INK}" stroke-width="1.5"><circle cx="47" cy="40" r="7" fill="#fbf6ea"/><rect x="44" y="44" width="6" height="13" rx="3" fill="#fbf6ea"/><circle cx="73" cy="40" r="7" fill="#fbf6ea"/><rect x="70" y="44" width="6" height="13" rx="3" fill="#fbf6ea"/></g>`;
+   s+=`<text x="41" y="80" font-family="Space Mono" font-size="6" fill="${INK}" opacity=".7">AIRPADS</text>`;
+ }
+ return `<svg viewBox="0 0 120 100" ${extra}>${s}</svg>`;
 }
+function barcode(str,h=26){let s='',x=4;const rr=mulberry32([...str].reduce((a,c)=>a+c.charCodeAt(0),7));
+ while(x<116){const w=1+Math.floor(rr()*3);if(rr()>.35)s+=`<rect x="${x}" y="0" width="${w}" height="${h*0.62}" fill="${INK}"/>`;x+=w+1+Math.floor(rr()*2)}
+ return `<svg viewBox="0 0 120 ${h}" style="width:100%;height:${h}px">${s}<text x="4" y="${h-4}" font-family="Space Mono" font-size="6" fill="${INK}">${esc(str)}</text></svg>`}
+function truckSVG(){return `<svg viewBox="0 0 130 70" style="width:100%">
+ <rect x="2" y="8" width="82" height="40" rx="3" fill="#f2efe6" stroke="${INK}" stroke-width="2.5"/>
+ <rect x="86" y="16" width="34" height="32" rx="3" fill="#28477e" stroke="${INK}" stroke-width="2.5"/>
+ <path d="M94 28 h18 v10 h-18 z" fill="#f2efe6" stroke="${INK}" stroke-width="1.5"/>
+ <text x="8" y="30" font-family="Space Mono" font-weight="700" font-size="9" fill="#28477e">RIZZITGO</text><text x="8" y="41" font-family="Space Mono" font-size="7" fill="#c0391b">REPS EXPRESS</text>
+ <g class="wheel"><circle cx="26" cy="56" r="10" fill="${INK}"/><circle cx="26" cy="56" r="4" fill="#f2efe6"/></g>
+ <g class="wheel"><circle cx="60" cy="56" r="10" fill="${INK}"/><circle cx="60" cy="56" r="4" fill="#f2efe6"/></g>
+ <g class="wheel"><circle cx="104" cy="56" r="10" fill="${INK}"/><circle cx="104" cy="56" r="4" fill="#f2efe6"/></g>
+</svg>`}
+function boxSVG(sz,fillPct){const f=Math.max(.08,Math.min(1,fillPct));
+ return `<svg viewBox="0 0 160 120"><rect x="20" y="30" width="120" height="80" fill="#d9b573" stroke="${INK}" stroke-width="3"/>
+ <rect x="20" y="30" width="120" height="80" fill="none" stroke="${INK}" stroke-width="3"/>
+ <g stroke="#a9814e" stroke-width="1.5"><path d="M20 46 h120 M20 62 h120 M20 78 h120 M20 94 h120"/></g>
+ <rect x="66" y="30" width="28" height="80" fill="#28477e" opacity=".92"/>
+ <g transform="translate(80,70) rotate(-90)"><text font-family="Space Mono" font-size="9" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="2">RIZZITGO·TAPE</text></g>
+ <text x="26" y="103" font-family="Space Mono" font-size="10" font-weight="700" fill="${INK}">BOX ${sz}</text>
+ <rect x="128" y="34" width="8" height="${Math.max(4,72*f)}" fill="${f>.95?'#c0391b':'#2f7d4f'}" stroke="${INK}" stroke-width="1.5" transform="translate(-6,0)"/></svg>`}
 
-/* ===== HOME ===== */
-function renderHome(){
-  $('#scr-home').innerHTML=`
-  <div class="home-top">
-    <span class="mono dim" style="font-size:11px;letter-spacing:.18em">MERCATO APERTO · GUANGZHOU, CN</span>
-    <span class="sponsor-chip">${rzAvatar(28)} AGENTE UFFICIALE: <b>RIZZITGO</b></span>
+/* ---------- STATO ---------- */
+const S={day:1,hours:12,money:0,phase:'title',cur:null,orders:[],chat:[],unread:0,started:false,flashState:0,overtimeCount:0,stats:{ship:0,seized:0,duty:0,dmg:0,ret:0,late:0,defShip:0,defNoticed:0,checks:0,hotAll:0}};
+const PHASES=[['order','ORDINE','clipboard-check'],['sourcing','SOURCING','search'],['transit','TRANSITO','truck'],['qc','QUALITY CHECK','scan-line'],['rehearsal','REHEARSAL','camera'],['pack','IMBALLO','package'],['ship','SPEDIZIONE','map-pin'],['done','SPEDITO','package-check']];
+
+function spend(h,label){if(h>0){if(S.hours<=0){S.money-=40;S.overtimeCount++;toast('STRAORDINARIO: -¥40 (ore finite!)','bad');AU.bad()}S.hours-=h}renderHUD()}
+function addChat(from,text,silent){const m={from,text,t:`G${S.day} · ${fmtH(12-S.hours<0?'0':12-S.hours)||'0h00'}`};
+ S.chat.push(m);
+ const log=$('#chatlog');const d=document.createElement('div');
+ d.className='msg '+(from==='ag'?'ag':from==='sys'?'sys':'cl');
+ d.innerHTML=(from==='ag'?'<span class="who">AGENT (TU)</span>':from==='sys'?'':'<span class="who">'+esc(curName())+'</span>')+esc(text);
+ log.appendChild(d);log.scrollTop=log.scrollHeight;
+ if(!silent&&from!=='ag'){S.unread++;updFab()}else{updFab()}}
+function say(from,text,delay=500){setTimeout(()=>{addChat(from,text);AU.click()},delay)}
+function typing(cb,ms=900){const log=$('#chatlog');const d=document.createElement('div');d.className='typing';d.innerHTML='<i></i><i></i><i></i>';log.appendChild(d);log.scrollTop=log.scrollHeight;setTimeout(()=>{d.remove();cb()},ms)}
+function curName(){return S.cur?CLIENTS[S.cur.cli].u:'RIZZITGO'}
+function updFab(){const b=$('#unreadBdg');if(S.unread>0){b.style.display='flex';b.textContent=S.unread}else b.style.display='none'}
+function toggleChat(){const c=$('#chatcol');c.classList.toggle('open');if(c.classList.contains('open')){S.unread=0;updFab()}}
+function ackChat(){S.unread=0;updFab()}
+setInterval(ackChat,4000);
+function toast(txt,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=txt;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),2600)}
+
+/* ---------- COSTRUZIONE SETTIMANA ---------- */
+function addrFor(geo,i){const P={ITALIA:['Via #N Casalone 12, 20121 Milano, IT'],UK:['14 Brick Lane, London E2 7#N, GB','Studio 4, Hackney Walk, London E8 3#N, GB'],USA:['4#N Moore St, Brooklyn NY 11211, US','Studio B, 2#N Grand St, SoHo NY 10013, US'],GERMANIA:['Torstraße #N8, 10115 Berlin, DE'],GIAPPONE:['2-11-#N Meguro-ku, Tokyo 153-0063, JP'],FRANCIA:['#N Rue Oberkampf, 75011 Paris, FR']};
+ let a=(P[geo]||P.ITALIA)[i%((P[geo]||P.ITALIA).length)].replace(/#N/,String(ri(1,99)));return a.replace(/, GB/, i?', GB — STUDIO':', GB').replace(/, US/, i?', US — STUDIO':', US')}
+function buildWeek(){
+ S.orders=SCEN.map((sc,i)=>{
+  const c=CLIENTS[sc.cli];const items=sc.items.map(id=>{
+   const it=CATALOG.find(x=>x.id===id);
+   return {ref:it,sellers:TIERS.map(t=>({tier:t.k,price:Math.round(it.price[t.k]*(0.92+R()*0.2)/5)*5,transit:2+Math.floor(R()*3),name:pick(SELLERS)})),chosen:-1,defects:[],wrong:false,checked:{},accepted:{},swapped:{},flagged:{}};
+  });
+  // stima budget (conservativa: volume generoso, linea preferita)
+  let est=0,vol=0,wt=0;
+  items.forEach(o=>{est+=o.ref.price[sc.expect];
+   const db=sc.serv.includes('debox')&&o.ref.deboxable,vac=sc.serv.includes('vacuum')&&o.ref.soft;
+   vol+=o.ref.vol*(db?.45:1)*(vac?.5:1); wt+=o.ref.wt*(db?.78:1)});
+  const line=LINES.find(l=>l.id===sc.pref);
+  const bx=BOXES.find(b=>b.vol>=vol*1.3)||BOXES[3];
+  const bill=Math.max(wt+bx.wt,bx.vol*.25);
+  const shipEst=Math.round(line.base+line.rate*Math.max(bill,line.min||0));
+  const servTar=sc.serv.reduce((a,k)=>a+SERVICES[k].fee,0);
+  const budget=Math.round((est+servTar+shipEst)*(sc.expect==='top'?1.18:1.22)/10)*10;
+  const nAddr=sc.addr, addrs=[];for(let k=0;k<nAddr;k++)addrs.push({lab:k===0?'CASA':'STUDIO · '+(sc.anote||''),txt:addrFor(c.geo,k)});
+  return {day:i+1,cli:sc.cli,sc,items,budget,shipCover:shipEst,addrs,reqIdx:nAddr===2?(sc.req||1):0,
+    services:{},photos:false,box:null,addrIdx:-1,lineId:null,sealed:false,shipped:false,cancelled:false,spent:0,
+    hoursUsed:0,rev:0,isFlash:false,arrDay:0,outcome:null,spotDone:0};
+ });
+}
+function makeFlash(fid,day){const cli=FLASH[fid];const sc={cli,items:[fid],expect:'low',serv:['photoStd'],pref:'gd',addr:1,flash:null};
+ const c=CLIENTS[cli];const items=[fid].map(id=>{const it=CATALOG.find(x=>x.id===id);
+  return {ref:it,sellers:TIERS.map(t=>({tier:t.k,price:Math.round(it.price[t.k]*(0.92+R()*0.2)/5)*5,transit:2+Math.floor(R()*3),name:pick(SELLERS)})),chosen:-1,defects:[],wrong:false,checked:{},accepted:{},swapped:{},flagged:{}}});
+ let est=items[0].ref.price.low;const line=LINES.find(l=>l.id===sc.pref);
+ const bill=Math.max(items[0].ref.wt+BOXES[0].wt,BOXES[1].vol*.25);
+ const shipEst=Math.round(line.base+line.rate*bill);
+ const budget=Math.round((est+25+shipEst)*1.3/10)*10;
+ return {day,cli,sc,items,budget,shipCover:shipEst,addrs:[{lab:'CASA',txt:addrFor(c.geo,0)}],reqIdx:0,
+  services:{},photos:false,box:null,addrIdx:-1,lineId:null,sealed:false,shipped:false,cancelled:false,spent:0,hoursUsed:0,rev:0,isFlash:true,arrDay:0,outcome:null,spotDone:0}}
+
+/* ---------- RENDER ---------- */
+function renderHUD(){$('#vDay').textContent=S.day+'/7';$('#vHrs').textContent=fmtH(Math.max(0,S.hours))+(S.hours<0?fmtH(-S.hours)+' EXTRA':'');
+ $('#hMoney').classList.toggle('neg',S.money<0);$('#vMoney').textContent=fmt(S.money);
+ $('#vHrs').parentElement.classList.toggle('neg',S.hours<=0)}
+function renderStepper(){const st=$('#stepper');const idx=PHASES.findIndex(p=>p[0]===S.phase);
+ st.innerHTML=PHASES.map((p,i)=>`<div class="step ${i<idx?'done':i===idx?'cur':''}"><i data-lucide="${i<idx?'check':p[2]}"></i>${p[1]}</div>`).join('');
+ if(window.lucide)lucide.createIcons()}
+function icons(){if(window.lucide)lucide.createIcons()}
+function renderAll(){renderHUD();renderStepper();renderPanel()}
+function panelHTML(inner){return `<div class="panel"><div class="corner tl"></div><div class="corner br"></div><div class="tapebar"><span>★★★ RIZZITGO QUALITY LOGISTICS · GUANGZHOU WAREHOUSE #7 · ${'RIZZITGO · REPS · SAFE LINE · '.repeat(6)}</span></div><div class="pbody">${inner}</div></div>`}
+
+function renderPanel(){
+ const p=$('#panel');const ph=S.phase;
+ if(ph==='title'){p.innerHTML='';return}
+ if(!S.cur){p.innerHTML=panelHTML(`<h2 style="font-weight:900">Giornata ${S.day} — attesa ordini…</h2>`);return}
+ const o=S.cur,c=CLIENTS[o.cli];
+ if(ph==='order'){
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Nuovo ordine</h2><span class="sub">fondo verificato ✓ utente pagato ✓</span>${o.isFlash?'<span class="flashtag"><i data-lucide="flame"></i>ORDINE LAMPO</span>':''}</div>
+   <div class="cli"><div class="avat" style="background:${c.col}">${c.av}</div><div><div class="un">${esc(c.u)}</div><div class="geo mono">${c.geo} · ${esc(c.pers.toUpperCase())}</div></div></div>
+   <hr class="hr">
+   ${o.items.map(it=>`<div class="itemrow"><div class="art">${svP(it.ref.id)}</div><div><div class="nm">${esc(it.ref.brand)} — ${esc(it.ref.name)}</div><div class="bd">${esc(it.ref.blurb||'')}</div></div></div>`).join('')}
+   <div style="margin:10px 0;display:flex;gap:6px;flex-wrap:wrap">
+    <span class="chip req"><i data-lucide="badge-check"></i>SERVIZI RICHIESTI: ${o.sc.serv.map(k=>SERVICES[k].t).join(' · ')}</span>
+    ${o.sc.addr===2?`<span class="chip req"><i data-lucide="map-pin"></i>SPEDIZIONE: ${esc(o.sc.anote||'secondo indirizzo')}</span>`:''}
+    <span class="chip"><i data-lucide="gem"></i>ASPETTATIVA BATCH: <span class="tag ${o.sc.expect}" style="margin-left:4px">${o.sc.expect.toUpperCase()}</span></span>
+    <span class="chip"><i data-lucide="truck"></i>LINEA VOGLIA: ${LINES.find(l=>l.id===o.sc.pref).n}</span>
+   </div>
+   <div class="kv" style="font-size:14px"><span>BUDGET DEL CLIENTE (già pagato a te)</span><b style="color:var(--stamp)">${fmt(o.budget)}</b></div>
+   <p class="note" style="margin:8px 0 14px">Tutto ciò che avanzi dopo prodotti, servizi e spedizione è il tuo margine. Ma occhio: batch sotto aspettativa = disputa e rimborso parziale.</p>
+   <button class="btn red" onclick="startSourcing()"><i data-lucide="play"></i>Apri il sourcing</button>`);
+ }
+ if(ph==='sourcing'){
+  let tot=0;
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Sourcing</h2><span class="sub">scegli seller & batch per ogni item</span></div>
+   ${o.items.map((it,i)=>`<div style="margin-bottom:16px">
+     <div class="itemrow" style="margin-bottom:8px"><div class="art">${svP(it.ref.id)}</div><div><div class="nm">${esc(it.ref.brand)} — ${esc(it.ref.name)}</div><div class="bd">listino: budget ${fmt(it.ref.price.low)} · mid ${fmt(it.ref.price.mid)} · top ${fmt(it.ref.price.top)}</div></div></div>
+     ${it.sellers.map((s,t)=>`<div class="seller ${it.chosen===t?'sel':''}" onclick="selSeller(${i},${t})">
+        <span class="tag ${s.tier}">${TIERS[t].tag}</span>
+        <div><div class="snm">${esc(s.name)}</div><div class="sbl">${esc(TIERS[t].blurb)}</div></div>
+        <div class="pr">${fmt(s.price)}<small>transito ${s.transit}h</small></div>
+     </div>`).join('')}
+   </div>`).join('')}
+   <div class="budgetbar"><i style="width:${Math.min(100,tot/o.budget*100)}%"></i><span id="srcSum">—</span></div>
+   <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+     <button class="btn" id="btnSrc" onclick="confirmSourcing()" disabled><i data-lucide="send"></i>Ordina dai seller</button>
+     <span class="note" style="align-self:center">Aspettativa cliente: <b>${o.sc.expect.toUpperCase()}</b> — la corsa è tra margine e recensione.</span>
+   </div>`);
+  updSrcSum();
+ }
+ if(ph==='transit'){
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Transito verso il magazzino</h2><span class="sub">Guangzhou factory → RIZZITGO Hub</span></div>
+   <div class="road"><div class="truck" id="trk">${truckSVG()}</div></div>
+   <div class="budgetbar" style="margin-top:6px"><i id="trkBar" style="width:0%"></i><span>in viaggio…</span></div>
+   <p class="note" id="trkMsg" style="margin:10px 0 12px;min-height:2.4em">Il corriere parte. Il tè è già sul fornello.</p>
+   <button class="btn ghost sm" onclick="skipTransit()"><i data-lucide="chevron-right"></i>Salta attesa</button>`);
+  setTimeout(runTransit,300);
+ }
+ if(ph==='qc'){
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Quality Check</h2><span class="sub">clicca i punti da ispezionare · 15 min a check</span></div>
+   <p class="note" style="margin-bottom:12px">Regola d'oro dell'agent: <b>verifica SEMPRE la corrispondenza con l'ordine</b>. E ricorda: un difetto che non controlli, in foto il cliente forse lo vede lo stesso.</p>
+   ${o.items.map((it,i)=>qcItemHTML(it,i)).join('')}
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+     <button class="btn" onclick="toRehearsal()"><i data-lucide="camera"></i>Vai al rehearsal →</button>
+     <span class="note" id="qcWarn" style="align-self:center"></span>
+   </div>`);
+  qcWarn();
+ }
+ if(ph==='rehearsal'){
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Rehearsal & servizi</h2><span class="sub">prepara tutto, poi scatta le foto</span></div>
+   ${Object.keys(SERVICES).map(k=>{
+     const appl=(k==='debox'&&o.items.some(x=>x.ref.deboxable))||(k==='vacuum'&&o.items.some(x=>x.ref.soft))||(!['debox','vacuum'].includes(k));
+     if(!appl)return '';
+     const req=o.sc.serv.includes(k);
+     return `<div class="svc ${o.services[k]?'on':''}" onclick="tglService('${k}')">
+      <i data-lucide="${SERVICES[k].ic}"></i>
+      <div><div class="tk">${SERVICES[k].t}${req?'<span class="chip req">RICHIEDE</span>':''}</div><div class="ds">${esc(SERVICES[k].ds)} · tuo costo ${SERVICES[k].cost?fmt(SERVICES[k].cost):'¥0'} · cliente paga ${fmt(SERVICES[k].fee)}</div></div>
+      <div class="sw"><i></i></div></div>`}).join('')}
+   <hr class="hr">
+   <div class="kv"><span>Peso stimato pacco</span><b id="rvWt">${fmtH2(packCalc().wt)} kg</b></div>
+   <div class="kv"><span>Volume stimato</span><b id="rvVol">${packCalc().vol} L</b></div>
+   <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+     <button class="btn red" onclick="sendPhotos()" ${o.photos?'disabled':''}><i data-lucide="camera"></i>${o.photos?'Foto già inviate ✓':'Scatta foto e invia al cliente'}</button>
+     <button class="btn" onclick="toPack()"><i data-lucide="package"></i>Procedi all'imballo →</button>
+   </div>
+   <div id="flagZone" style="margin-top:10px"></div>`);
+  renderFlags();
+ }
+ if(ph==='pack'){
+  const pc=packCalc();
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Creazione del pacco</h2><span class="sub">scegli la scatola giusta</span></div>
+   <div class="packviz" id="pv">${o.items.map(it=>`<div class="mini">${svP(it.ref.id)}</div>`).join('')}</div>
+   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0">
+    ${BOXES.map(b=>`<div class="boxopt ${o.box&&o.box.s===b.s?'sel':''}" onclick="selBox('${b.s}')"><div class="bs">${b.s}</div><div class="bv">${b.vol}L · ${b.wt}kg</div></div>`).join('')}
+   </div>
+   <div class="fillbar"><i id="fillBar" style="width:0%"></i></div>
+   <div class="kv" style="margin-top:8px"><span>Peso reale / billabile</span><b id="pkWt">—</b></div>
+   <p class="note" id="pkNote" style="margin:8px 0 12px">Il peso billabile è max(peso reale, volume×0,25): una scatola gigante si paga come se pesasse. Rimuovere le box scarpe all'inizio ti salva la giornata.</p>
+   <button class="btn red" id="btnSeal" onclick="sealPack()" ${o.box?'':'disabled'}><i data-lucide="package-check"></i>Sigilla il pacco</button>`);
+  updPack();
+ }
+ if(ph==='ship'){
+  const pc=packCalc();const bill=billable();
+  p.innerHTML=panelHTML(`
+   <div class="ph"><h2>Spedizione</h2><span class="sub">indirizzo giusto · linea giusta</span></div>
+   <p class="note" style="margin-bottom:10px">Copertura spedizione del cliente: <b>${fmt(o.shipCover)}</b> (preventivo sulla linea che voleva: ${LINES.find(l=>l.id===o.sc.pref).n}). Differenze a tuo carico… o a tuo favore.</p>
+   <div style="margin-bottom:12px">
+    <div class="mono" style="font-size:10px;letter-spacing:1px;margin-bottom:6px">INDIRIZZI DI DESTINAZIONE ${o.addrs.length>1?'(OCCHIO: quale voleva?)':''}</div>
+    ${o.addrs.map((a,i)=>`<div class="seller ${o.addrIdx===i?'sel':''}" onclick="selAddr(${i})" style="margin-bottom:6px">
+      <i data-lucide="map-pin"></i><div><div class="snm">${esc(a.lab)}</div><div class="sbl mono">${esc(a.txt)}</div></div></div>`).join('')}
+    <button class="btn ghost sm" onclick="openOrderModal()"><i data-lucide="info"></i>Rileggi l'ordine</button>
+   </div>
+   <div class="mono" style="font-size:10px;letter-spacing:1px;margin:10px 0 6px">LINEE DISPONIBILI · ${bill.toFixed(1)}KG BILLABILI</div>
+   ${LINES.map(l=>{const bad=(!l.liq&&o.items.some(x=>x.ref.liquid))?'NO LIQUIDI su questa linea':(!l.batt&&o.items.some(x=>x.ref.battery))?'NO BATTERIE su questa linea':(l.max&&bill>l.max)?`Superiore a ${l.max}kg`:null;
+     const cost=Math.round(l.base+l.rate*Math.max(bill,l.min||0));
+     return `<div class="line ${bad?'dis':o.lineId===l.id?'sel':''}" ${bad?'':`onclick="selLine('${l.id}')"`}>
+      <div><div class="lnm">${l.n} <span class="mono" style="font-size:10px;color:var(--ink-soft)">${fmt(l.rate)}/kg · ${l.days}gg</span></div></div>
+      <div class="mono" style="font-weight:700">${bad?'✕ '+bad:fmt(cost)}</div>
+      <div class="ldt"><span class="chip">${l.liq?'LIQ ✓':'LIQ ✕'}</span><span class="chip">${l.batt?'BATT ✓':'BATT ✕'}</span><span class="chip">RISCHIO DOGANALE <span class="risk">${[1,2,3,4].map(n=>`<b class="${n<=Math.round(l.risk*10)?'on':''}"></b>`).join('')}</span></span><span class="chip" style="max-width:220px;white-space:normal">${esc(l.note)}</span></div>
+     </div>`}).join('')}
+   <div class="kv" id="shipDiff" style="margin-top:10px"></div>
+   <button class="btn red" id="btnShip" onclick="shipNow()" ${o.lineId&&o.addrIdx>=0?'':'disabled'}><i data-lucide="send"></i>Affranca e spedisci</button>`);
+  updShipDiff();
+ }
+ if(ph==='done'){
+  const profit=o.rev-o.spent;
+  p.innerHTML=panelHTML(`
+   <div style="text-align:center;padding:6px 0 2px">
+    <div class="stampbox in">SPEDITO ✓ RIZZITGO</div>
+    <h2 style="margin-top:12px;font-weight:900">Ordine chiuso</h2>
+    <p class="note">Tracking in mano al cliente. Il margine definitivo (dogane permettendo) lo vediamo nel resoconto di fine settimana.</p>
+   </div>
+   <div class="kv"><span>Budget incassato</span><b>${fmt(o.rev)}</b></div>
+   <div class="kv"><span>Spese sostenute</span><b>-${fmt(o.spent)}</b></div>
+   <div class="kv" style="border:none"><span><b>Margine lordo d'ordine</b></span><b style="color:${profit>=0?'var(--ok)':'var(--bad)'}">${fmt(profit)}</b></div>
+   ${o.sc.flash&&!o.isFlash?`<hr class="hr"><div class="flashtag"><i data-lucide="flame"></i>ORDINE LAMPO DISPONIBILE</div>
+     <p class="note" style="margin:8px 0 10px">Un secondo cliente ha pagato adesso: ordine piccolo, margine rapido. Accetti lo straordinario?</p>
+     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn sm" onclick="startFlash()"><i data-lucide="flame"></i>Accetta</button>
+     <button class="btn ghost sm" onclick="skipFlash()"><i data-lucide="moon"></i>No grazie, chiudo</button></div>`:
+    `<hr class="hr"><button class="btn" onclick="closeDay()"><i data-lucide="moon"></i>Chiudi la giornata</button>`}`);
+ }
+ icons();
+}
+function fmtH2(n){return n.toFixed(2)}
+
+/* ---------- AZIONI: FLUSSO ---------- */
+function start(){SEED=Date.now()%2147483647;S.day=1;S.hours=12;S.money=0;S.phase='order';S.cur=null;S.chat=[];S.unread=0;S.overtimeCount=0;S.stats={ship:0,seized:0,duty:0,dmg:0,ret:0,late:0,defShip:0,defNoticed:0,checks:0,hotAll:0};
+ buildWeek();$('#ovl').innerHTML='';$('#chatlog').innerHTML='';
+ addChat('sys','— SETTIMANA DI LAVORO INIZIATA — RIZZITGO HUB, GUANGZHOU —',true);
+ openDayOrder();renderAll()}
+function openDayOrder(){const o=S.orders[S.day-1];if(!o)return;S.cur=o;S.phase='order';
+ const c=CLIENTS[o.cli];typing(()=>{addChat('cl',c.greet);AU.ok()},400);renderAll()}
+function startSourcing(){AU.click();S.phase='sourcing';renderAll()}
+function selSeller(i,t){const it=S.cur.items[i];it.chosen=t;AU.click();renderPanel()}
+function updSrcSum(){const o=S.cur;let tot=0,hrs=0,all=true;
+ o.items.forEach(it=>{if(it.chosen<0){all=false}else{tot+=it.sellers[it.chosen].price;hrs=Math.max(hrs,it.sellers[it.chosen].transit)}});
+ const el=$('#srcSum');if(el)el.textContent=all?`SPESA ${fmt(tot)} / ${fmt(o.budget)} · transito max ${hrs}h`:'SELEZIONA UN SELLER PER OGNI ITEM';
+ const b=$('#btnSrc');if(b)b.disabled=!all;if(b)b.innerHTML=`<i data-lucide="send"></i>Ordina dai seller (${fmt(tot)})`;icons()}
+function confirmSourcing(){const o=S.cur;let tot=0,hrs=0;
+ o.items.forEach(it=>{tot+=it.sellers[it.chosen].price;hrs=Math.max(hrs,it.sellers[it.chosen].transit)});
+ S.money-=tot;o.spent+=tot;spend(.5);AU.ok();toast('Ordini inviati ai seller: -'+fmt(tot));
+ addChat('ag','Ordini piazzati ✓ — '+o.items.map(it=>it.sellers[it.chosen].name).join(', '));
+ o.transitH=hrs;S.phase='transit';renderAll()}
+function runTransit(){const trk=$('#trk'),bar=$('#trkBar');if(!trk)return;AU.truck();
+ trk.classList.add('go');bar.style.transition='width 2.6s linear';requestAnimationFrame(()=>bar.style.width='100%');
+ const ev=pick(['Pioggia su Guangzhou: il corriere si ferma per un hotpot. (+0h, questione di stile)','Peso controllo al hub: tutto in regola ✓','Il seller ha aggiunto un piccolo GIFT nel cartone!','Traffico sulla G4: solito, indifferente, cinese.','Il corriere ha insultato amorevolmente un collega. Riparte.']);
+ setTimeout(()=>{const m=$('#trkMsg');if(m)m.innerHTML='<b>EVENTO TRANSITO:</b> '+esc(ev);
+  addChat('sys','Colli arrivati al RIZZITGO Hub. '+ev);
+  rollArrivals();S.phase='qc';renderAll();AU.chime()},2800)}
+function skipTransit(){rollArrivals();S.phase='qc';renderAll();AU.ok()}
+function rollArrivals(){const o=S.cur;
+ o.items.forEach(it=>{const tier=TIERS[it.sellers[it.chosen].tier];
+  it.wrong=R()<tier.wrong;
+  let defs=0;SPOTS[it.ref.type].slice(1).forEach(sp=>{if(defs<2&&R()<tier.risk){it.defects.push(sp.k);defs++}})})}
+function qcItemHTML(it,i){const spots=SPOTS[it.ref.type];const allDone=spots.slice(1).every(sp=>it.checked[sp.k]);
+ return `<div style="border:2px solid ${allDone?'var(--ok)':'var(--ink)'};border-radius:10px;padding:10px;margin-bottom:14px;background:#fff9ec">
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+    <div class="art" style="width:64px;flex:0 0 64px;border:1.5px solid var(--ink);border-radius:6px;padding:3px;background:var(--paper-d)">${svP(it.ref.id)}</div>
+    <div><div class="nm" style="font-weight:900;font-size:13px">${esc(it.ref.brand)} — ${esc(it.ref.name)}</div>
+    <div class="mono" style="font-size:9px;color:var(--ink-soft)">SELLER: ${esc(it.sellers[it.chosen].name)} · BATCH ${TIERS[it.sellers[it.chosen].tier].tag}</div></div>
+    <button class="btn sm ${it.checked.order?'ghost':''}" style="margin-left:auto" onclick="checkSpot(${i},'order')" ${it.checked.order?'disabled':''}>
+      <i data-lucide="search"></i>${it.checked.order?(it.wrong&&it.wrongShown?'⚠ ERRATO':'✓ Corrisponde'):'Confronta con ordine'}</button>
   </div>
-  <div class="container">
-    <div class="hero">
-      <div>
-        <p class="kicker">IL GIOCO DELLE REP · DA GUANGZHOU AL TUO STASH</p>
-        <h1 class="title">REP <span class="r2">RUSH</span></h1>
-        <p class="tagline">Compra. Aspetta il pacco. Prega che passi il <b>QC</b>. Fletti.</p>
-        <p class="hero-sub">5 MERCATI · 12 GIORNI · € 1.000 DI PARTENZA · 1 AGENTE CINESE LEGGENDARIO</p>
-        <div class="nick-row">
-          <label for="nick-in">SPEDISCE A:</label>
-          <input id="nick-in" maxlength="14" placeholder="IL TUO NICKNAME" value="${esc(S.nick)}" autocomplete="off">
-        </div>
-        <div class="modes">
-          <button class="mode-row" data-action="start-single">
-            <span class="m-arrow">→</span>
-            <span><span class="m-tit">Partita singola</span><br><span class="m-sub">MERCATO CASUALE · SOLO TU CONTRO I VENDOR</span></span>
-          </button>
-          <button class="mode-row" data-action="start-daily">
-            <span class="m-arrow">→</span>
-            <span><span class="m-tit">Sfida quotidiana</span><br><span class="m-sub">OGGI TUTTI GIOCANO LA STESSA PARTITA · ${todayIT().toUpperCase()}</span></span>
-          </button>
-          <button class="mode-row" data-action="open-lobby">
-            <span class="m-arrow">→</span>
-            <span><span class="m-tit">Stanza privata</span><br><span class="m-sub">CREA UN CODICE · STESSA PARTITA PER TUTTI · VINCE IL PATRIMONIO PIÙ ALTO</span></span>
-          </button>
-        </div>
-      </div>
-      <div class="wb-deco">
-        <span class="tape" aria-hidden="true"></span>
-        <div class="wb-head"><b>RIZZITGO EXPRESS</b><span>WAYBILL · PRIORITY</span></div>
-        <div class="wb-fields">
-          <div><span>DA</span><b>GUANGZHOU, CN</b></div>
-          <div><span>A</span><b>IL TUO STASH</b></div>
-          <div><span>CONTENUTO</span><b>1× FORTUNA (FRAGILE)</b></div>
-          <div><span>PESO</span><b>1.000 € / 12 GIORNI</b></div>
-        </div>
-        ${barcode('reprush-hero',36)}
-        <div class="wb-qr-row">
-          <div><canvas id="hero-qr"></canvas><span class="mono" style="font-size:9px;letter-spacing:.2em;color:#6b6152">NON SCANSIONARE (È SOLO BELLO)</span></div>
-          <span class="stamp wb-stamp">REP RUSH</span>
-        </div>
-      </div>
-    </div>
+  ${it.wrong&&it.wrongShown?`<div class="qcres bad">${esc(pick(DEF.order))} <button class="btn sm red" onclick="swapWrong(${i})">SOSTITUZIONE +3h (colpa seller, gratis)</button></div>`:''}
+  <div class="qcwrap">${it.wrong&&it.wrongShown?'':`<div class="art">${svP(it.ref.id)}</div>`}
+   ${spots.slice(1).map(sp=>{const st=it.checked[sp.k];const bad=st&&it.defects.includes(sp.k);
+     return `<button class="hotspot ${st?(bad?'bad':'done'):''}" style="left:${sp.x}%;top:${sp.y}%" onclick="checkSpot(${i},'${sp.k}')" title="${esc(sp.l)}" ${st?'disabled':''}>${st?(bad?'!':'✓'):'?'}</button>`}).join('')}
+  </div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">
+   ${spots.slice(1).map(sp=>`<span class="chip ${it.checked[sp.k]?(it.defects.includes(sp.k)?'bad':'ok'):''}" style="font-size:9px">${esc(sp.l)}</span>`).join('')}
+  </div>
+  <div id="qcres${i}"></div>
+  ${it.defects.filter(k=>k!=='order'&&it.checked[k]&&!it.accepted[k]&&!it.swapped[k]).map(k=>`
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;align-items:center">
+      <span class="chip bad">DIFETTO: ${esc(pick(DEF[k]))}</span>
+      <button class="btn sm" onclick="swapDefect(${i},'${k}')"><i data-lucide="rotate-ccw"></i>Swap +2h · ¥30</button>
+      <button class="btn ghost sm" onclick="keepDefect(${i},'${k}')">Spedisci così (rischiamo)</button>
+    </div>`).join('')}
+ </div>`}
+function qcWarn(){let un=0,tot=0;S.cur.items.forEach(it=>{tot+=SPOTS[it.ref.type].length;un+=Object.keys(it.checked).length});
+ const w=$('#qcWarn');if(w)w.innerHTML=un<tot?`⚠ Check QC: ${un}/${tot} — chi non controlla, vola alla cieca`:'✓ Ispettore falco: tutto controllato'}
+function checkSpot(i,k){const it=S.cur.items[i];if(it.checked[k])return;
+ spend(.25);S.stats.checks++;it.checked[k]=true;AU.click();
+ if(k==='order'){if(it.wrong){it.wrongShown=true;AU.bad();toast('MODELLO SBAGLIATO ricevuto dal seller!','bad')}else toast('Corrisponde al listing ✓','ok')}
+ else{if(it.defects.includes(k)){AU.bad();toast('Difetto trovato: '+pick(DEF[k]),'bad')}else{AU.ok()}}
+ renderPanel()}
+function swapWrong(i){const it=S.cur.items[i];spend(3);it.wrong=false;it.wrongShown=false;it.defects=[];it.checked={};AU.chime();
+ toast('Il seller ha rimandato l\'item giusto, imbarcatissimo.');renderPanel()}
+function swapDefect(i,k){const it=S.cur.items[i];S.money-=30;o_spend(30);spend(2);it.swapped[k]=true;it.defects=it.defects.filter(d=>d!==k);
+ const tier=TIERS[it.sellers[it.chosen].tier];if(R()<tier.risk/2){const other=SPOTS[it.ref.type].slice(1).map(s=>s.k).filter(x=>!it.defects.includes(x));if(other.length)it.defects.push(pick(other))}
+ it.checked[k]=true;AU.chime();toast('Pezzo sostituito dal seller. Nuovo QC disponibile.');renderPanel()}
+function keepDefect(i,k){S.cur.items[i].accepted[k]=true;AU.click();renderPanel()}
+function o_spend(n){S.cur.spent+=n;S.money-=n}
+function toRehearsal(){S.phase='rehearsal';renderAll()}
+function tglService(k){const o=S.cur;o.services[k]=!o.services[k];spend(o.services[k]?SERVICES[k].h:0);
+ if(o.services[k]&&SERVICES[k].cost){S.money-=SERVICES[k].cost;o.spent+=SERVICES[k].cost}
+ AU.click();renderPanel()}
+function packCalc(){const o=S.cur;let wt=0,vol=0;
+ o.items.forEach(it=>{const db=o.services.debox&&it.ref.deboxable,vac=o.services.vacuum&&it.ref.soft;
+  wt+=it.ref.wt*(db?.78:1);vol+=it.ref.vol*(db?.45:1)*(vac?.5:1)});
+ return {wt:+wt.toFixed(2),vol:+vol.toFixed(1)}}
+function billable(){const o=S.cur;const pc=packCalc();const bx=BOXES.find(b=>b.s===o.box)||BOXES[1];
+ return Math.max(pc.wt+bx.wt,bx.vol*.25)}
+function sendPhotos(){const o=S.cur,c=CLIENTS[o.cli];if(o.photos)return;
+ o.photos=true;const hd=o.services.photoHD;spend(hd?.3:.2);AU.ok();
+ addChat('ag',`Foto QC inviate (${o.items.length*4} shot${hd?' + video 360°':''}) ✓`);
+ let flags=[];
+ o.items.forEach((it,i)=>{it.defects.forEach(k=>{if(!it.swapped[k]&&!it.flagged[k]){
+   const p=c.notice*(it.checked[k]?1:.85);
+   if(R()<p){flags.push({i,k})}}})});
+ typing(()=>{
+  if(flags.length){AU.bad();
+   flags.forEach(f=>{o.items[f.i].flagged[f.k]=true});
+   const f=flags[0];const it=o.items[f.i];
+   addChat('cl','Hmm. Guardando le foto: '+pick(DEF[f.k])+' Puoi sistemare o swappare, per favore?');
+  }else{addChat('cl',pick(['Looks fire. SHIP IT.','Foto perfette agent, complimenti. Si parte.','Clean. Stele. Spedisci quando vuoi.','W photo. Il mio feed sarà contento.']))}
+  renderPanel()},1000);
+ renderPanel()}
+function renderFlags(){const o=S.cur;const z=$('#flagZone');if(!z)return;
+ const fl=[];o.items.forEach((it,i)=>{it.defects.forEach(k=>{if(it.flagged[k]&&!it.swapped[k])fl.push({i,k,it})})});
+ z.innerHTML=fl.length?`<div class="chip bad" style="margin-bottom:8px">DIFETTI SEGNALATI DAL CLIENTE: gestiscili prima di imballare</div>`+fl.map(f=>`
+  <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px">
+   <span class="chip bad">${esc(f.it.ref.brand)}: ${esc(pick(DEF[f.k]))}</span>
+   <button class="btn sm" onclick="swapDefect(${f.i},'${f.k}');renderFlags()"><i data-lucide="rotate-ccw"></i>Swap +2h · ¥30</button>
+   <button class="btn ghost sm" onclick="keepDefect(${f.i},'${f.k}');f2flag(${f.i},'${f.k}')">Ignora e spera</button>
+  </div>`).join(''):'';icons()}
+function f2flag(i,k){const it=S.cur.items[i];it.ignoredFlag=it.ignoredFlag||{};it.ignoredFlag[k]=true;renderFlags()}
+function toPack(){S.phase='pack';renderAll()}
+function selBox(sz){S.cur.box=sz;AU.click();renderPanel()}
+function updPack(){const o=S.cur;const pc=packCalc();const bx=BOXES.find(b=>b.s===o.box);if(!bx)return;
+ const fill=pc.vol/bx.vol;const fb=$('#fillBar');if(fb)fb.style.width=Math.min(100,fill*100)+'%';
+ const pv=$('#pv');if(pv)pv.classList.toggle('over',fill>1);
+ const bl=billable();const el=$('#pkWt');if(el)el.textContent=pc.wt.toFixed(2)+'kg / '+bl.toFixed(1)+'kg';
+ const n=$('#pkNote');
+ if(n)n.innerHTML=fill>1?'<b style="color:var(--bad)">GLI ITEM NON ENTRANO in questa scatola.</b> Prendine una più grande (o deboxa/sottovuota).':
+  fill<.5?'Ci sta troppo vuoto: pluricarta extra <b>¥10</b> e sprechi volume billabile.':'Riempimento '+(fill*100).toFixed(0)+'% — da manuale RIZZITGO.'}
+function sealPack(){const o=S.cur;const pc=packCalc();const bx=BOXES.find(b=>b.s===o.box);
+ if(pc.vol>bx.vol){toast('Gli item non entrano!','bad');return}
+ if(pc.vol/bx.vol<.5){S.money-=10;o.spent+=10;toast('Pluricarta extra: -¥10')}
+ spend(.5);o.sealed=true;fxSeal(()=>{S.phase='ship';renderAll()})}
+function selAddr(i){S.cur.addrIdx=i;AU.click();renderPanel()}
+function selLine(id){S.cur.lineId=id;AU.click();renderPanel()}
+function updShipDiff(){const o=S.cur;const el=$('#shipDiff');if(!el)return;
+ if(!o.lineId){el.innerHTML='<span>Seleziona indirizzo e linea</span><b>—</b>';return}
+ const l=LINES.find(x=>x.id===o.lineId);const cost=Math.round(l.base+l.rate*Math.max(billable(),l.min||0));
+ const d=cost-o.shipCover;
+ el.innerHTML=`<span>Costo linea ${esc(l.n)}</span><b>${fmt(cost)}</b></div>
+ <div class="kv"><span>Differenza vs copertura cliente</span><b style="color:${d>0?'var(--bad)':'var(--ok)'}">${d>0?fmt(d)+' a tuo carico':d<0?fmt(-d)+' in tasca tua':'in pari'}</b>`}
+function shipNow(){const o=S.cur;const l=LINES.find(x=>x.id===o.lineId);
+ const cost=Math.round(l.base+l.rate*Math.max(billable(),l.min||0));
+ S.money-=cost;o.spent+=cost;o.rev=o.budget;S.money+=o.budget;
+ spend(.5);o.shipped=true;o.arrDay=S.day+l.days;S.stats.ship++;
+ fxLabel(o,()=>{AU.chime();
+  addChat('ag','Pacco affrancato con '+l.n+' ✓ tracking RZT'+ri(100000,999999));
+  typing(()=>addChat('cl',pick(['Tracking received. Let\'s gooo.','Yesss. Postato sul mio canale haul.','Grazie agent! Ci vediamo alla prossima drop.','Tracking attivo. Che la dogana ci sia amica.'])),700);
+  S.phase='done';renderAll()})}
+function startFlash(){const fid=S.cur.sc.flash;S.cur=makeFlash(fid,S.day);S.phase='order';
+ const c=CLIENTS[S.cur.cli];typing(()=>addChat('cl',c.greet),400);renderAll()}
+function skipFlash(){closeDay()}
 
-    <div class="steps-wrap">
-      <p class="sec-kicker">MANIFESTO DI SPEDIZIONE</p>
-      <div class="steps">
-        <div class="step"><span class="num">01</span><div><h4>Leggi il mercato</h4><p>Ogni giorno cinque indici si muovono: <b>scarpe, borse, streetwear, orologi, profumi</b>. Compra quando sono bassi, vendi quando volano.</p></div></div>
-        <div class="step"><span class="num">02</span><div><h4>Valuta le offerte</h4><p>Tre vendor al giorno. Prezzo, rapporto con la stima e <b>indizi</b>: alcuni sono campanelli d'allarme, altri oro puro. Imparali a memoria.</p></div></div>
-        <div class="step"><span class="num">03</span><div><h4>Aspetta il pacco</h4><p>La merce arriva <b>dopo 2 giorni</b> e solo allora scopri la qualità: 1:1 mirror, AAA, standard… o flop. E a volte il vendor sparisce col bonifico.</p></div></div>
-        <div class="step"><span class="num">04</span><div><h4>Chiudi ricco</h4><p>Alla giornata 12 lo stash viene liquidato di colpo. <b>Patrimonio finale = punteggio</b>. Da € 1.000 a CEO di Guangzhou.</p></div></div>
-      </div>
-    </div>
+/* ---------- FINE GIORNO / SETTIMANA ---------- */
+function closeDay(){const o=S.cur;
+ if(o&&o.shipped===false&&S.phase!=='done'&&S.phase!=='title'){
+  $('#ovl').innerHTML=`<div class="ovl"><div class="card"><div class="pbody">
+   <h2 style="font-weight:900;font-size:22px">Ordine in sospeso!</h2>
+   <p class="note" style="margin:10px 0 14px;line-height:1.6">${esc(CLIENTS[o.cli].u)} ha già pagato: se chiudi ora, l'ordine viene annullato, il cliente rimborsato del budget che hai già incassato parzialmente… e la recensione sarà brutta. Davvero brutta.</p>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn ghost" onclick="closeOvl()">Torna al lavoro</button>
+   <button class="btn red" onclick="doCancel()">Annulla comunque</button></div></div></div></div>`;return}
+ if(S.day>=7){finishWeek();return}
+ dayEndOverlay()}
+function closeOvl(){$('#ovl').innerHTML=''}
+function doCancel(){const o=S.cur;o.cancelled=true;if(!o.rev){S.money+=o.budget;o.rev=o.budget}
+ addChat('cl','…quindi annulli il mio ordine? Ok. RECENSIONE IN ARRIVO.');closeOvl();dayEndOverlay()}
+function dayEndOverlay(){const delta='—';
+ $('#ovl').innerHTML=`<div class="ovl"><div class="card"><div class="pbody">
+  <div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>${'FINE TURNO · RIZZITGO · '.repeat(8)}</span></div>
+  <div class="stampbox in" style="font-size:19px">GIORNO ${S.day} CHIUSO</div>
+  <h2 style="font-weight:900;margin:12px 0 6px">Resoconto del turno</h2>
+  <div class="kv"><span>Ordini completati oggi</span><b>${S.orders.filter(x=>x.day===S.day&&x.shipped).length}${S.cur&&S.cur.isFlash&&S.cur.shipped?' +1 lampo':''}</b></div>
+  <div class="kv"><span>Ore consumate</span><b>${fmtH(12-S.hours)}${S.hours<0?' (straordinario!)':''}</b></div>
+  <div class="kv"><span>Cassa cumulata</span><b style="color:${S.money>=0?'var(--ok)':'var(--bad)'}">${fmt(S.money)}</b></div>
+  <p class="note" style="margin:12px 0">${S.day<7?'Domani nuovi clienti: qualcuno porterà vincoli su batterie, liquidi e… sbirri della dogana.':'Ultima porta: il resoconto di fine settimana.'}</p>
+  <button class="btn red" onclick="nextDay()"><i data-lucide="moon"></i>Dormi → Giorno ${S.day+1}</button>
+ </div></div></div>`;icons();AU.stamp()}
+function nextDay(){$('#ovl').innerHTML='';S.day++;S.hours=12;S.cur=null;S.phase='order';
+ addChat('sys','— GIORNO '+S.day+' —',true);
+ if(S.day<=7)openDayOrder();renderAll()}
 
-    <div class="sponsor-foot">
-      <span class="tape t2" aria-hidden="true"></span>
-      <p class="sec-kicker">SPONSOR UFFICIALE DELLA SERIE</p>
-      <div class="sp-row">
-        <div class="sp-name">RIZZIT<em>GO</em></div>
-        <p class="sp-desc">IL TUO AGENTE A GUANGZHOU. CONSOLIDAMENTO · QC FOTOGRAFICO · SPEDIZIONI DDP IN TUTTO IL MONDO.</p>
-        ${barcode('rizzitgo-foot',30)}
-      </div>
-      <p class="sp-quote">«Fratello, fidati: una consulenza a partita te la offro <b>io</b>.» <span class="mono dim">— R.</span></p>
-      <p class="disclaimer">REP RUSH è un gioco parodistico. Tutti i marchi, i vendor e i prodotti citati sono invenzioni satiriche. Nessuna merce reale viene venduta, spedita, ispezionata o sequestrata. RIZZITGO è un personaggio immaginario — ma con un ottimo rapporto qualità/prezzo.</p>
+/* ---------- OUTCOME & RECENSIONI ---------- */
+function tierScore(o){let pts=0,notes=[];
+ o.items.forEach(it=>{const t=it.sellers[it.chosen].tier;const e=o.sc.expect;
+  if(t===e)pts+=.6;else if(t==='top'&&e==='mid'||t==='mid'&&e==='low')pts+=.8;else if(t==='low'&&e==='top')pts-=2;else pts-=1.2});
+ return pts}
+function finishWeek(){closeOvl();
+ let profit=0,starSum=0,n=0;const reviews=[];
+ S.orders.concat(S.cur&&S.cur.isFlash&&!S.orders.includes(S.cur)?[S.cur]:[]).forEach(o=>{
+  if(!o||(!o.shipped&&!o.cancelled&&o.items[0].chosen<0))return;
+  if(!o.shipped&&!o.cancelled&&o.items[0].chosen>=0){o.cancelled=true}
+ });
+ const all=[...S.orders];if(S.cur&&S.cur.isFlash)all.push(S.cur);
+ all.forEach((o,idx)=>{
+  const c=CLIENTS[o.cli];let stars=3,fac='';
+  if(o.cancelled){stars=1;fac='ordine annullato';profit+=o.rev-o.spent-(o.rev?0:o.budget);
+   if(!o.rev){profit-=o.budget}
+  }else{
+   // dogana
+   const l=LINES.find(x=>x.id===o.lineId);
+   let kept=0;o.items.forEach(it=>{if(it.ref.deboxable&&!o.services.debox)kept++});
+   let risk=Math.min(.85,l.risk+kept*.09+(o.items.some(x=>x.ref.highValue)&&l.risk>.2?.1:0)+(o.services.detag?-.03:0));
+   const roll=R();let customs='ok';
+   if(roll<risk)customs='seized';else if(roll<risk+.1)customs='duty';
+   const wrongAddr=o.addrIdx!==o.reqIdx;
+   const fragile=o.items.some(x=>x.ref.fragile)&&!o.services.protect;
+   const damaged=fragile&&R()<.3;
+   let pts=tierScore(o);
+   // difetti spediti
+   let noticed=0,shippedDef=0;
+   o.items.forEach(it=>{it.defects.forEach(k=>{if(!it.swapped[k]){shippedDef++;
+     const p=c.notice*(it.flagged[k]?1.15:it.checked[k]?1:.9);
+     if(it.flagged[k]&&it.ignoredFlag&&it.ignoredFlag[k]){noticed++;pts-=1.6}
+     else if(R()<p){noticed++;pts-=1.2}else if(R()<p*.5){noticed++;pts-=1.2}}})});
+   S.stats.defShip+=shippedDef;S.stats.defNoticed+=noticed;
+   if(it0(o).wrong){pts-=2.5;fac='item sbagliato'}
+   function it0(o){return o.items[0]}
+   if(o.wrongAny){pts-=2.5;fac='item sbagliato'}
+   // servizi
+   o.sc.serv.forEach(k=>{if(!o.services[k])pts-=.8;fac=fac||'servizio mancante'});
+   const extras=Object.keys(o.services).filter(k=>!o.sc.serv.includes(k)).length;
+   pts+=Math.min(.4,extras*.2);
+   if(o.lineId===o.sc.pref)pts+=.4;else pts-=.4;
+   if(customs==='duty')pts-=.6;
+   if(damaged)pts-=1.2;
+   if(wrongAddr)pts-=2;
+   if(o.arrDay<=S.day+1)pts+=.1;
+   stars=Math.max(1,Math.min(5,Math.round((3+pts)*2)/2));
+   // profitto
+   let p=o.rev-o.spent;
+   if(customs==='seized'){p-=o.rev;S.stats.seized++;stars=1;fac='sequestro doganale'}
+   if(customs==='duty')S.stats.duty++;
+   if(damaged){p-=o.budget*.4;S.stats.dmg++;fac=fac||'pacco danneggiato'}
+   if(wrongAddr){p-=Math.round(o.shipCover);S.stats.ret++;fac=fac||'indirizzo sbagliato'}
+   if(tierScore(o)<0&&o.sc.expect==='top'&&o.items.every(it=>it.sellers[it.chosen].tier==='low')){p-=o.budget*.15;fac=fac||'disputa qualità'}
+   else if(o.items.every(it=>it.sellers[it.chosen].tier==='low')&&o.sc.expect!=='low'){p-=o.budget*.15;fac=fac||'disputa qualità'}
+   if(o.arrDay>S.day+1)S.stats.late++;
+   profit+=p;o.profit=Math.round(p);
+   reviews.push({o,stars,customs,damaged,wrongAddr,fac:fac||(stars>=4.5?'consegna perfetta':stars>=3.5?'buon lavoro':'qualcosa è scivolato'),p});
+  }
+  o.reviewStars=o.reviewStars||stars;
+ });
+ // sbagliato flag globale
+ all.forEach(o=>{o.wrongAny=o.items.some(it=>it.wrong&&!it.wrongShown===false&&it.wrong)});
+ finalOverlay(all,reviews,profit)}
+function finalOverlay(all,reviews,profit){
+ const avg=reviews.length?reviews.reduce((a,r)=>a+r.stars,0)/reviews.length:0;
+ const rank=avg>=4.5?['AGENTE PLATINO','RIZZ LEGEND DEL MAGAZZINO']:avg>=4?['AGENTE ORO','I clienti fanno il tuo nome nei server Discord']:avg>=3?['AGENTE ARGENTO','Solido. Il boss annuisce.']:avg>=2?['AGENTE BRONZO','Sopravvissuto. Barely.']:['AGENTE IN PROVA','Il boss ti guarda. Non batte ciglio. Non è un buon segno.'];
+ const badges=[];
+ if(S.stats.ship>0)badges.push('PRIMO TIMBRO');
+ if(S.stats.checks>=40)badges.push('OCCHIO DI FALCO');
+ if(S.stats.defNoticed===0)badges.push('ZERO SFUGGITI');
+ if(S.stats.seized===0)badges.push('DOGANAMICA');
+ if(S.stats.ship>=8)badges.push('CATENA DI MONTAGGIO');
+ if(profit>=2000)badges.push('MARGINE IMPERIALE');
+ if(S.overtimeCount===0)badges.push('ORIZZONTALE');
+ $('#ovl').innerHTML=`<div class="ovl"><div class="card"><div class="pbody">
+  <div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>${'RESOCONTO SETTIMANA · RIZZITGO · '.repeat(8)}</span></div>
+  <div style="text-align:center"><div class="stampbox in" style="font-size:22px">SETTIMANA CHIUSA</div></div>
+  <h2 class="bigtitle" style="margin:14px 0 4px">Resoconto di fine settimana</h2>
+  <p class="note">7 giorni, ${S.stats.ship} pazzi spediti nel mondo, ${S.overtimeCount} straordinari pagati.</p>
+  <hr class="hr">
+  <div class="kv" style="font-size:14px"><span><b>PROFITTO NETTO</b></span><b style="color:${profit>=0?'var(--ok)':'var(--bad)'};font-size:17px">${fmt(profit)}</b></div>
+  <div class="kv"><span>Pacchi consegnati / in transito</span><b>${S.stats.ship-S.stats.late} / ${S.stats.late}</b></div>
+  <div class="kv"><span>Sequestrati · tassati · danneggiati · resi</span><b>${S.stats.seized} · ${S.stats.duty} · ${S.stats.dmg} · ${S.stats.ret}</b></div>
+  <div class="kv"><span>Difetti spediti / notati dai clienti</span><b>${S.stats.defShip} / ${S.stats.defNoticed}</b></div>
+  <div class="kv" style="border:none"><span>Rating medio agent</span><b>${avg.toFixed(1)} / 5</b></div>
+  <div style="text-align:center;margin:14px 0"><div class="stampbox in" style="font-size:18px;border-color:${avg>=4?'var(--ok)':'var(--stamp)'};color:${avg>=4?'var(--ok)':'var(--stamp)'}">${rank[0]}</div>
+   <p class="note" style="margin-top:8px">${rank[1]}</p></div>
+  <hr class="hr"><h3 style="font-weight:900;margin-bottom:8px">Recensioni della clientela</h3>
+  ${reviews.map((r,i)=>`<div class="revrow" style="animation-delay:${i*.15}s">
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+     <span class="mono" style="font-size:11px;font-weight:700">${esc(CLIENTS[r.o.cli].u)}</span>
+     <span class="stars">${[1,2,3,4,5].map(n=>`<i data-lucide="star" class="${n<=r.stars?'f':'e'}"></i>`).join('')}</span>
+     <span class="chip ${r.stars>=4?'ok':r.stars>=3?'':'bad'}">${esc(r.fac)}</span>
+     <b class="mono" style="margin-left:auto;font-size:11px;color:${r.p>=0?'var(--ok)':'var(--bad)'}">${fmt(r.p)}</b>
     </div>
+    <p style="font-size:12px;margin-top:5px;line-height:1.4">${esc(reviewText(r))}</p>
+   </div>`).join('')}
+  ${badges.length?`<h3 style="font-weight:900;margin:12px 0 8px">Timbri conquistati</h3>
+   <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px">${badges.map(b=>`<span class="stampbox" style="font-size:11px">${b}</span>`).join('')}</div>`:''}
+  <hr class="hr">
+  <div class="qrcard"><img src="https://z-cdn-media.chatglm.cn/files/16426538-1a7c-4926-ba28-7d6b319616ae.png?auth_key=1889841687-08e242a199474ccd84a236f00a0ae13c-0-0324c596081e14c914d35d3debbf1abe" alt="QR affiliato" onerror="this.style.display='none'">
+   <div><div class="qt">Vuoi fare anche tu un haul?</div>
+   <div class="qs">Passa da <b>RIZZITGO</b>, l'agent sponsor di questo gioco.<br>Inquadra il QR con il telefono → pagina affiliata del creatore. Ogni sostegno è membro del magazzino.</div></div></div>
+  <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+   <button class="btn red" onclick="replay()"><i data-lucide="rotate-ccw"></i>Altra settimana</button>
+   <button class="btn ghost" onclick="closeOvl()"><i data-lucide="package"></i>Rivedi il magazzino</button></div>
+ </div></div></div>`;
+ icons();AU.chime()}
+function reviewText(r){const o=r.o,c=CLIENTS[o.cli];
+ if(r.customs==='seized')return pick(['Package SEIZED alla dogana. Budget cremato. 1 stella e un pensiero.','La linea che "dichiara tutto" ha dichiarato tutto. RIP. Mai più.']);
+ if(r.wrongAddr)return pick(['Il pacco è finito all\'indirizzo SBAGLIATO. Come si fa??','Spedito dove non dovevi. Ora mia moglie sa tutto. Grazie eh.']);
+ if(o.wrongAny)return pick(['Mi è arrivato l\'ITEM SBAGLIATO. Come confondi una Low con una High??']);
+ if(r.damaged)return pick(['Arrivato danneggiato: senza bolla, il vetro era "un\'ipotesi". Deluso.','Pacco ammaccato come le mie aspettative. Protezione: parola che dovresti cercare.']);
+ if(r.stars>=4.5)return pick(['W agent. Foto QC ottime, nastro ovunque, arrivo in tempi. 5/5 senza pensieri.','Unboxing da video. Tutto intatto, tutto pulito. Sei il mio agente fisso adesso.','Imballo da banca, timing da treno svizzero. Confirmed.']);
+ if(r.stars>=3.5)return pick(['Solido. Piccole cose, ma lo rifarei. 4 stelle.','Buon lavoro, shipping un filo lento ma item puliti. Si riparte presto.']);
+ if(r.stars>=2.5)return pick(['Mid experience. Niente di rotto, niente di memorabile. 3 stelle di garanzia.']);
+ if(r.stars>=1.5)return pick(['Il QC doveva essere fatto, non "pensato". Non felice.','Sotto le aspettative che PAGAVO per avere. La prossima volta leggo le recensioni meglio.']);
+ return pick(['Mai più. Ti metto nella blacklist del server. 1 stella.','Esperienza da dimenticare, purtroppo ho le foto come promemoria.'])}
+function replay(){closeOvl();start()}
+
+/* ---------- FX OVERLAY ---------- */
+function fxSeal(cb){const fx=$('#fx');
+ fx.innerHTML=`<div class="stage">
+   <div class="fxbox" id="fxb">${boxSVG(S.cur.box,S.cur.items.length/4)}</div>
+   <div class="tapeline" id="tl"><b>${'RIZZITGO QUALITY TAPE ★ '.repeat(10)}</b></div>
+   <div class="bigstamp" id="bs" style="display:none">QC PASSATO</div>
   </div>`;
-  drawQR($('#hero-qr'),'rizzitgo-express-hero');
-}
+ fx.classList.add('on');AU.tape();
+ setTimeout(()=>{$('#tl').classList.add('go')},60);
+ setTimeout(()=>{AU.stamp();const bs=$('#bs');bs.style.display='block';bs.classList.add('in');document.body.classList.add('shake');setTimeout(()=>document.body.classList.remove('shake'),350)},650);
+ setTimeout(()=>{fx.classList.remove('on');fx.innerHTML='';cb()},1700)}
+function fxLabel(o,cb){const fx=$('#fx');const trk='RZT'+ri(100000000,999999999);
+ fx.innerHTML=`<div class="stage"><div class="lab" id="lab">
+   <div style="display:flex;gap:10px;align-items:center"><div class="avat" style="background:${CLIENTS[o.cli].col};width:40px;height:40px;font-size:13px">${CLIENTS[o.cli].av}</div>
+   <div><b style="font-weight:900">${esc(CLIENTS[o.cli].u)}</b><div class="mono" style="font-size:9px">${esc(o.addrs[o.addrIdx>=0?o.addrIdx:0].txt)}</div></div></div>
+   <div style="margin-top:8px">${barcode(trk)}</div>
+   <div class="mono" style="font-size:9px;display:flex;justify-content:space-between;margin-top:4px"><span>${LINES.find(l=>l.id===o.lineId).n.toUpperCase()}</span><span>${billable().toFixed(1)}KG</span><span>BOX ${o.box}</span></div>
+  </div></div>`;
+ fx.classList.add('on');AU.tape();
+ setTimeout(()=>$('#lab').classList.add('go'),80);
+ setTimeout(()=>{AU.stamp()},500);
+ setTimeout(()=>{fx.classList.remove('on');fx.innerHTML='';cb()},1400)}
 
-/* ===== LOBBY ===== */
-function genRoomCode(){
-  const A='ABCDEFGHJKMNPQRSTUVWXYZ23456789'; let s='';
-  for(let i=0;i<5;i++) s+=A[Math.floor(Math.random()*A.length)];
-  return s;
-}
-function renderLobby(){
-  $('#scr-lobby').innerHTML=`
-  <div class="container lobby">
-    <button class="btn" data-action="go-home">← TORNA ALLA HOME</button>
-    <h2 class="disp">STANZA PRIVATA</h2>
-    <p class="lobby-sub">Condividi il codice con gli amici: <b>lo stesso codice genera la stessa identica partita</b> — stessi vendor, stessi eventi, stesso mercato. Ognuno gioca sul suo dispositivo, poi si confrontano i patrimoni in classifica. Vince chi chiude più ricco.</p>
-    <div class="ticket">
-      <div>
-        <label for="room-in">CODICE STANZA</label>
-        <div class="ticket-row">
-          <input id="room-in" maxlength="8" placeholder="ES. KX7QM" autocomplete="off">
-          <button class="btn" data-action="gen-code">GENERA</button>
-        </div>
-        <p class="ticket-note">4–8 CARATTERI · IL CODICE DETERMINA LA PARTITA, SU QUALSIASI DISPOSITIVO</p>
-        <button class="btn btn-orange big" data-action="lobby-start" id="lobby-start" disabled>APRI IL MERCATO →</button>
-        <div class="ticket-fields mono">
-          <div><span>MITTENTE</span><b>GUANGZHOU, CN</b></div>
-          <div><span>PACCHI</span><b>3 / GIORNO</b></div>
-          <div><span>DURATA</span><b>12 GIORNI</b></div>
-        </div>
-      </div>
-      <div class="ticket-r">
-        <canvas id="room-qr"></canvas>
-        <span>NON SCANSIONARE<br>(ESTETICA PURA)</span>
-      </div>
+/* ---------- MODALI ---------- */
+function openOrderModal(){const o=S.cur;
+ $('#ovl').innerHTML=`<div class="ovl" onclick="if(event.target===this)closeOvl()"><div class="card"><div class="pbody">
+  <h2 style="font-weight:900">Richiami ordine — ${esc(CLIENTS[o.cli].u)}</h2>
+  <hr class="hr">
+  ${o.addrs.map((a,i)=>`<div class="kv"><span>${esc(a.lab)}</span><b class="mono" style="font-size:10px">${esc(a.txt)}</b></div>`).join('')}
+  <div class="kv"><span>Linea desiderata</span><b>${LINES.find(l=>l.id===o.sc.pref).n}</b></div>
+  <div class="kv"><span>Aspettativa batch</span><b>${o.sc.expect.toUpperCase()}</b></div>
+  <div class="kv" style="border:none"><span>Servizi richiesti</span><b>${o.sc.serv.map(k=>SERVICES[k].t).join(' · ')}</b></div>
+  <p class="note" style="margin:10px 0">Rileggi anche la chat: i clienti ricordano tutto. Anche troppo.</p>
+  <button class="btn ghost" onclick="closeOvl()">Chiudi</button></div></div></div>`;icons()}
+function openQR(){
+ $('#ovl').innerHTML=`<div class="ovl" onclick="if(event.target===this)closeOvl()"><div class="card"><div class="pbody">
+  <div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>${'RIZZITGO SPONSOR UFFICIALE · '.repeat(8)}</span></div>
+  <h2 style="font-weight:900;font-size:22px">Il mio link affiliato</h2>
+  <p class="note" style="margin:8px 0 14px">Questo gioco è sponsorizzato da <b>RIZZITGO</b>. Inquadra il QR con la fotocamera per andare alla pagina affiliata del creatore (link bitly).</p>
+  <div class="qrcard"><img src="https://z-cdn-media.chatglm.cn/files/16426538-1a7c-4926-ba28-7d6b319616ae.png?auth_key=1889841687-08e242a199474ccd84a236f00a0ae13c-0-0324c596081e14c914d35d3debbf1abe" alt="QR affiliato" style="width:170px;height:170px" onerror="this.parentNode.innerHTML='<div class=qt>QR non raggiungibile in questo momento (host scaduto). Controlla la connessione.</div>'">
+   <div><div class="qt">SCANSIONA IL QR</div><div class="qs">Inquadra con la fotocamera del telefono.<br>Supporta il creatore, sostieni il magazzino.</div></div></div>
+  <button class="btn ghost" style="margin-top:14px" onclick="closeOvl()">Chiudi</button></div></div></div>`;icons()}
+function openGuide(){
+ $('#ovl').innerHTML=`<div class="ovl" onclick="if(event.target===this)closeOvl()"><div class="card"><div class="pbody">
+  <div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>${'MANUALE AGENTE · RIZZITGO · '.repeat(8)}</span></div>
+  <h2 style="font-weight:900;font-size:22px">Come si lavora da Rizzitgo</h2>
+  <ul class="rules" style="margin-top:12px">
+   <li><i data-lucide="clipboard-check"></i><span><b>Ordine.</b> Il cliente ha GIÀ pagato. Budget, lista, servizi richiesti e aspettativa di batch sono nel contratto.</span></li>
+   <li><i data-lucide="search"></i><span><b>Sourcing.</b> Scegli seller/batch per ogni item: più spendi, meglio esce (di solito). Ciò che avanzi è margine.</span></li>
+   <li><i data-lucide="truck"></i><span><b>Transito.</b> I colli arrivano al magazzino. Ogni azione consuma ore: finiscono? Paghi straordinari.</span></li>
+   <li><i data-lucide="scan-line"></i><span><b>QC.</b> Clicca i punti ispezione. Difetti trovati = swap o rischio. Difetti NON controllati = il cliente forse li vede lo stesso in foto… o a casa sua.</span></li>
+   <li><i data-lucide="camera"></i><span><b>Rehearsal.</b> Servizi richiesti (debox, sottovuoto, protezione…) + foto in chat. Il cliente approva prima della spedizione.</span></li>
+   <li><i data-lucide="package"></i><span><b>Imballo.</b> Scatola giusta: il peso "billabile" è max(peso, volume×0,25). Una XL mezza vuota costa come un mattone.</span></li>
+   <li><i data-lucide="map-pin"></i><span><b>Spedizione.</b> Indirizzo ESATTO + linea compatibile (liquidi? batterie?) e a rischio doganale accettabile. DLE è veloce ma dichiara tutto: con 4 scatole brand, prega.</span></li>
+   <li><i data-lucide="star"></i><span><b>Resoconto.</b> Sette giorni, poi stelle, rimborsi, sequestri e gloria. Rating 4.5+ = AGENTE PLATINO.</span></li>
+  </ul>
+  <button class="btn ghost" onclick="closeOvl()">Ok, al lavoro</button></div></div></div>`;icons()}
+function closeOvl(){$('#ovl').innerHTML=''}
+
+/* ---------- TITLE SCREEN ---------- */
+function titleScreen(){
+ $('#ovl').innerHTML=`<div class="ovl" style="align-items:flex-start;padding-top:5vh"><div class="card"><div class="pbody">
+  <div class="tapebar" style="margin:-20px -20px 16px;border-radius:6px 6px 0 0"><span>${'RIZZITGO ★ REPS AGENT ★ GUANGZHOU ★ '.repeat(6)}</span></div>
+  <div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+   <div style="flex:1;min-width:240px">
+    <div class="stampbox" style="font-size:12px">SPONSOR: RIZZITGO</div>
+    <h1 class="bigtitle" style="margin:10px 0 2px">Rizzitgo<br>Reps Agent<br>Simulator</h1>
+    <p class="mono" style="font-size:11px;color:var(--ink-soft);margin-bottom:14px">Una settimana nel magazzino di Guangzhou.<br>Tu compri, controlli, imballi e spedisci.<br>Loro, dall'altra parte del mondo, giudicano.</p>
+    <ul class="rules">
+     <li><i data-lucide="scan-line"></i><span>Quality check veri: clicca i punti e trova i difetti prima che li trovi il cliente.</span></li>
+     <li><i data-lucide="package-open"></i><span>Debox, sottovuoto, bolla: i servizi salvano volumi, pacchi e recensioni.</span></li>
+     <li><i data-lucide="truck"></i><span>5 linee di spedizione, vincoli su batterie e liquidi, dogane con senso dell'umorismo variabile.</span></li>
+     <li><i data-lucide="star"></i><span>7 clienti, 7 recensioni, un solo rating: da Agente in Prova a RIZZ LEGEND.</span></li>
+    </ul>
+    <button class="btn red" style="margin-top:16px" onclick="start()"><i data-lucide="play"></i>Timbra il cartellino</button>
+    <button class="btn ghost sm" style="margin-left:8px" onclick="openGuide()">Guida</button>
+   </div>
+   <div style="flex:0 1 250px;min-width:220px">
+    <div class="qrcard" style="flex-direction:column;text-align:center;gap:10px">
+     <img src="https://z-cdn-media.chatglm.cn/files/16426538-1a7c-4926-ba28-7d6b319616ae.png?auth_key=1889841687-08e242a199474ccd84a236f00a0ae13c-0-0324c596081e14c914d35d3debbf1abe" alt="QR affiliato" style="width:150px;height:150px;margin:0 auto" onerror="this.style.display='none'">
+     <div><div class="qt">Sostieni il creatore</div><div class="qs">Inquadra il QR → pagina affiliata<br>(link bitly) · gioco 100% gratuito</div></div>
     </div>
-    <div id="lobby-board"></div>
-  </div>`;
-  const inp=$('#room-in');
-  inp.addEventListener('input',()=>{
-    inp.value=inp.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
-    S.lobby.code=inp.value;
-    updateLobby();
-  });
-  updateLobby();
-}
-function updateLobby(){
-  const code=S.lobby.code;
-  const btn=$('#lobby-start');
-  if(btn) btn.disabled=code.length<4;
-  const qr=$('#room-qr');
-  if(qr) drawQR(qr,'room|'+code);
-  const slot=$('#lobby-board');
-  if(slot){ code.length>=4 ? renderBoardInto(slot,code) : slot.innerHTML=''; }
-}
+    <p class="note" style="margin-top:10px;text-align:center">Parodia e finzione: marchi "quasi" veri,<br>agent quasi serio, dogana quasi reale.</p>
+   </div>
+  </div>
+ </div></div></div>`;icons()}
 
-/* ===== GIOCO ===== */
-function startGame(opts){
-  ensureNick();
-  const seed = opts.mode==='room' ? 'room|'+opts.room
-             : opts.mode==='daily' ? 'daily|'+todayKey()
-             : 'single|'+Math.random().toString(36).slice(2,11);
-  S.game={
-    seed,mode:opts.mode,room:opts.room||null,
-    rounds:buildRounds(seed),roundIdx:0,cash:1000,uid:0,
-    stash:[],decisions:[null,null,null],
-    market:Object.fromEntries(CATS.map(c=>[c.id,1])),tickerDelta:{},
-    rzUsed:false,rzArmed:false,rzHint:null,
-    stats:{bought:0,sold:0,spent:0,earned:0,scam:0,scamLoss:0,bestPl:-1e9,bestFlip:'—'},
-    arrivalNews:[],animateArrivals:false,tickerAnim:false,animateCard:null,
-    prevCash:1000,boardRoom:null
-  };
-  showScreen('game');
-  enterRound(0);
-}
-function buyPrice(card,rnd){ return Math.max(10,Math.round(card.cost*(1+rnd.costMod))); }
-function cardValue(card){
-  return Math.max(0,Math.round(card.listino*QUALITIES[card.quality].sell*S.game.market[card.cat]));
-}
-function applyRoundMarket(rnd){
-  const g=S.game;
-  const prev={...g.market};
-  CATS.forEach(c=>{ g.market[c.id]=clamp(g.market[c.id]+rnd.moves[c.id],0.55,2.5); });
-  const ev=rnd.event;
-  if(ev&&ev.tipo==='index'){
-    const targets=ev.pick==='all'?CATS.map(c=>c.id):[ev.pick==='one'?ev.catId:ev.pick];
-    targets.forEach(id=>{ g.market[id]=clamp(g.market[id]+ev.delta,0.55,2.5); });
-  }
-  CATS.forEach(c=>{ g.tickerDelta[c.id]=g.market[c.id]-prev[c.id]; });
-}
-function enterRound(idx){
-  const g=S.game;
-  g.roundIdx=idx; g.decisions=[null,null,null]; g.rzHint=null; g.rzArmed=false;
-  const rnd=g.rounds[idx];
-  applyRoundMarket(rnd);
-  g.arrivalNews=[];
-  g.stash=g.stash.filter(it=>{
-    if(!it.revealed&&it.arriveRound<=idx){
-      it.revealed=true;
-      g.arrivalNews.push(it);
-      if(it.card.quality==='scam'){ it.scamLost=true; g.stats.scam++; g.stats.scamLoss+=it.paid; return false; }
-    }
-    return true;
-  });
-  g.animateArrivals=true; g.tickerAnim=true;
-  renderGame();
-  g.animateArrivals=false; g.tickerAnim=false;
-  g.arrivalNews.forEach((it,k)=>{
-    setTimeout(()=>{ it.card.quality==='scam'?FX.scam():FX.stamp(); },350+k*480);
-  });
-}
-function renderGame(){
-  const g=S.game; if(!g) return;
-  const rnd=g.rounds[g.roundIdx];
-  const day=g.roundIdx+1;
-  const cashCls=g.cash>g.prevCash?'cash-up':(g.cash<g.prevCash?'cash-dn':'');
-  g.prevCash=g.cash;
-
-  const modeTag=g.mode==='room'?('STANZA '+g.room):(g.mode==='daily'?('QUOTIDIANA · '+todayIT().toUpperCase()):'SINGOLA');
-  const ticker=CATS.map(c=>{
-    const v=g.market[c.id],d=g.tickerDelta[c.id]||0,pct=Math.round(Math.abs(d)*100);
-    const fl=g.tickerAnim&&Math.abs(d)>0.002?(d>0?'flash-up':'flash-down'):'';
-    return `<span class="tk mono ${fl}"><b>${c.nome}</b> ×${v.toFixed(2)} <em class="${d>=0?'up':'down'}">${d>=0?'▲':'▼'}${pct}%</em></span>`;
-  }).join('');
-
-  const segs=Array.from({length:12},(_,i)=>
-    `<span class="seg ${i<g.roundIdx?'done':(i===g.roundIdx?'now':'')}"></span>`).join('');
-
-  const arrivals=(g.arrivalNews.length)?`
-    <section class="arrivals">
-      <h3 class="sec-title">${IC.box} PACCHI ARRIVATI OGGI</h3>
-      <div class="arr-grid">${g.arrivalNews.map(it=>{
-        const q=QVIS[it.card.quality];
-        if(it.card.quality==='scam'){
-          return `<div class="arr scam">
-            <div class="arr-way">WB ${String(it.buyRound+1).padStart(2,'0')} · ${esc(it.card.spu)}</div>
-            <div class="arr-item">${esc(it.card.brand)} ${esc(it.card.model)}</div>
-            <div class="arr-val">BONIFICO PERSO: <em class="neg">−${eur(it.paid).slice(2)}</em> · IL VENDOR HA CHIUSO IL NEGOZIO</div>
-            <span class="stamp a-stamp ${g.animateArrivals?'stamp-in':''}" style="color:var(--red)">SMARRITO</span></div>`;
-        }
-        const v=cardValue(it.card),pl=v-it.paid;
-        return `<div class="arr">
-          <div class="arr-way">WB ${String(it.buyRound+1).padStart(2,'0')} · ${esc(it.card.spu)}</div>
-          <div class="arr-item">${esc(it.card.brand)} ${esc(it.card.model)}</div>
-          <div class="arr-val">VALORE ${eur(v)} · P/L <em class="${pl>=0?'pos':'neg'}">${pl>=0?'+':''}${Math.round(pl)}</em></div>
-          <span class="stamp a-stamp ${g.animateArrivals?'stamp-in':''}" style="color:${q.color}">${q.label}</span></div>`;
-      }).join('')}</div>
-    </section>`:'';
-
-  const ev=rnd.event;
-  let bTit,bMsg,bChips='';
-  if(day===1){
-    bTit='APERTURA DEL MERCATO';
-    bMsg='Benvenuto a Guangzhou: hai <b>€ 1.000</b> e 12 giorni di fronte. Valuta le offerte qui sotto — la merce arriva <b>dopo 2 giorni</b> e solo allora scopri la qualità. Quando vuoi incassare, vendi dallo stash.';
-  } else if(ev){
-    bTit=ev.tit; bMsg=ev.msg;
-    if(ev.tipo==='index'){
-      const targets=ev.pick==='all'?CATS:CATS.filter(c=>c.id===(ev.pick==='one'?ev.catId:ev.pick));
-      bChips=targets.map(c=>`<span class="chip ${ev.delta>0?'chip-up':'chip-down'}">${c.nome} ${ev.delta>0?'+':''}${Math.round(ev.delta*100)}%</span>`).join('');
-    } else {
-      bChips=`<span class="chip chip-cost">PREZZI D'ACQUISTO ${ev.delta>0?'+':''}${Math.round(ev.delta*100)}% SOLO OGGI</span>`;
-    }
-  } else { bTit='MERCATO STABILE'; bMsg=rnd.quiet; }
-
-  const rzNote=rnd.rzLot?`
-    <div class="rz-note">${rzAvatar(30)}<div><b>RIZZITGO SCRIVE:</b> «Uno dei lotti di oggi è garantito AAA+ o 1:1 mirror. Indovina quale — io non te lo dico.» <span class="mono dim">— R.</span></div></div>`:'';
-
-  const rots=[-0.5,0.45,-0.35];
-  const offers=rnd.cards.map((card,i)=>{
-    const dec=g.decisions[i];
-    const price=buyPrice(card,rnd);
-    const ratio=(price/card.listino).toFixed(2);
-    const cat=CATBY[card.cat];
-    const armed=g.rzArmed&&!dec;
-    let stamp='';
-    if(dec==='buy') stamp=`<div class="stamp o-stamp ok ${g.animateCard===i?'stamp-in':''}">ACQUISTATO</div>`;
-    if(dec==='pass') stamp=`<div class="stamp o-stamp no ${g.animateCard===i?'stamp-in':''}">SCARTATO</div>`;
-    const hinted=g.rzHint===i;
-    const off=(g.cash<price||g.stash.length>=6);
-    const bl=g.stash.length>=6?'STASH PIENO':(g.cash<price?'CASH INSUFF.':'COMPRA · '+eur(price));
-    return `<article class="offer ${dec?'decided':''} ${armed?'rz-target':''}" style="--rot:${rots[i]}deg" ${armed?`data-action="rz-card" data-i="${i}"`:''}>
-      <span class="tape" aria-hidden="true"></span>
-      <div class="offer-in">
-        <div class="o-left">
-          <div class="o-meta"><span class="cat-chip" style="background:${cat.c}">${cat.nome}</span><span class="mono">${esc(card.spu)} · WB ${String(day).padStart(2,'0')}-${i+1}</span></div>
-          <h3 class="o-name">${esc(card.brand)} <span>${esc(card.model)}</span></h3>
-          ${barcode(card.wb,30)}
-          <ul class="o-tags">${card.tags.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
-        </div>
-        <div class="o-right">
-          <div class="o-price">
-            <div class="p-row"><span>STIMA MERCATO</span><b class="mono">${eur(card.listino)}</b></div>
-            <div class="p-mid"><span class="p-ratio">×${ratio}</span><span class="mono" style="font-size:10px;color:#6b6152">INDICE ${cat.nome} ×${g.market[card.cat].toFixed(2)}</span></div>
-            <div class="p-row vendor"><span>PREZZO VENDOR</span><b class="mono">${eur(price)}</b></div>
-            ${rnd.costMod?`<div class="p-note mono">${rnd.costMod>0?'+':''}${Math.round(rnd.costMod*100)}% EVENTO DI OGGI SUL PREZZO</div>`:''}
-          </div>
-          <div class="o-actions">
-            <button class="btn btn-buy" data-action="buy" data-i="${i}" ${off?'data-off="1"':''}>${bl}</button>
-            <button class="btn btn-pass" data-action="pass" data-i="${i}">PASSA</button>
-          </div>
-        </div>
-      </div>
-      ${hinted?`<div class="rz-quote">${rzAvatar(28)}<div>«${RZ_HINT[card.quality]}» <span class="mono">— RIZZITGO, IN CHIAMATA</span></div></div>`:''}
-      ${stamp}
-    </article>`;
-  }).join('');
-
-  /* stash */
-  const merch=g.stash.filter(i=>i.revealed).reduce((s,i)=>s+cardValue(i.card),0);
-  const transit=g.stash.filter(i=>!i.revealed).reduce((s,i)=>s+i.paid,0);
-  const net=g.cash+merch;
-  const stashRows=g.stash.length?g.stash.map(it=>{
-    if(!it.revealed){
-      const eta=(it.arriveRound===11&&it.buyRound===11)?'LIQUIDAZIONE FINALE':'GIORNO '+(it.arriveRound+1);
-      return `<div class="s-item transit">
-        <div class="s-top"><b>${esc(it.card.brand)} ${esc(it.card.model)}</b><span>${CATBY[it.card.cat].nome} · PAGATO ${eur(it.paid)}</span></div>
-        <div class="s-bot"><span class="tr">${IC.plane} IN TRANSITO</span><span class="mono" style="font-size:10px;color:#6b6152">ARRIVO: ${eta}</span></div>
-      </div>`;
-    }
-    const v=cardValue(it.card),pl=v-it.paid,q=QVIS[it.card.quality];
-    return `<div class="s-item">
-      <span class="qmini" style="color:${q.color}">${q.label}</span>
-      <div class="s-top"><b>${esc(it.card.brand)} ${esc(it.card.model)}</b><span>${CATBY[it.card.cat].nome}</span></div>
-      <div class="s-bot"><span class="s-val mono">${eur(v)} <em class="${pl>=0?'pos':'neg'}">${pl>=0?'+':''}${Math.round(pl)}</em></span>
-      <button class="btn-sell" data-action="sell" data-id="${it.id}">VENDI</button></div>
-    </div>`;
-  }).join(''):`<div class="stash-empty">IL TUO STASH È VUOTO.<br>IL MERCATO NON ASPETTA.</div>`;
-
-  const done=g.decisions.filter(Boolean).length;
-  const last=g.roundIdx===11;
-  const rzState=g.rzUsed?'CONSULENZA USATA':(g.rzArmed?'SCEGLI UN\'OFFERTA…':'1 CONSULENZA GRATUITA · OFFRE LO SPONSOR');
-
-  $('#scr-game').innerHTML=`
-    <header class="gbar">
-      <span class="g-logo">REP<em>RUSH</em></span>
-      <span class="mode-tag mono">${modeTag}</span>
-      <div class="ticker">${ticker}</div>
-      <span class="g-cash ${cashCls}">${eur(g.cash)}</span>
-      <button class="btn-icon" data-action="mute" aria-label="Attiva o disattiva i suoni">${FX.on?IC.vol:IC.volOff}</button>
-    </header>
-    <div class="game-grid">
-      <div>
-        <div class="dayline">
-          <span class="d-lab">GIORNO <em>${day}</em>/12</span>
-          <div class="segs">${segs}</div>
-        </div>
-        ${arrivals}
-        <section class="bulletin">
-          <span class="b-tag">BOLLETTINO · GIORNO ${day}</span>
-          <h3 class="b-tit">${bTit}</h3>
-          <p class="b-msg">${bMsg}</p>
-          ${bChips?`<div class="b-chips">${bChips}</div>`:''}
-          ${rzNote}
-        </section>
-        <p class="offers-label">OFFERTE DEI VENDOR DI OGGI — 3 LOTTI · DECIDERE ENTRO FINE GIORNATA</p>
-        ${offers}
-        <div class="actionbar">
-          <button class="btn btn-rz ${g.rzUsed?'used':''} ${g.rzArmed?'armed':''}" data-action="arm-rz" ${g.rzUsed?'disabled':''}>
-            ${rzAvatar(40)}
-            <span class="rz-txt"><b>CHIEDI A RIZZITGO</b><em>${rzState}</em></span>
-          </button>
-          <button class="btn btn-next" data-action="next" ${done<3?'disabled':''}>
-            ${done<3?`VALUTA LE OFFERTE ${done}/3`:(last?'CHIUDI IL MERCATO':'PROSSIMO GIORNO →')}
-          </button>
-        </div>
-      </div>
-      <aside class="stash-panel">
-        <div class="stash-head"><h3 class="disp">STASH</h3><span class="mono">${g.stash.length}/6 SLOT</span></div>
-        <div class="net-box">
-          <span class="lbl mono">PATRIMONIO STIMATO</span>
-          <div class="net-val">${eur(net)}</div>
-          <div class="net-sub">CASH ${eur(g.cash)} · MERCE ${eur(merch)} · TRANSITO ${eur(transit)}</div>
-        </div>
-        <div id="stash-list">${stashRows}</div>
-      </aside>
-    </div>`;
-}
-
-/* azioni di gioco */
-function decideCard(i,act){
-  const g=S.game; if(!g||g.decisions[i]) return;
-  const rnd=g.rounds[g.roundIdx];
-  const card=rnd.cards[i];
-  if(act==='buy'){
-    const price=buyPrice(card,rnd);
-    if(g.cash<price){ toast('Cash insufficiente per questa offerta.','bad'); FX.bad(); return; }
-    if(g.stash.length>=6){ toast('Stash pieno: vendi qualcosa prima di comprare.','bad'); FX.bad(); return; }
-    const it={id:'it'+(++g.uid),card,paid:price,buyRound:g.roundIdx,
-      arriveRound:Math.min(g.roundIdx+2,11),revealed:false};
-    g.cash-=price; g.stats.spent+=price; g.stats.bought++;
-    g.stash.push(it); g.decisions[i]='buy'; g.animateCard=i;
-    FX.buy();
-    toast(`${IC.box} Ordine inviato: <b>${esc(card.brand)} ${esc(card.model)}</b> — ${eur(price)}. Arrivo previsto: ${it.arriveRound===11&&g.roundIdx===11?'liquidazione finale':'giorno '+(it.arriveRound+1)}.`);
-  } else {
-    g.decisions[i]='pass'; g.animateCard=i; FX.click();
-  }
-  renderGame();
-  g.animateCard=null;
-}
-function sellItem(id){
-  const g=S.game; if(!g) return;
-  const it=g.stash.find(x=>x.id===id);
-  if(!it||!it.revealed) return;
-  const v=cardValue(it.card),pl=v-it.paid;
-  g.cash+=v; g.stats.earned+=v; g.stats.sold++;
-  if(pl>g.stats.bestPl){ g.stats.bestPl=pl; g.stats.bestFlip=it.card.brand+' '+it.card.model; }
-  g.stash=g.stash.filter(x=>x.id!==id);
-  FX.cash();
-  toast(`Venduto <b>${esc(it.card.brand)} ${esc(it.card.model)}</b> a ${eur(v)} <span class="${pl>=0?'pos':'neg'}">(${pl>=0?'+':''}${Math.round(pl)} €)</span>`,pl>=0?'good':'bad');
-  renderGame();
-}
-function toggleRz(){
-  const g=S.game; if(!g||g.rzUsed) return;
-  g.rzArmed=!g.rzArmed; FX.click(); renderGame();
-}
-function rzOnCard(i){
-  const g=S.game; if(!g||g.rzUsed||g.decisions[i]) return;
-  g.rzUsed=true; g.rzArmed=false; g.rzHint=i;
-  FX.buy();
-  const q=g.rounds[g.roundIdx].cards[i].quality;
-  toast(`${rzAvatar(20,'')} RizzitGo: «${RZ_HINT[q]}»`);
-  renderGame();
-}
-function nextRound(){
-  const g=S.game; if(!g) return;
-  if(g.decisions.filter(Boolean).length<3) return;
-  FX.click();
-  if(g.roundIdx===11){ endGame(); return; }
-  enterRound(g.roundIdx+1);
-}
-function gradeOf(v){
-  if(v<600) return ['SCAMMATO','Il mercato ti ha mangiato vivo.'];
-  if(v<1000) return ['FLOP BUYER','Almeno ci hai provato.'];
-  if(v<1600) return ['HUSTLER','Cominci a capire il gioco.'];
-  if(v<2500) return ['RESELLER','Occhio clinico rispettabile.'];
-  if(v<4000) return ['REPGOD','I vendor ti temono.'];
-  return ['CEO DI GUANGZHOU','Leggenda del mercato.'];
-}
-function endGame(){
-  const g=S.game;
-  g.stash.forEach(it=>{
-    if(!it.revealed){
-      it.revealed=true;
-      if(it.card.quality==='scam'){ it.scamLost=true; g.stats.scam++; g.stats.scamLoss+=it.paid; }
-    }
-  });
-  g.stash=g.stash.filter(it=>!it.scamLost);
-  const liquid=g.stash.reduce((s,it)=>s+cardValue(it.card),0);
-  g.liquid=liquid; g.final=g.cash+liquid;
-  const [grade,gradeSub]=gradeOf(g.final);
-  g.grade=grade; g.gradeSub=gradeSub;
-  g.boardRoom=g.mode==='room'?g.room:(g.mode==='daily'?'DAILY':null);
-  if(g.boardRoom){
-    boardSave(g.boardRoom,{name:S.nick,score:g.final,grade,ts:Date.now()});
-    boardBroadcast(g.boardRoom);
-  }
-  renderResults();
-  showScreen('results');
-}
-
-/* ===== RESULTS ===== */
-function renderResults(){
-  const g=S.game;
-  const mult=(g.final/1000).toFixed(2);
-  const code=g.boardRoom?resultEncode({room:g.boardRoom,name:S.nick,score:g.final,grade:g.grade}):null;
-  const st=g.stats;
-  const rows=[
-    ['OFFERTE COMPRATE',st.bought],
-    ['PACCHI VENDUTI',st.sold],
-    ['SPESO TOTALE',eur(st.spent)],
-    ['INCASSATO IN VENDITE',eur(st.earned)],
-    ['LIQUIDAZIONE FINALE STASH','+'+eur(g.liquid).slice(2)],
-    ['PACCHI SMARRITI (SCAM)',st.scam?st.scam+' · −'+eur(st.scamLoss).slice(2):'0'],
-    ['FLIP MIGLIORE',st.bestPl>-1e9?esc(st.bestFlip)+' · +'+Math.round(st.bestPl)+' €':'—'],
-    ['CONSULENZA RIZZITGO',g.rzUsed?'USATA':'NON USATA (TIMIDO…)']
-  ].map(r=>`<div class="brow-s"><span>${r[0]}</span><b>${r[1]}</b></div>`).join('');
-
-  const share=g.boardRoom?`
-    <div class="share">
-      <label>CODICE RISULTATO — CONDIVIDILO: CHI LO INCOLLA IN QUESTA STANZA TI VEDE IN CLASSIFICA</label>
-      <div class="share-row">
-        <code id="rescode">${esc(code||'')}</code>
-        <button class="btn" data-action="copy-result">${IC.copy} COPIA</button>
-      </div>
-      <div class="friend-row">
-        <input id="friend-code" placeholder="Incolla qui RR1-… di un amico" autocomplete="off">
-        <button class="btn" data-action="add-friend">${IC.plus} AGGIUNGI</button>
-      </div>
-    </div>`:'';
-
-  const board=g.boardRoom?`<div id="board-slot"></div>`:'';
-
-  const modeTag=g.mode==='room'?'STANZA '+esc(g.room):(g.mode==='daily'?'SFIDA QUOTIDIANA':'PARTITA SINGOLA');
-  $('#scr-results').innerHTML=`
-  <div class="container results">
-    <p class="sec-kicker" style="text-align:center">GIORNO 12 · MERCATO CHIUSO · ${modeTag}</p>
-    <div class="res-stamp stamp">${esc(g.grade)}</div>
-    <div class="res-money">${eur(g.final)}</div>
-    <p class="res-sub">DA € 1.000 IN 12 GIORNI · ×${mult} — ${esc(g.gradeSub).toUpperCase()}</p>
-    <div class="res-bill">${rows}</div>
-    ${share}
-    ${board}
-    <div class="res-actions">
-      <button class="btn btn-orange" data-action="replay">RIGIOCA</button>
-      <button class="btn" data-action="go-home">HOME</button>
-    </div>
-  </div>`;
-  if(g.boardRoom){ renderBoardInto($('#board-slot'),g.boardRoom); }
-  FX.cash();
-}
-
-/* ---------- delegation eventi ---------- */
-document.getElementById('app').addEventListener('click',e=>{
-  const el=e.target.closest('[data-action]');
-  if(!el) return;
-  const a=el.dataset.action;
-  switch(a){
-    case 'start-single': FX.click(); startGame({mode:'single'}); break;
-    case 'start-daily': FX.click(); startGame({mode:'daily'}); break;
-    case 'open-lobby': FX.click(); S.lobby.code=''; renderLobby(); showScreen('lobby'); break;
-    case 'go-home': FX.click(); renderHome(); showScreen('home'); break;
-    case 'gen-code':{
-      FX.click();
-      const inp=$('#room-in');
-      if(inp){ inp.value=genRoomCode(); S.lobby.code=inp.value; updateLobby(); }
-      break;
-    }
-    case 'lobby-start':{
-      const code=(S.lobby.code||'').trim();
-      if(code.length<4){ toast('Il codice stanza serve di almeno 4 caratteri.','bad'); break; }
-      FX.click(); startGame({mode:'room',room:code});
-      break;
-    }
-    case 'buy': case 'pass':{
-      if(el.dataset.off){ toast('Stash pieno o cash insufficiente.','bad'); FX.bad(); break; }
-      decideCard(+el.dataset.i,a); break;
-    }
-    case 'rz-card': rzOnCard(+el.dataset.i); break;
-    case 'arm-rz': toggleRz(); break;
-    case 'sell': sellItem(el.dataset.id); break;
-    case 'next': nextRound(); break;
-    case 'mute':{
-      FX.on=!FX.on; setLS('rr_sound',FX.on);
-      FX.init(); if(FX.on) FX.click();
-      const b=$('.btn-icon[data-action="mute"]');
-      if(b) b.innerHTML=FX.on?IC.vol:IC.volOff;
-      break;
-    }
-    case 'copy-result':{
-      const g=S.game;
-      const code=$('#rescode')?$('#rescode').textContent:'';
-      const where=g.mode==='room'?'STANZA '+g.room:'SFIDA QUOTIDIANA';
-      copyText(`REP RUSH · ${where} · ${S.nick} chiude a ${eur(g.final)} (${g.grade}) — batti questo: ${code}`);
-      break;
-    }
-    case 'add-friend':{
-      const g=S.game; if(!g||!g.boardRoom) break;
-      const inp=$('#friend-code');
-      const d=resultDecode(inp?inp.value:'');
-      if(!d){ toast('Codice risultato non valido.','bad'); FX.bad(); break; }
-      if(d.room.toUpperCase()!==g.boardRoom.toUpperCase()){
-        toast(`Questo risultato appartiene alla stanza <b>${esc(d.room)}</b>.`,'bad'); FX.bad(); break;
-      }
-      boardSave(g.boardRoom,{name:d.name,score:d.score,grade:d.grade,ts:Date.now()});
-      boardBroadcast(g.boardRoom);
-      renderBoardInto($('#board-slot'),g.boardRoom);
-      inp.value='';
-      toast(`Aggiunto in classifica: <b>${esc(d.name)}</b> · ${eur(d.score)}`,'good');
-      FX.cash();
-      break;
-    }
-    case 'replay':{
-      FX.click();
-      const g=S.game;
-      if(g.mode==='room') startGame({mode:'room',room:g.room});
-      else if(g.mode==='daily') startGame({mode:'daily'});
-      else startGame({mode:'single'});
-      break;
-    }
-  }
-});
-document.getElementById('app').addEventListener('input',e=>{
-  if(e.target&&e.target.id==='nick-in'){
-    S.nick=e.target.value.slice(0,14);
-    setLS('rr_nick',S.nick);
-  }
-});
-document.getElementById('app').addEventListener('keydown',e=>{
-  if(e.target&&e.target.id==='friend-code'&&e.key==='Enter'){
-    const b=document.querySelector('[data-action="add-friend"]');
-    if(b) b.click();
-  }
-});
-
-/* ---------- avvio ---------- */
-renderHome();
-showScreen('home');
+titleScreen();renderHUD();
+document.addEventListener('click',()=>{AU.c()},{once:true});
 </script>
 </body>
 </html>
