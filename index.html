@@ -16,8 +16,7 @@
   --ok:#2f7d4f; --warn:#a8700a; --bad:#b3261e;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-html{overflow-x:hidden}                /* niente scroll orizzontale mai */
-html{-webkit-text-size-adjust:100%}
+html{overflow-x:hidden;-webkit-text-size-adjust:100%}
 body{
   font-family:'Archivo',sans-serif;color:var(--ink);min-height:100vh;
   background:
@@ -26,7 +25,7 @@ body{
     repeating-linear-gradient(3deg, rgba(255,255,255,.05) 0 3px, transparent 3px 9px),
     var(--kraft);
   background-attachment:fixed;
-  padding-bottom:calc(58px + env(safe-area-inset-bottom));
+  padding-bottom:calc(48px + env(safe-area-inset-bottom));
 }
 body.shake{animation:shk .3s}
 @keyframes shk{0%,100%{transform:translate(0,0)}20%{transform:translate(-6px,3px)}40%{transform:translate(5px,-4px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,3px)}}
@@ -55,8 +54,8 @@ img{max-width:100%}
 }
 /* ---------- LAYOUT ---------- */
 #wrap{max-width:1060px;margin:0 auto;padding:14px 12px 26px;display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:14px}
-#wrap>main,#wrap>aside{min-width:0}   /* FIX grid blowout */
-@media(max-width:920px){#wrap{grid-template-columns:minmax(0,1fr)}} /* su telefono: tutto impilato */
+#wrap>main,#wrap>aside{min-width:0}
+@media(max-width:920px){#wrap{grid-template-columns:minmax(0,1fr)}}
 /* ---------- STEPPER ---------- */
 #stepper{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none;min-width:0}
 #stepper::-webkit-scrollbar{display:none}
@@ -110,7 +109,8 @@ img{max-width:100%}
 .itemrow .art svg{display:block;width:100%;height:auto}
 .itemrow>div:last-child{min-width:0;flex:1}
 .itemrow .nm{font-weight:900;font-size:14px;line-height:1.15;overflow-wrap:anywhere}
-.itemrow .bd{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);margin-top:2px}
+.itemrow .bd{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);margin-top:2px;overflow-wrap:anywhere}
+@media(max-width:560px){.itemrow .art{flex:0 0 72px}}
 .budgetbar{height:22px;border:2px solid var(--ink);border-radius:5px;background:var(--paper-d);overflow:hidden;position:relative;margin:6px 0 2px}
 .budgetbar i{display:block;height:100%;background:repeating-linear-gradient(45deg,var(--tape) 0 8px,var(--tape-d) 8px 16px);transition:width .4s}
 .budgetbar span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono';font-size:10px;font-weight:700}
@@ -209,30 +209,26 @@ img{max-width:100%}
 }
 /* ---------- FOOTER SPONSOR ---------- */
 #sponsor{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--ink);color:var(--paper);
-  display:flex;align-items:center;gap:10px;padding:4px 12px;padding-bottom:calc(4px + env(safe-area-inset-bottom));
+  display:flex;align-items:center;gap:10px;padding:6px 12px;padding-bottom:calc(6px + env(safe-area-inset-bottom));
   font-family:'Space Mono';font-size:10px;letter-spacing:1px}
 #sponsor .sTxt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #sponsor b{color:#f0b34d}
-#sponsor .sp{margin-left:auto;color:#9a8f7c;white-space:nowrap}
-@media(max-width:560px){#sponsor .sp{display:none}}
-/* ---------- QR ---------- */
-.qrframe{flex:0 0 auto;border:2px solid var(--ink);background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:3px}
-.qrframe img{width:100%;height:100%;display:block;image-rendering:pixelated;object-fit:contain}
-.qrframe.fail{border-style:dashed;color:var(--ink-soft);background:var(--paper-d)}
-.qrframe.fail svg{width:55%;height:55%}
-.qrframe.fail span{font-family:'Space Mono';font-size:8.5px;text-align:center;line-height:1.3}
-#sponsor .qrframe{border-color:var(--paper);cursor:pointer}
-#sponsor .qrframe.fail{background:transparent}
-.qrcard{display:flex;gap:14px;align-items:center;border:2px dashed var(--ink);border-radius:8px;padding:12px;background:#fffdf4;flex-wrap:wrap}
-.qrcard>div:last-child{min-width:0;flex:1}
-.qrcard .qt{font-weight:900;font-size:14px}
-.qrcard .qs{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);margin-top:4px;line-height:1.5;overflow-wrap:anywhere}
+#sponsor .fLink{margin-left:auto;color:#f0b34d;text-decoration:underline;font-weight:700;white-space:nowrap}
+/* ---------- PROMO (link al sito personale) ---------- */
+.promo{display:flex;flex-direction:column;gap:8px;border:2.5px dashed var(--ink);border-radius:8px;background:#fffdf4;padding:14px;text-decoration:none;color:var(--ink)}
+.promo .pTag{font-family:'Space Mono';font-size:9px;letter-spacing:2px;color:var(--stamp);font-weight:700}
+.promo .pt{font-weight:900;font-size:16px;line-height:1.1}
+.promo .ps{font-family:'Space Mono';font-size:10px;color:var(--ink-soft);line-height:1.55;overflow-wrap:anywhere}
+.promo .pbtn{display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--stamp);color:#fff;border:2px solid #7e2410;border-radius:6px;
+  padding:9px 14px;font-weight:900;font-size:12px;letter-spacing:.5px;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+.promo .pbtn svg{width:14px;height:14px}
+.promo .pu{font-family:'Space Mono';font-size:9px;color:var(--ink-soft);overflow-wrap:anywhere}
 /* ---------- OVERLAY ---------- */
 .ovl{position:fixed;inset:0;z-index:80;background:rgba(28,22,16,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
 .ovl .card{background:var(--paper);border:2.5px solid var(--ink);border-radius:10px;box-shadow:8px 8px 0 rgba(0,0,0,.35);
   max-width:640px;width:100%;max-height:92vh;overflow-y:auto;position:relative}
-.ovl .card .pbody{padding:20px}      /* sempre 20px: i nastri a margine negativo restano allineati */
-#ovl2 .ovl{z-index:95}               /* modali sopra la schermata titolo */
+.ovl .card .pbody{padding:20px}
+#ovl2 .ovl{z-index:95}
 .revrow{border:1.5px solid var(--ink);border-radius:8px;padding:10px;margin-bottom:9px;background:#fff9ec;animation:fu .4s both}
 .stars{display:inline-flex;gap:2px;vertical-align:middle}
 .stars svg{width:15px;height:15px}
@@ -309,9 +305,8 @@ ul.rules svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--sta
 <button id="chatFab" onclick="toggleChat()"><i data-lucide="message-square"></i><span class="bdg" id="unreadBdg">0</span></button>
 
 <footer id="sponsor">
-  <span id="footQRSlot" onclick="openQR()"></span>
-  <span class="sTxt">SPONSOR: <b>RIZZITGO</b> — reps agent ufficiale · <u style="cursor:pointer" onclick="openQR()">inquadra il QR</u></span>
-  <span class="sp">v1.2 · Guangzhou, CN</span>
+  <span class="sTxt">SPONSOR: <b>RIZZITGO</b> — reps agent ufficiale</span>
+  <a class="fLink" href="https://lorenzotomainoo.github.io/portfolio/" target="_blank" rel="noopener">ORDINA DAVVERO →</a>
 </footer>
 
 <div id="toasts"></div>
@@ -321,7 +316,8 @@ ul.rules svg{width:16px;height:16px;flex:0 0 auto;margin-top:2px;color:var(--sta
 
 <script>
 /* =========================================================
-   RIZZITGO — REPS AGENT SIMULATOR
+   RIZZITGO — REPS AGENT SIMULATOR v2.0
+   Catalogo randomizzato + link portfolio al posto del QR
    ========================================================= */
 'use strict';
 const $=s=>document.querySelector(s);
@@ -329,22 +325,8 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 const fmt=n=>'¥'+Math.round(n).toLocaleString('it-IT');
 const fmtH=h=>{const m=Math.round(Math.max(0,h)*60);return Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')};
 const fmt2=n=>(+n).toFixed(2);
+const PORTFOLIO='https://lorenzotomainoo.github.io/portfolio/';
 
-/* ---- QR AFFILIATO: sostituisci qui con un link permanente se l'host scade ---- */
-const QR_SOURCES=[
- 'https://bit.ly/4hAOb19'
-];
-function qrFrame(sz,cap){return '<div class="qrframe" style="width:'+sz+'px;height:'+sz+'px"><img src="'+QR_SOURCES[0]+'" alt="QR affiliato Rizzitgo" onerror="qrErr(this)" data-cap="'+(cap?1:0)+'" data-qi="0"></div>'}
-function qrErr(img){
- const next=+(img.dataset.qi||0)+1;
- if(next<QR_SOURCES.length){img.dataset.qi=next;img.src=QR_SOURCES[next];return}
- const cap=img.dataset.cap==='1';const p=img.parentNode;if(!p)return;
- p.classList.add('fail');
- p.innerHTML='<i data-lucide="qr-code"></i>'+(cap?'<span>QR non raggiungibile</span>':'');
- icons();
-}
-
-/* ---- errori sempre visibili, mai silenzi ---- */
 window.addEventListener('error',e=>{try{
  const t=document.createElement('div');t.className='toast bad';
  t.textContent='Errore interno: '+(e.message||'?');
@@ -356,6 +338,7 @@ let RNG=mulberry32(Date.now()%2147483647);
 const ri=(a,b)=>a+Math.floor(RNG()*(b-a+1));
 const pick=a=>a[Math.floor(RNG()*a.length)];
 function reseed(){RNG=mulberry32((Date.now()+Math.floor(Math.random()*1e9))%2147483647)}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(RNG()*(i+1));const t=a[i];a[i]=a[j];a[j]=t}return a}
 
 /* ---------- AUDIO ---------- */
 const AU={ctx:null,on:true,
@@ -385,25 +368,62 @@ function toggleMute(){AU.on=!AU.on;const w=document.getElementById('sndWrap');
  toast(AU.on?'Audio attivo':'Audio disattivato')}
 function icons(){if(window.lucide&&window.lucide.createIcons){try{lucide.createIcons()}catch(e){}}}
 
-/* ---------- CATALOGO (brand parodiati) ---------- */
+/* =========================================================
+   CATALOGO — 52 referenze randomizzabili
+   ========================================================= */
 const CATALOG=[
- {id:'af1',   brand:'MIKE',        name:'Air Force Low "White on White"', type:'sneaker',  price:{low:260,mid:420,top:650}, wt:1.4, vol:9, deboxable:true, blurb:'Il classico che non sbaglia mai.'},
- {id:'jorjan',brand:'JORJAN',      name:'Retro High 1 "Bred Toe"',        type:'sneaker',  price:{low:300,mid:480,top:700}, wt:1.5, vol:10,deboxable:true, blurb:'Rosso e nero, haters degni di nota.'},
- {id:'samba', brand:'ABIBAS',      name:'Samba OG "White/Black"',         type:'sneaker2', price:{low:220,mid:350,top:520}, wt:1.2, vol:8, deboxable:true, blurb:'Il colpo di stato del 2023, ancora in vigore.'},
- {id:'nb550', brand:'BALENCE',     name:'550 Retro "White/Green"',        type:'sneaker',  price:{low:240,mid:380,top:560}, wt:1.3, vol:9, deboxable:true, blurb:'Basket anni 80, vibes da nonno figo.'},
- {id:'slide', brand:'YEEZI',       name:'Slide "Bone"',                   type:'slide',    price:{low:90, mid:150,top:220}, wt:0.5, vol:3, deboxable:true, blurb:'Ciabatta canonica dello stay-at-home flexer.'},
- {id:'suprene',brand:'SUPRENE',    name:'Box Logo Hoodie "Red"',          type:'hoodie',   price:{low:180,mid:300,top:450}, wt:0.9, vol:4, soft:true, blurb:'Il Box Logo. Lo conoscono tutti. Anzi: quasi.'},
- {id:'bame',  brand:'BAME',        name:'Shark Hoodie "Green Camo"',      type:'shark',    price:{low:220,mid:360,top:520}, wt:1.0, vol:4.5,soft:true, blurb:'Cappuccio squalo: quando entri, ENTRI.'},
- {id:'chromo',brand:'CHROMO HART', name:'Cross Patch Hoodie "Black"',     type:'hoodie',   price:{low:200,mid:330,top:500}, wt:0.9, vol:4, soft:true, blurb:'Croci ovunque. In tutti i sensi.'},
- {id:'lv',    brand:'LUOIS VITTON',name:'Speedy 30 "Monogram"',           type:'bagLV',    price:{low:380,mid:620,top:980}, wt:1.1, vol:9, blurb:'La borsa che urla "sto vincendo" (forse).'},
- {id:'chanele',brand:'CHANELE',    name:'Classic Flap "Black/Gold"',      type:'bagFlap',  price:{low:420,mid:680,top:1050},wt:0.9, vol:6, blurb:'Eleganza parigina, produzione flessibile.'},
- {id:'diorr', brand:'DIORR',       name:'Sauvage EDP 100ml',              type:'perfume',  price:{low:120,mid:200,top:320}, wt:0.7, vol:1.5, liquid:true, fragile:true, blurb:'Liquido + vetro: la dogana lo adora.'},
- {id:'roleks',brand:'ROLEKS',      name:'Submariner "No-Date"',           type:'watch',    price:{low:260,mid:450,top:850}, wt:0.4, vol:0.6, fragile:true, highValue:true, blurb:"Perde 3 minuti al giorno. Come l'originale, ma più."},
- {id:'rayben',brand:'RAY-BEN',     name:'Aviator "Gold/Green"',           type:'glasses',  price:{low:90, mid:160,top:260}, wt:0.3, vol:0.8, fragile:true, blurb:'Piloti, poliziotti e papà del 1987 approvano.'},
- {id:'monkler',brand:'MONKLER',    name:'Maya Down Jacket "Black"',       type:'puffer',   price:{low:480,mid:760,top:1150},wt:1.6, vol:6, soft:true, blurb:'Piumino seria. Termico anche solo a guardarla.'},
- {id:'feco',  brand:'NORTH FECO',  name:'1996 Puffer "Black"',            type:'puffer',   price:{low:320,mid:520,top:780}, wt:1.3, vol:5, soft:true, blurb:'Pacco voluminoso? Sottovuoto, amico.'},
- {id:'labobo',brand:'LABOBO',      name:'The Monsters — Vinyl Figura',    type:'figure',   price:{low:60, mid:110,top:180}, wt:0.4, vol:1.2, fragile:true, blurb:'Il gobelin che domina le scrivanie del pianeta.'},
- {id:'airpads',brand:'AIRPADS',    name:'Pro 2 "USB-C"',                  type:'buds',     price:{low:180,mid:300,top:480}, wt:0.35,vol:0.5, battery:true, blurb:'Batterie al litio: qualche linea farà storie.'},
+ {id:'af1',brand:'MIKE',name:'Air Force Low "White on White"',cat:'SCARPE',type:'sneaker',c1:'#f2efe6',c2:'#8a8374',c3:'#efe9d8',price:{low:260,mid:420,top:650},wt:1.4,vol:9,deboxable:true,blurb:'Il classico che non sbaglia mai.'},
+ {id:'dunk',brand:'MIKE',name:'Dunk Low "Panda"',cat:'SCARPE',type:'sneaker',c1:'#201d22',c2:'#f2efe6',c3:'#f2efe6',price:{low:280,mid:450,top:680},wt:1.4,vol:9,deboxable:true,blurb:'Bianco e nero: la legge della strada.'},
+ {id:'jorjan',brand:'JORJAN',name:'Retro High 1 "Bred Toe"',cat:'SCARPE',type:'sneaker',c1:'#201d22',c2:'#c0391b',c3:'#f2efe6',price:{low:300,mid:480,top:700},wt:1.5,vol:10,deboxable:true,blurb:'Rosso e nero, haters degni di nota.'},
+ {id:'jor4',brand:'JORJAN',name:'Retro 4 "Military Black"',cat:'SCARPE',type:'sneaker',c1:'#585c4e',c2:'#c9a227',c3:'#efe9d8',price:{low:340,mid:560,top:820},wt:1.5,vol:10,deboxable:true,blurb:'Militare, ma per andare a fare shopping.'},
+ {id:'samba',brand:'ABIBAS',name:'Samba OG "White/Black"',cat:'SCARPE',type:'sneaker2',c1:'#f2efe6',c2:'#201d22',c3:'#efe9d8',price:{low:220,mid:350,top:520},wt:1.2,vol:8,deboxable:true,blurb:'Il colpo di stato del 2023, ancora in vigore.'},
+ {id:'campus',brand:'ABIBAS',name:'Campus 00s "Core Black"',cat:'SCARPE',type:'sneaker2',c1:'#201d22',c2:'#f2efe6',c3:'#efe9d8',price:{low:240,mid:380,top:540},wt:1.2,vol:8,deboxable:true,blurb:'Gomma gigante, gusto gigante.'},
+ {id:'nb550',brand:'BALENCE',name:'550 "White/Green"',cat:'SCARPE',type:'sneaker',c1:'#f2efe6',c2:'#2f7d4f',c3:'#efe9d8',price:{low:240,mid:380,top:560},wt:1.3,vol:9,deboxable:true,blurb:'Basket anni 80, vibes da nonno figo.'},
+ {id:'slide',brand:'YEEZI',name:'Slide "Bone"',cat:'SCARPE',type:'slide',c1:'#e8ddc6',c2:'#d8c9a8',price:{low:90,mid:150,top:220},wt:0.5,vol:3,deboxable:true,blurb:'Ciabatta canonica dello stay-at-home flexer.'},
+ {id:'clogs',brand:'CROKS',name:'Classic Clog "Cocoa"',cat:'SCARPE',type:'clog',c1:'#b98a5a',c2:'#8a6238',price:{low:70,mid:120,top:180},wt:0.4,vol:2.5,deboxable:true,blurb:'Bucate, sacre, indivisibili.'},
+ {id:'timbs',brand:'TIMBO',name:'6" Premium "Wheat"',cat:'SCARPE',type:'boot',c1:'#c8a24a',c2:'#8a5a2a',price:{low:260,mid:420,top:620},wt:1.6,vol:11,deboxable:true,blurb:"Se non le indossi scalpando legname, perché?"},
+ {id:'suprene',brand:'SUPRENE',name:'Box Logo Hoodie "Red"',cat:'FELPA',type:'hoodie',logo:'box',c1:'#c0391b',c2:'#f2efe6',price:{low:180,mid:300,top:450},wt:0.9,vol:4,soft:true,blurb:'Il Box Logo. Lo conoscono tutti. Anzi: quasi.'},
+ {id:'chromo',brand:'CHROMO HART',name:'Cross Patch Hoodie',cat:'FELPA',type:'hoodie',logo:'cross',c1:'#201d22',c2:'#c9a227',price:{low:200,mid:330,top:500},wt:0.9,vol:4,soft:true,blurb:'Croci ovunque. In tutti i sensi.'},
+ {id:'bame',brand:'BAME',name:'Shark Hoodie "Green Camo"',cat:'FELPA',type:'shark',c1:'#3f5a3a',c2:'#2f4629',price:{low:220,mid:360,top:520},wt:1.0,vol:4.5,soft:true,blurb:'Cappuccio squalo: quando entri, ENTRI.'},
+ {id:'monkler',brand:'MONKLER',name:'Maya Puffer "Black"',cat:'GIACCA',type:'puffer',c1:'#1a1a1f',c2:'#c9c9d1',price:{low:480,mid:760,top:1150},wt:1.6,vol:6,soft:true,blurb:'Piumino seria. Termico anche solo a guardarla.'},
+ {id:'feco',brand:'NORTH FECO',name:'1996 Puffer "Navy"',cat:'GIACCA',type:'puffer',c1:'#23303c',c2:'#c9c9d1',price:{low:320,mid:520,top:780},wt:1.3,vol:5,soft:true,blurb:'Pacco voluminoso? Sottovuoto, amico.'},
+ {id:'lvtee',brand:'LUI VITTON',name:'Monogram Tee "White"',cat:'TEE',type:'tee',c1:'#f2efe6',c2:'#a97036',price:{low:150,mid:260,top:420},wt:0.4,vol:1.5,soft:true,blurb:'Il monogramma anche sulla maglietta morale.'},
+ {id:'celini',brand:'CELINIO',name:'Oversize Tee "Chez Moi"',cat:'TEE',type:'tee',c1:'#e8e0cc',c2:'#1a1a1f',price:{low:120,mid:220,top:340},wt:0.4,vol:1.5,soft:true,blurb:'"A casa mia" — cioè Guangzhou.'},
+ {id:'carharto',brand:'CARHARTO',name:'Double Knee Pant "Rust"',cat:'PANTALONI',type:'pants',c1:'#b06a2a',c2:'#8a4a18',price:{low:180,mid:300,top:460},wt:0.8,vol:3,soft:true,blurb:'Non lavori in cantiere, ma sembri uno che sa fare cose.'},
+ {id:'levy',brand:"LEVY'S",name:'501 "Original"',cat:'PANTALONI',type:'pants',c1:'#3f5a7d',c2:'#2c405c',price:{low:160,mid:260,top:400},wt:0.8,vol:3,soft:true,blurb:'Il jeans dei nonni, ora dei nipoti snob.'},
+ {id:'amirijo',brand:'AMIRIJO',name:'MX 070 "Distressed"',cat:'PANTALONI',type:'pants',c1:'#1a1a1f',c2:'#3a3a44',price:{low:280,mid:460,top:700},wt:0.8,vol:3,soft:true,blurb:"Strappi calcolati al millimetro. Costano come l'affitto."},
+ {id:'diortrack',brand:'DIORR',name:'Track Pants "Gray"',cat:'PANTALONI',type:'pants',c1:'#c9c2ad',c2:'#201d22',price:{low:220,mid:360,top:540},wt:0.7,vol:2.5,soft:true,blurb:'Atelier-sportswear: corsa col cane, ma in stile.'},
+ {id:'trench',brand:'BURBERRYO',name:'Heritage Trench "Beige"',cat:'GIACCA',type:'trench',c1:'#c8ab7a',c2:'#7a3b2e',price:{low:380,mid:620,top:950},wt:1.2,vol:5,soft:true,blurb:'Detective di Londra, ferie a Guangzhou.'},
+ {id:'burbscarf',brand:'BURBERRYO',name:'Check Scarf "Camel"',cat:'SCIARPA',type:'scarf',style:'check',c1:'#c8ab7a',c2:'#7a3b2e',c3:'#a97036',price:{low:140,mid:240,top:380},wt:0.3,vol:1,soft:true,blurb:'La sciarpa che grida "prep school" in cinese.'},
+ {id:'lvscarf',brand:'LUI VITTON',name:'Monogram Scarf',cat:'SCIARPA',type:'scarf',style:'dots',c1:'#a97036',c2:'#6b4419',price:{low:160,mid:280,top:440},wt:0.3,vol:1,soft:true,blurb:'Collo caldo, logos caldissimi.'},
+ {id:'twilly',brand:'HERMUS',name:'Silk Twilly',cat:'SCIARPA',type:'scarf',style:'thin',c1:'#b06a9e',c2:'#6b2f5a',price:{low:90,mid:160,top:260},wt:0.1,vol:0.4,soft:true,blurb:'Nastri di seta: li annodi alla borsa o alla tua autostima.'},
+ {id:'diorr',brand:'DIORR',name:'Sauvage EDP 100ml',cat:'PROFUMO',type:'perfume',c1:'#3d3d5c',c2:'#14141f',price:{low:120,mid:200,top:320},wt:0.7,vol:1.5,liquid:true,fragile:true,blurb:'Liquido + vetro: la dogana lo adora.'},
+ {id:'n5',brand:'CHANELE',name:'N°5 EDP 100ml',cat:'PROFUMO',type:'perfume',c1:'#c98aa0',c2:'#8f4a5f',price:{low:140,mid:240,top:380},wt:0.7,vol:1.5,liquid:true,fragile:true,blurb:'Un classico che profuma di nonna ricca.'},
+ {id:'aventus',brand:'CREDO',name:'Aventus 100ml',cat:'PROFUMO',type:'perfume',c1:'#2f4629',c2:'#1a2c1c',price:{low:180,mid:320,top:520},wt:0.7,vol:1.5,liquid:true,fragile:true,blurb:'Il batch della discordia: fruttato? fumoso? avvocato?'},
+ {id:'tobacco',brand:'TOM FORO',name:'Tobacco Vanille 50ml',cat:'PROFUMO',type:'perfume',c1:'#b06a2a',c2:'#6b3d12',price:{low:150,mid:260,top:420},wt:0.5,vol:1,liquid:true,fragile:true,blurb:'Profuma di sigaro e torta. Insieme. Va bene così.'},
+ {id:'labobo',brand:'LABOBO',name:'The Monsters — Vinyl Figura',cat:'DECOR',type:'figure',c1:'#9aa89f',c2:'#8a9a90',price:{low:60,mid:110,top:180},wt:0.4,vol:1.2,fragile:true,blurb:'Il gobelin che domina le scrivanie del pianeta.'},
+ {id:'bear',brand:'JELLYCATO',name:'Bartholomew Bear',cat:'DECOR',type:'plush',c1:'#b98a5a',c2:'#e8ddc6',price:{low:70,mid:130,top:210},wt:0.6,vol:3,soft:true,blurb:"L'orso che i broker tengono in webcam durante le riunioni."},
+ {id:'stitchi',brand:'DISENYI',name:'Stitch Plush',cat:'DECOR',type:'plush',c1:'#5a7fc0',c2:'#3a5a94',price:{low:60,mid:110,top:180},wt:0.5,vol:2.5,soft:true,blurb:'Alieno azzurro, abbraccio garantito, copyright ballerino.'},
+ {id:'baies',brand:'DIPTIQ',name:'Baies Candle',cat:'DECOR',type:'candle',c1:'#e8e0cc',c2:'#2f4629',price:{low:80,mid:150,top:240},wt:0.6,vol:1,fragile:true,blurb:"Rosa e ribes: l'appartamento sa di ricchezza altrui."},
+ {id:'lampa',brand:'IKEO',name:'LÅMPAN Lampada',cat:'DECOR',type:'lamp',c1:'#f2efe6',c2:'#28477e',price:{low:90,mid:150,top:230},wt:1.0,vol:3,fragile:true,blurb:'Fungo luminoso svedese, edizione Cantonia.'},
+ {id:'mingvase',brand:'MING & SONS',name:'Vaso "Blue & White"',cat:'DECOR',type:'vase',c1:'#eef2f6',c2:'#28477e',price:{low:120,mid:220,top:360},wt:0.9,vol:2.5,fragile:true,blurb:'Ceramica imperiale… di reparto ceramiche imperiali.'},
+ {id:'legoo',brand:'LEGOO',name:'Orchidea Botanica',cat:'DECOR',type:'lego',c1:'#c0391b',c2:'#28477e',price:{low:50,mid:90,top:140},wt:0.5,vol:2,blurb:'Fiore eterno: sopravvive a te e alle tue relazioni.'},
+ {id:'airpads',brand:'AIRPADS',name:'Pro 2 "USB-C"',cat:'TECH',type:'buds',c1:'#f2efe6',c2:'#2f7d4f',price:{low:180,mid:300,top:480},wt:0.35,vol:0.5,battery:true,blurb:'Batterie al litio: qualche linea farà storie.'},
+ {id:'rayben',brand:'RAY-BEN',name:'Aviator "Gold/Green"',cat:'OCCHIALI',type:'glasses',c1:'#c9a227',c2:'#5d6b52',price:{low:90,mid:160,top:260},wt:0.3,vol:0.8,fragile:true,blurb:'Piloti, poliziotti e papà del 1987 approvano.'},
+ {id:'carrero',brand:'CARRERO',name:'Champion 51 "Black"',cat:'OCCHIALI',type:'glasses',c1:'#1c1610',c2:'#3a3a44',price:{low:70,mid:130,top:210},wt:0.3,vol:0.8,fragile:true,blurb:'Occhiali da persona che non sta ridendo.'},
+ {id:'roleks',brand:'ROLEKS',name:'Submariner "No-Date"',cat:'OROLOGIO',type:'watch',c1:'#e9e4d2',c2:'#c9a227',price:{low:260,mid:450,top:850},wt:0.4,vol:0.6,fragile:true,highValue:true,blurb:"Perde 3 minuti al giorno. Come l'originale, ma più."},
+ {id:'datejust',brand:'ROLLIX',name:'Datejust 36 "Fluted"',cat:'OROLOGIO',type:'watch',c1:'#d8d8de',c2:'#9aa0a8',price:{low:220,mid:380,top:620},wt:0.4,vol:0.6,fragile:true,highValue:true,blurb:"La data c'è. L'orario, a tratti."},
+ {id:'gshock',brand:'KASIO',name:'GA-2100 "Casioak"',cat:'OROLOGIO',type:'watch',gsq:true,c1:'#201d22',c2:'#c9a227',price:{low:110,mid:190,top:300},wt:0.5,vol:0.8,battery:true,fragile:true,blurb:'Ottagono indistruttibile, batteria discussa.'},
+ {id:'gucbelt',brand:'GUCCE',name:'Double G Belt',cat:'CINTURA',type:'belt',c1:'#201d22',c2:'#c9a227',price:{low:140,mid:240,top:400},wt:0.3,vol:0.5,blurb:"Due G d'oro che tengono su i jeans e la reputazione."},
+ {id:'hermbelt',brand:'HERMUS',name:'"H" Belt Etoupe',cat:'CINTURA',type:'belt',c1:'#a98a6a',c2:'#c9a227',price:{low:160,mid:280,top:460},wt:0.3,vol:0.5,blurb:'La H che al ristorante ti fa portare il pane prima.'},
+ {id:'lvbelt',brand:'LUI VITTON',name:'Initiales Reversible',cat:'CINTURA',type:'belt',c1:'#7a4a24',c2:'#c9a227',price:{low:180,mid:300,top:480},wt:0.3,vol:0.5,blurb:'Due cinture in una: doppio il flex, doppio il dubbio.'},
+ {id:'lv',brand:'LUI VITTON',name:'Speedy 30 "Monogram"',cat:'BORSA',type:'bagLV',c1:'#a97036',c2:'#6b4419',price:{low:380,mid:620,top:980},wt:1.1,vol:9,blurb:'La borsa che urla "sto vincendo" (forse).'},
+ {id:'flap',brand:'CHANELE',name:'Classic Flap "Black/Gold"',cat:'BORSA',type:'bagFlap',c1:'#1a1a1f',c2:'#c9a227',price:{low:420,mid:680,top:1050},wt:0.9,vol:6,highValue:true,blurb:'Eleganza parigina, produzione flessibile.'},
+ {id:'ophidia',brand:'GUCCE',name:'Ophidia Tote GG',cat:'BORSA',type:'tote',c1:'#d9c9a8',c2:'#2f7d4f',c3:'#c0391b',price:{low:260,mid:420,top:650},wt:0.8,vol:7,blurb:'Tote da università privata, tasca per il disagio.'},
+ {id:'backpack',brand:'LUI VITTON',name:'Christopher Backpack',cat:'BORSA',type:'backpack',c1:'#a97036',c2:'#6b4419',price:{low:320,mid:520,top:820},wt:1.3,vol:8,blurb:'Zaino da adulto ricco con skateboard mentale.'},
+ {id:'lvwallet',brand:'LUI VITTON',name:'Multiple Wallet',cat:'PORTAFOGLIO',type:'wallet',c1:'#a97036',c2:'#6b4419',price:{low:150,mid:260,top:420},wt:0.2,vol:0.4,blurb:'Portafoglio monogramma: paga in contanti, pavoneggia.'},
+ {id:'hermwallet',brand:'HERMUS',name:'Constance Wallet',cat:'PORTAFOGLIO',type:'wallet',c1:'#c0391b',c2:'#e8ddc6',price:{low:180,mid:300,top:480},wt:0.2,vol:0.4,blurb:'Rosso arancione da collezione (di reparto).'},
+ {id:'pradwallet',brand:'PRADU',name:'Saffiano Card Holder',cat:'PORTAFOGLIO',type:'wallet',c1:'#1a1a1f',c2:'#c9c9d1',price:{low:90,mid:160,top:260},wt:0.15,vol:0.3,blurb:'Minimal, rigido, professionale nel negare tutto.'},
 ];
 const SELLERS=['Golden Dragon Kicks','Mr. Yu Factory Store','PK God Warehouse','Coco Direct','Boss Chen Basement','TopBatch Union','Heyday Footwear Co.','Dragon Mart 88',"Hu's Sneaker Lab",'Wanbao Plaza 3F'];
 const TIERS=[
@@ -411,7 +431,6 @@ const TIERS=[
  {k:'mid', tag:'MID',    risk:.22, wrong:.03, blurb:'Il punto dolce. Qualche piccola pecca possibile.'},
  {k:'top', tag:'TOP',    risk:.08, wrong:.01, blurb:'Batch top dichiarato PK/LJR. Photography-grade.'}
 ];
-/* FIX CRITICO: TIERS va cercato per chiave stringa, non indicizzato */
 const tierOf=it=>TIERS.find(t=>t.k===it.sellers[it.chosen].tier)||TIERS[0];
 
 /* ---------- SERVIZI ---------- */
@@ -434,183 +453,341 @@ const LINES=[
 ];
 const BOXES=[{s:'S',vol:2,wt:.25},{s:'M',vol:8,wt:.5},{s:'L',vol:18,wt:.9},{s:'XL',vol:30,wt:1.4}];
 
-/* ---------- CLIENTI ---------- */
+/* ---------- CLIENTI (personalità fisse, ordini random) ---------- */
 const CLIENTS={
  nonna:{u:'@nonna.resell',geo:'ITALIA · IT',pers:'chill',av:'NR',col:'#8a6a3d',notice:.45,
-   greet:'Buongiorno agent! Ordine pagato ✓ Prendi quello in lista, senza stress. Qualità media va benissimo: è per tutti i giorni.'},
+   greet:'Buongiorno agent! Ordine pagato ✓ Senza stress: qualità onesta va benissimo, è per tutti i giorni.'},
  marco:{u:'@marco_fuoco90',geo:'ITALIA · IT',pers:'newbie',av:'MF',col:'#2f7d4f',notice:.55,
-   greet:'Ciao!! primo ordine mai, ho seguito la guida sul subreddit. Metto la lista, dimmi tu! (non voglio problemi con la dogana pls)'},
+   greet:'Ciao!! Primo ordine mai, ho seguito la guida sul subreddit. Dimmi tu! (dogana pls)'},
  nerd:{u:'xX_qc_nerd_Xx',geo:'GERMANIA · DE',pers:'qcnerd',av:'QN',col:'#28477e',notice:.95,
-   greet:'Order paid. Voglio il TOP batch, intesi? Foto QC in macro: controllo ogni filo col righello. E toglili dalle scatole, pagamento note allegate.'},
+   greet:'Order paid. Voglio il TOP batch, intesi? Foto QC in macro: controllo ogni filo col righello.'},
  flex:{u:'@flex.scaler',geo:'USA · US',pers:'flexer',av:'FS',col:'#c0391b',notice:.7,
-   greet:'Paid in full. Voglio roba TOP: la mostro su IG. Spedizione DLE Priority. Ah: spedisci in STUDIO, non a casa. Mia moglie non deve vedere.'},
+   greet:'Paid in full. Roba TOP: la mostro su IG. E mi raccomando, spedizione VELOCE.'},
  yumi:{u:'@yumi.drip',geo:'GIAPPONE · JP',pers:'collector',av:'YD',col:'#b06a9e',notice:.7,
-   greet:'こんにちは agent! Lista pagata. Per le batterie mi serve una linea che le accetti, ma senza spendere come DLE. Imballo MORBIDO per la figura, onegai.'},
+   greet:'こんにちは agent! Lista pagata. Occhio ai vincoli della linea di spedizione, onegai.'},
  clout:{u:'@clout.chaser',geo:'USA · US',pers:'flexer',av:'CC',col:'#8f43c2',notice:.7,
-   greet:'Paid. Top batch per entrambi. Spedisci con Yanween Express: odio aspettare. Il profumo imballalo BENE, e il hoodie sottovuoto: odio i pacchi gonfi.'},
+   greet:'Paid. Voglio il meglio e spedizione express: fit-check venerdì. E niente pacco gonfio.'},
  trevolta:{u:'@trevolta_hauls',geo:'UK · GB',pers:'reseller',av:'TH',col:'#1d3260',notice:.85,
-   greet:'Big haul paid. Batch MID basta — i margini sono margini — ma voglio DLE Priority, serve per un drop. DEBOX + SOTTOVUOTO + PROTEZIONE: nota bene. Ship to THE STUDIO address, non a casa.'},
+   greet:'Big haul paid. Onesto basta — i margini sono margini — ma voglio l\'express per un drop. E occhio all\'indirizzo: studio, non casa.'},
  thrifty:{u:'@thrifty.tia',geo:'FRANCIA · FR',pers:'broke',av:'TT',col:'#a8700a',notice:.5,
-   greet:'Salut! Pagato il minimo sindacale ahah. Batch economico, linea GD, foto standard. Siamo poveri ma belli.'},
+   greet:'Salut! Minimo sindacale ahah: batch economico, linea lenta, foto standard. Poveri ma belli.'},
  mom:{u:'@haulmom_of2',geo:'FRANCIA · FR',pers:'chill',av:'HM',col:'#2f7d4f',notice:.45,
-   greet:"Coucou! Regalo per mio figlio. Occhiali stylos, batch basso ok. Un po' di protezione nel pacco, sono fragili eh."},
+   greet:"Coucou! Regalo per mio figlio. Batch basso ok, ma imballalo con cura: è fragile eh."},
 };
 
-/* ---------- SCENARI SETTIMANA ---------- */
-const SCEN=[
- {cli:'nonna', items:['samba'], expect:'mid', serv:['photoStd'], pref:'gd',  addr:1},
- {cli:'marco', items:['suprene'],expect:'mid', serv:['vacuum','photoHD'], pref:'gd', addr:1, flash:'slide'},
- {cli:'nerd',  items:['jorjan'], expect:'top', serv:['debox','photoHD','detag'], pref:'salt', addr:1},
- {cli:'flex',  items:['roleks','rayben'], expect:'top', serv:['protect','photoHD'], pref:'dle', addr:2, req:1, anote:'ship to STUDIO'},
- {cli:'yumi',  items:['labobo','airpads'], expect:'mid', serv:['protect','photoStd'], pref:'salt', addr:1, flash:'rayben'},
- {cli:'clout', items:['bame','diorr'], expect:'top', serv:['vacuum','photoHD'], pref:'yan', addr:1},
- {cli:'trevolta',items:['monkler','feco','af1','lv'], expect:'mid', serv:['vacuum','debox','protect','photoHD'], pref:'dle', addr:2, req:1, anote:'STUDIO, non casa'},
-];
-const FLASH={slide:'thrifty',rayben:'mom'};
-
-/* ---------- HOTSPOT QC ---------- */
+/* ---------- HOTSPOT QC (per tipo di prodotto) ---------- */
 const SPOTS={
- sneaker:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:50,y:30},{k:'stitch',l:'CUCITURE',x:22,y:26},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:78,y:22}],
- sneaker2:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'STRISPE',x:30,y:28},{k:'stitch',l:'CUCITURE',x:70,y:24},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:78,y:30}],
- slide:[{k:'order',l:'CONFRONTO ORDINE'},{k:'strap',l:'STRAP',x:55,y:40},{k:'sole',l:'SUOLA',x:50,y:78},{k:'color',l:'COLORE',x:25,y:30},{k:'mold',l:'STAMPAGGIO',x:78,y:55}],
- hoodie:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO STAMPATO',x:52,y:48},{k:'stitch',l:'CUCITURE',x:22,y:30},{k:'fabric',l:'TESSUTO',x:76,y:62},{k:'color',l:'COLORE',x:50,y:24}],
- shark:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'CAMO',x:30,y:55},{k:'stitch',l:'CUCITURE',x:74,y:30},{k:'fabric',l:'TESSUTO',x:60,y:70},{k:'color',l:'COLORE',x:25,y:25}],
- bagLV:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MONOGRAM',x:45,y:55},{k:'handle',l:'MANICI',x:55,y:20},{k:'hardware',l:'HARDWARE',x:78,y:45},{k:'stitch',l:'CUCITURE',x:20,y:70}],
- bagFlap:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'DOPPIA C',x:55,y:38},{k:'handle',l:'CATENA',x:35,y:20},{k:'hardware',l:'HARDWARE',x:76,y:60},{k:'stitch',l:'CUCITURE',x:25,y:70}],
- perfume:[{k:'order',l:'CONFRONTO ORDINE'},{k:'bottle',l:'FLACONE',x:50,y:60},{k:'cap',l:'TAPPO·POMPA',x:50,y:22},{k:'label',l:'ETICHETTA',x:62,y:55},{k:'boxq',l:'SCATOLA',x:20,y:40}],
- watch:[{k:'order',l:'CONFRONTO ORDINE'},{k:'dial',l:'QUADRANTE',x:50,y:50},{k:'glass',l:'VETRO',x:50,y:32},{k:'strap',l:'BRACCIALE',x:50,y:80},{k:'move',l:'MOVIMENTO',x:76,y:50}],
- glasses:[{k:'order',l:'CONFRONTO ORDINE'},{k:'lens',l:'LENTI',x:30,y:55},{k:'frame',l:'ASTE',x:76,y:30},{k:'hardware',l:'PONTICELLO',x:50,y:32},{k:'color',l:'FINITURA',x:68,y:70}],
- puffer:[{k:'order',l:'CONFRONTO ORDINE'},{k:'zip',l:'ZIP·HARDWARE',x:50,y:52},{k:'stitch',l:'QUILTING',x:25,y:55},{k:'fill',l:'PIUMINO',x:74,y:35},{k:'color',l:'COLORE',x:50,y:22}],
- figure:[{k:'order',l:'CONFRONTO ORDINE'},{k:'paint',l:'VERNICE',x:70,y:30},{k:'face',l:'FACCIA',x:50,y:45},{k:'joint',l:'ARTICOLAZIONI',x:30,y:70},{k:'boxq',l:'SCATOLA',x:20,y:28}],
- buds:[{k:'order',l:'CONFRONTO ORDINE'},{k:'caseq',l:'CASE',x:50,y:72},{k:'budsq',l:'AURICOLARI',x:30,y:30},{k:'sound',l:'PAIRING AUDIO',x:70,y:28},{k:'battery',l:'BATTERIA',x:55,y:45}],
+ sneaker:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:50,y:28},{k:'stitch',l:'CUCITURE',x:22,y:26},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:78,y:20}],
+ sneaker2:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'STRISPE',x:30,y:28},{k:'stitch',l:'CUCITURE',x:70,y:24},{k:'sole',l:'SUOLA·COLLA',x:52,y:78},{k:'color',l:'COLORE',x:80,y:24}],
+ slide:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'BRANDING',x:62,y:38},{k:'mold',l:'STAMPAGGIO',x:80,y:55},{k:'sole',l:'SUOLA',x:50,y:80},{k:'color',l:'COLORE',x:25,y:32}],
+ clog:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'BRANDING',x:50,y:36},{k:'mold',l:'FORI·STAMPO',x:70,y:50},{k:'sole',l:'SUOLA',x:50,y:80},{k:'color',l:'COLORE',x:25,y:32}],
+ boot:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:50,y:26},{k:'stitch',l:'CUCITURE',x:24,y:42},{k:'sole',l:'SUOLA',x:52,y:82},{k:'color',l:'COLORE',x:78,y:44}],
+ hoodie:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:52,y:48},{k:'stitch',l:'CUCITURE',x:22,y:30},{k:'fabric',l:'TESSUTO',x:78,y:62},{k:'color',l:'COLORE',x:50,y:22}],
+ shark:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'CAMO',x:30,y:55},{k:'stitch',l:'CUCITURE',x:74,y:30},{k:'fabric',l:'TESSUTO',x:60,y:70},{k:'color',l:'COLORE',x:25,y:24}],
+ tee:[{k:'order',l:'CONFRONTO ORDINE'},{k:'print',l:'STAMPA',x:52,y:52},{k:'fabric',l:'TESSUTO',x:76,y:62},{k:'stitch',l:'CUCITURE',x:24,y:34},{k:'color',l:'COLORE',x:50,y:22}],
+ pants:[{k:'order',l:'CONFRONTO ORDINE'},{k:'stitch',l:'CUCITURE',x:26,y:40},{k:'fabric',l:'TESSUTO',x:70,y:50},{k:'wash',l:'LAVAGGIO',x:50,y:68},{k:'color',l:'COLORE',x:50,y:24}],
+ trench:[{k:'order',l:'CONFRONTO ORDINE'},{k:'stitch',l:'CUCITURE',x:24,y:34},{k:'fabric',l:'TESSUTO',x:72,y:58},{k:'hardware',l:'BOTTONI·CCINTURA',x:50,y:50},{k:'color',l:'COLORE',x:50,y:22}],
+ scarf:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MOTIVO',x:45,y:45},{k:'fabric',l:'TESSUTO',x:72,y:62},{k:'stitch',l:'ORLO',x:24,y:40},{k:'color',l:'COLORE',x:62,y:22}],
+ puffer:[{k:'order',l:'CONFRONTO ORDINE'},{k:'zip',l:'ZIP·HARDWARE',x:50,y:52},{k:'stitch',l:'QUILTING',x:25,y:55},{k:'fill',l:'PIUMINO',x:75,y:35},{k:'color',l:'COLORE',x:50,y:22}],
+ perfume:[{k:'order',l:'CONFRONTO ORDINE'},{k:'bottle',l:'FLACONE',x:50,y:60},{k:'cap',l:'TAPPO·POMPA',x:50,y:22},{k:'label',l:'ETICHETTA',x:64,y:55},{k:'scent',l:'PROVA OLFAKTIVA',x:80,y:42}],
+ figure:[{k:'order',l:'CONFRONTO ORDINE'},{k:'paint',l:'VERNICE',x:72,y:30},{k:'face',l:'FACCIA',x:50,y:45},{k:'joint',l:'ARTICOLAZIONI',x:30,y:70},{k:'boxq',l:'SCATOLA',x:20,y:28}],
+ plush:[{k:'order',l:'CONFRONTO ORDINE'},{k:'fabric',l:'PELUCHE',x:72,y:60},{k:'face',l:'FACCIA',x:50,y:40},{k:'stitch',l:'CUCITURE',x:26,y:34},{k:'fill',l:'IMBOTTITURA',x:50,y:72}],
+ candle:[{k:'order',l:'CONFRONTO ORDINE'},{k:'wax',l:'CERA',x:42,y:62},{k:'scent',l:'FRAGANZA',x:78,y:40},{k:'label',l:'ETICHETTA',x:55,y:50},{k:'boxq',l:'SCATOLA',x:20,y:30}],
+ lamp:[{k:'order',l:'CONFRONTO ORDINE'},{k:'finish',l:'FINITURA',x:50,y:26},{k:'structure',l:'STRUTTURA',x:55,y:70},{k:'wiring',l:'FILI·INTERRUTORE',x:78,y:55},{k:'boxq',l:'SCATOLA',x:20,y:35}],
+ vase:[{k:'order',l:'CONFRONTO ORDINE'},{k:'paint',l:'DECORI',x:40,y:50},{k:'finish',l:'SMALTO',x:70,y:55},{k:'structure',l:'FORMA',x:50,y:74},{k:'boxq',l:'SCATOLA',x:22,y:30}],
+ lego:[{k:'order',l:'CONFRONTO ORDINE'},{k:'brick',l:'PEZZI',x:40,y:62},{k:'paint',l:'COLORI·ADESIVI',x:65,y:35},{k:'structure',l:'ASSEMBLAGGIO',x:50,y:78},{k:'boxq',l:'SCATOLA',x:20,y:25}],
+ buds:[{k:'order',l:'CONFRONTO ORDINE'},{k:'caseq',l:'CASE',x:50,y:72},{k:'budsq',l:'AURICOLARI',x:30,y:30},{k:'sound',l:'PAIRING AUDIO',x:72,y:28},{k:'battery',l:'BATTERIA',x:55,y:45}],
+ glasses:[{k:'order',l:'CONFRONTO ORDINE'},{k:'lens',l:'LENTI',x:30,y:55},{k:'frame',l:'ASTE',x:76,y:30},{k:'hardware',l:'PONTICELLO',x:50,y:32},{k:'color',l:'FINITURA',x:70,y:70}],
+ watch:[{k:'order',l:'CONFRONTO ORDINE'},{k:'dial',l:'QUADRANTE',x:50,y:50},{k:'glass',l:'VETRO',x:50,y:32},{k:'strap',l:'BRACCIALE',x:50,y:82},{k:'move',l:'MOVIMENTO',x:78,y:50}],
+ belt:[{k:'order',l:'CONFRONTO ORDINE'},{k:'leather',l:'CUOIO',x:38,y:50},{k:'hardware',l:'FIBBIA',x:80,y:48},{k:'stitch',l:'CUCITURE',x:58,y:68},{k:'color',l:'COLORE',x:58,y:32}],
+ bagLV:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MONOGRAM',x:45,y:55},{k:'handle',l:'MANICI',x:55,y:20},{k:'hardware',l:'HARDWARE',x:80,y:45},{k:'stitch',l:'CUCITURE',x:20,y:70}],
+ bagFlap:[{k:'order',l:'CONFRONTO ORDINE'},{k:'logo',l:'LOGO',x:55,y:38},{k:'handle',l:'CATENA',x:35,y:20},{k:'hardware',l:'HARDWARE',x:78,y:60},{k:'stitch',l:'CUCITURE',x:25,y:70}],
+ tote:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MOTIVO',x:45,y:55},{k:'handle',l:'MANICI',x:40,y:22},{k:'hardware',l:'HARDWARE',x:78,y:45},{k:'stitch',l:'CUCITURE',x:20,y:70}],
+ backpack:[{k:'order',l:'CONFRONTO ORDINE'},{k:'zip',l:'ZIP',x:50,y:62},{k:'handle',l:'MANICO',x:58,y:18},{k:'hardware',l:'HARDWARE',x:80,y:45},{k:'stitch',l:'CUSCINETTI',x:22,y:70}],
+ wallet:[{k:'order',l:'CONFRONTO ORDINE'},{k:'pattern',l:'MOTIVO',x:45,y:45},{k:'leather',l:'PELLAME',x:72,y:62},{k:'stitch',l:'CUCITURE',x:25,y:35},{k:'color',l:'COLORE',x:50,y:74}],
 };
 
 /* ---------- DIFETTI ---------- */
 const DEF={
- order:["Hanno spedito il MODELLO SBAGLIATO: versione Low invece di High.","Item diverso dal listing: colorway completamente altra."],
+ order:["Hanno spedito il MODELLO SBAGLIATO: versione completamente diversa dal listing.","Item diverso dall'ordine: colorway altra, taglia altra, mondo altro."],
  logo:["Il logo è storto di 2mm. Lo noterebbe anche mia nonna.","Ricamo con filo doppio: non si vedeva dal 2015.",'Le lettere sbavate: "MIKE" sembra "MlKE".'],
  stitch:["Cucitura del tallone fuori linea di 3mm.","Un punto mancante sulla linguetta.","Filo sporgente sul pannello laterale."],
  sole:["Colla in eccesso sulla suola: appiccica il pavimento.","Suole asimmetriche: la sinistra è più corta di 4mm.","Aloni di colla sul midsole."],
  color:['Il "bianco" è più crema-dentifricio che bianco.',"Colore mezzo tono più scuro del listing.","Sfumatura diversa dal campione in foto."],
  fabric:["Il cotone è più ruvido del previsto.","Pilling già presente sull'interno cappuccio.","Grammatura leggera: traspara sotto i flash."],
- pattern:['Il monogramma ha due "LV" attaccati: davanti c\'è un bacio.',"Il camo si ripete in modo troppo regolare: pattern blocco."],
+ pattern:['Il monogramma ha due sigle attaccate: davanti c\'è un bacio.',"Il motivo si ripete in modo troppo regolare: pattern blocco."],
  handle:["Manico sinistro più corto: la borsa pendola.",'La catena ha una maglia "cantante" (allentata).'],
  hardware:["Zip dura come un cancello di campagna.","Doratura della fibbia già opaca su un angolo."],
  bottle:["Bolla d'aria nel vetro del flacone.","Il liquido è leggermente torbido."],
  cap:["La pompa spruzza di lato: profumo negli occhi.","Tappo allentato: rischia di aprirsi in transito."],
- label:["Etichetta storta e leggermente sbiadita.",'Stampa "DIORR" con la R finale tagliata.'],
+ label:["Etichetta storta e leggermente sbiadita.","La stampa del brand ha l'ultima lettera tagliata."],
+ scent:["Apre bene, svanisce in 20 minuti.","Nota di fondo sospetta: detersivo per piatti.","Intensità metà del campione."],
  boxq:["Scatola ammaccata su un angolo.","La box ha un odore sospetto di magazzino umido."],
- dial:["Indici delle ore leggermente disallineati alle 4.","Lancetta dei secondi attritata: scatti nervosi."],
+ dial:["Indici delle ore leggermente disallineati.","Lancetta dei secondi attritata: scatti nervosi."],
  glass:["Vetro con micro-graffio circolare.","Un alone opaco sul cristallo (brutto, su un orologio)."],
- strap:["Bracciale con una maglia graffiata.","Chiusura con gioco eccessivo: apre da sola.","Bordo dello strap tagliente, non rifinito."],
- move:["Perde 4 minuti al giorno. L'originale ne perde 3.","Batteria scarica: parte già fermo."],
  lens:["Lente sinistra con distorsione ai bordi.","Un graffio a goccia sulla lente destra."],
  frame:["Asta sinistra allentata: scivola dal viso.","Punta in plastica (non metallo) sul lato destro."],
- zip:["Zip della giacca che sale storta.",'Aprendola fa "zzz-zz-ZOK" a metà percorso.'],
+ strap:["Bracciale con una maglia graffiata.","Chiusura con gioco eccessivo: apre da sola.","Bordo tagliente, non rifinito."],
+ move:["Perde 4 minuti al giorno. L'originale ne perde 3.","Batteria scarica: parte già fermo."],
+ zip:["Zip che sale storta.",'Aprendola fa "zzz-zz-ZOK" a metà percorso.'],
  fill:["Piumino distribuito male: un pannello più gonfio.","Imbottitura che fuoriesce da una cucitura."],
- paint:["Vernice sbavata sull'angolo di un'orecchia.","Un micro-dint nel nasone."],
- face:["Occhi stampati asimmetrici: guarda due direzioni.",'Denti della "smile" con una punta scolorita.'],
+ paint:["Vernice sbavata sull'angolo.","Un micro-dint dove non dovrebbe esserci."],
+ face:["Occhi stampati asimmetrici: guarda due direzioni.",'La "smile" ha una punta scolorita.'],
  joint:["Testa che ruota troppo liberamente: bobble-head.","Braccio destro bloccato."],
  caseq:["Case con graffio sul coperchio.","Cerniera del case rumorosa."],
  budsq:["Un auricolare più giallino dell'altro.","Griglia speaker storta su un lato."],
  sound:["Canale destro più basso del sinistro.","Il pairing funziona... ogni tanto. Tipo quando vuole."],
- battery:["Durata dichiarata 6h, reale: 2h e un preavviso.","Un bud si pairinga solo dopo un reboot esoterico."],
- mold:["Bordo stampato con sbavatura di gomma."],
+ battery:["Durata dichiarata 6h, reale: 2h e un preavviso.","Si pairinga solo dopo un reboot esoterico."],
+ mold:["Bordo stampato con sbavatura.","Superficie di stampaggio irregolare su un lato."],
+ print:["La stampa è fuori centro di mezzo centimetro.","Serigrafia già crepata sulla piega.","Il print ha un colore mezzo tono più spento."],
+ wash:["Lavaggio disuguale: un ginocchio più chiaro dell'altro.","Il distressing sembra opera di un gatto nervoso.","La tinta ha macchiato le cuciture."],
+ leather:["Grana della pelle troppo piatta: 'premium PU'.","Bordo tagliato senza rifinitura.","Odore chimico che apre le naristi."],
+ wax:["Crepa superficiale sulla cera.","Superficie irregolare su un lato.","Colore più scuro di mezzo tono."],
+ finish:["Finitura opaca dove doveva esser lucida.","Micro-graffi di trasporto.","Una bolla di vernice sul fianco."],
+ structure:["Pende leggermente a sinistra.","La base dondola: appoggio instabile.","Un giunto si piega più del dovuto."],
+ wiring:["Il filo è corto di 15 cm.","L'interruttore fa un click preoccupante.","La lampadina inclusa lampeggia, nervosa."],
+ brick:["Un pezzo ha il colore fuori tono.","Due mattoni si incastrano troppo duro.","Un adesivo decorativo storto di 10 gradi."],
 };
 function dtx(it,k){return (it.defText&&it.defText[k])||DEF[k][0]}
 
-/* ---------- SVG PRODOTTI ---------- */
+/* =========================================================
+   SVG PRODOTTI — un disegno per tipo, colori per item
+   ========================================================= */
 const INK='#1c1610';
-function svP(id){
- const it=CATALOG.find(x=>x.id===id);if(!it)return '';
+function svItem(it){
+ if(!it)return '';
  const t=it.type;
- const L=(d,f)=>'<path d="'+d+'" fill="'+(f||'none')+'" stroke="'+INK+'" stroke-width="2" stroke-linejoin="round"/>';
+ const c1=it.c1||'#f2efe6',c2=it.c2||'#28477e',c3=it.c3||'#efe9d8';
+ const P=(d,f)=>'<path d="'+d+'" fill="'+(f||'none')+'" stroke="'+INK+'" stroke-width="2" stroke-linejoin="round"/>';
+ const RX=(x,y,w,h,f,r)=>'<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" rx="'+(r||0)+'" fill="'+f+'" stroke="'+INK+'" stroke-width="2"/>';
+ const TX=(x,y,txt,fs,fill,op)=>'<text x="'+x+'" y="'+y+'" font-family="Space Mono" font-size="'+fs+'" font-weight="700" fill="'+(fill||INK)+'"'+(op?' opacity="'+op+'"':'')+'>'+esc(txt)+'</text>';
  let s='';
- if(t==='sneaker'||t==='sneaker2'){
-   const bred=(t==='sneaker'&&id==='jorjan');
-   s+=L('M16 66 L22 46 Q26 38 36 36 L46 30 Q55 24 62 28 L76 36 Q94 40 100 52 L104 62 L104 66 Z', bred?'#201d22':'#f2efe6');
-   s+=L('M16 66 Q60 58 104 66 L104 74 Q104 78 98 78 L22 78 Q16 78 16 72 Z', bred?'#f2efe6':'#efe9d8');
-   if(t==='sneaker2'){s+='<path d="M30 38 L38 56 M37 36 L45 56 M44 34 L52 54" stroke="'+(bred?'#c0391b':'#201d22')+'" stroke-width="4" fill="none"/>'}
-   else{s+='<path d="M50 56 Q68 44 88 58" stroke="'+(bred?'#c0391b':'#8a8374')+'" stroke-width="5" fill="none"/>'}
+ if(t==='sneaker'){
+   s+=P('M16 66 L22 46 Q26 38 36 36 L46 30 Q55 24 62 28 L76 36 Q94 40 100 52 L104 62 L104 66 Z',c1);
+   s+=P('M16 66 Q60 58 104 66 L104 74 Q104 78 98 78 L22 78 Q16 78 16 72 Z',c3);
+   s+='<path d="M50 56 Q68 44 88 58" stroke="'+c2+'" stroke-width="5" fill="none"/>';
    s+='<path d="M44 36 L52 32 M48 40 L58 34 M52 44 L64 38" stroke="'+INK+'" stroke-width="2" fill="none"/>';
-   s+='<text x="86" y="74" font-family="Space Mono" font-size="6" fill="'+INK+'" opacity=".65">'+esc(it.brand.split(' ')[0])+'</text>';
+   s+=TX(84,73,it.brand.split(' ')[0].slice(0,7),6,INK,.6);
  }
- if(t==='slide'){
-   s+=L('M18 68 L102 68 L102 80 Q102 86 94 86 L26 86 Q18 86 18 78 Z','#e8ddc6');
-   s+=L('M42 68 C48 44 78 46 86 64 L84 68 Z','#e3d3b5');
+ else if(t==='sneaker2'){
+   s+=P('M16 66 L22 46 Q26 38 36 36 L46 30 Q55 24 62 28 L76 36 Q94 40 100 52 L104 62 L104 66 Z',c1);
+   s+=P('M16 66 Q60 58 104 66 L104 74 Q104 78 98 78 L22 78 Q16 78 16 72 Z',c3);
+   s+='<path d="M30 38 L38 56 M37 36 L45 56 M44 34 L52 54" stroke="'+c2+'" stroke-width="4" fill="none"/>';
+   s+='<path d="M44 36 L52 32 M48 40 L58 34" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+   s+=TX(84,73,it.brand.split(' ')[0].slice(0,7),6,INK,.6);
+ }
+ else if(t==='slide'){
+   s+=P('M18 68 L102 68 L102 80 Q102 86 94 86 L26 86 Q18 86 18 78 Z',c1);
+   s+=P('M42 68 C48 44 78 46 86 64 L84 68 Z',c2);
    s+='<circle cx="34" cy="78" r="1.3" fill="'+INK+'"/><circle cx="44" cy="79" r="1.3" fill="'+INK+'"/><circle cx="54" cy="79" r="1.3" fill="'+INK+'"/><circle cx="64" cy="79" r="1.3" fill="'+INK+'"/><circle cx="74" cy="79" r="1.3" fill="'+INK+'"/><circle cx="84" cy="78" r="1.3" fill="'+INK+'"/>';
  }
- if(t==='hoodie'||t==='shark'){
-   const base=(t==='shark')?'#3f5a3a':(id==='suprene'?'#c0391b':'#201d22');
-   const pid='pt'+id;
-   if(t==='shark'){s+='<defs><pattern id="'+pid+'" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#3f5a3a"/><path d="M2 4 Q6 0 9 4 Q12 8 15 3 Q16 10 9 12 Q4 14 2 8 Z" fill="#556e4a"/><circle cx="13" cy="12" r="2" fill="#2f4629"/></pattern></defs>'}
-   s+='<path d="M38 34 L30 40 L22 44 L18 62 L28 60 L28 86 L92 86 L92 60 L102 62 L98 44 L90 40 L82 34 Q60 42 38 34 Z" fill="'+(t==='shark'?'url(#'+pid+')':base)+'" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M46 32 Q60 18 74 32 Q60 40 46 32 Z" fill="'+(t==='shark'?'#2f4629':'#151015')+'" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M48 68 L72 68 L74 84 L46 84 Z" fill="'+(t==='shark'?'#2f4629':'rgba(0,0,0,.15)')+'" stroke="'+INK+'" stroke-width="2"/>';
+ else if(t==='clog'){
+   s+=P('M26 48 Q26 34 40 34 L82 34 Q96 34 96 50 L96 76 Q96 84 88 84 L34 84 Q26 84 26 76 Z',c1);
+   s+='<circle cx="42" cy="46" r="2.4" fill="'+INK+'"/><circle cx="54" cy="44" r="2.4" fill="'+INK+'"/><circle cx="66" cy="46" r="2.4" fill="'+INK+'"/>';
+   s+='<path d="M26 68 L96 68" stroke="'+INK+'" stroke-width="2"/>';
+   s+=P('M60 34 Q64 18 78 24 L74 34 Z',c2);
+ }
+ else if(t==='boot'){
+   s+=RX(40,10,36,46,c1,3);
+   s+=P('M32 56 L84 56 L90 72 Q90 82 80 82 L34 82 Q26 82 26 72 Z',c1);
+   s+=RX(26,74,64,8,c2,2);
+   s+='<path d="M48 20 L64 26 M64 20 L48 26 M48 32 L64 38 M64 32 L48 38 M48 44 L64 50 M64 44 L48 50" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+   s+='<path d="M40 12 L76 12" stroke="'+c2+'" stroke-width="4" fill="none"/>';
+   s+=TX(44,40,it.brand.slice(0,6),6,INK,.75);
+ }
+ else if(t==='hoodie'){
+   s+=P('M38 34 L30 40 L22 44 L18 62 L28 60 L28 86 L92 86 L92 60 L102 62 L98 44 L90 40 L82 34 Q60 42 38 34 Z',c1);
+   s+=P('M46 32 Q60 18 74 32 Q60 40 46 32 Z',c2);
+   s+=P('M48 68 L72 68 L74 84 L46 84 Z','rgba(0,0,0,.15)');
    s+='<path d="M54 38 L54 52 M66 38 L66 52" stroke="'+INK+'" stroke-width="2" fill="none"/>';
-   if(id==='suprene')s+='<rect x="49" y="44" width="22" height="9" fill="#f2efe6" stroke="'+INK+'" stroke-width="1.5"/><text x="51.5" y="51" font-family="Space Mono" font-size="6" font-weight="700" fill="#c0391b">SUPRENE</text>';
-   if(id==='chromo')s+='<g stroke="'+INK+'" stroke-width="1.5" fill="none"><path d="M52 46 L57 41 L62 46 L67 41"/><path d="M52 53 L57 48 L62 53 L67 48"/></g>';
+   if(it.logo==='box'){s+=RX(49,42,22,9,'#f2efe6',1);s+=TX(51,49,'SUPRENE',5.5,'#c0391b')}
+   else if(it.logo==='cross'){s+='<g stroke="'+c2+'" stroke-width="2.5" fill="none"><path d="M52 46 L57 41 L62 46 L67 41"/><path d="M52 53 L57 48 L62 53 L67 48"/></g>'}
  }
- if(t==='bagLV'){
-   s+='<defs><pattern id="lv'+id+'" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="#a97036"/><text x="1" y="9" font-family="Space Mono" font-size="7" font-weight="700" fill="#6b4419">LV</text><text x="8" y="15" font-family="Space Mono" font-size="7" font-weight="700" fill="#6b4419">LV</text></pattern></defs>';
-   s+='<path d="M34 44 L86 44 L92 80 L28 80 Z" fill="url(#lv'+id+')" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M40 44 C40 26 80 26 80 44" fill="none" stroke="'+INK+'" stroke-width="4"/>';
-   s+='<path d="M30 50 L90 50" stroke="#6b4419" stroke-width="2"/><rect x="56" y="48" width="8" height="6" fill="#c9a227" stroke="'+INK+'" stroke-width="1.5"/>';
+ else if(t==='shark'){
+   s+='<defs><pattern id="pt'+it.id+'" width="16" height="16" patternUnits="userSpaceOnUse"><rect width="16" height="16" fill="#3f5a3a"/><path d="M2 4 Q6 0 9 4 Q12 8 15 3 Q16 10 9 12 Q4 14 2 8 Z" fill="#556e4a"/><circle cx="13" cy="12" r="2" fill="#2f4629"/></pattern></defs>';
+   s+='<path d="M38 34 L30 40 L22 44 L18 62 L28 60 L28 86 L92 86 L92 60 L102 62 L98 44 L90 40 L82 34 Q60 42 38 34 Z" fill="url(#pt'+it.id+')" stroke="'+INK+'" stroke-width="2"/>';
+   s+=P('M46 32 Q60 18 74 32 Q60 40 46 32 Z','#2f4629');
+   s+=P('M48 68 L72 68 L74 84 L46 84 Z','#2f4629');
+   s+='<path d="M54 38 L54 52 M66 38 L66 52" stroke="'+INK+'" stroke-width="2" fill="none"/>';
  }
- if(t==='bagFlap'){
-   s+='<path d="M34 38 L86 38 L92 82 L28 82 Z" fill="#1a1a1f" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M34 38 L86 38 L88 52 L32 52 Z" fill="#26262e" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M36 38 C36 20 84 20 84 38" fill="none" stroke="#c9a227" stroke-width="3"/>';
-   s+='<circle cx="36" cy="41" r="3" fill="#c9a227" stroke="'+INK+'" stroke-width="1"/><circle cx="84" cy="41" r="3" fill="#c9a227" stroke="'+INK+'" stroke-width="1"/>';
-   s+='<g stroke="#c9a227" stroke-width="2" fill="none"><path d="M56 60 a4 4 0 1 1 8 0"/><path d="M64 60 a4 4 0 1 1 -8 0"/></g>';
- }
- if(t==='perfume'){
-   s+='<defs><linearGradient id="pg'+id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3d3d5c"/><stop offset="1" stop-color="#14141f"/></linearGradient></defs>';
-   s+='<rect x="40" y="46" width="40" height="42" rx="4" fill="url(#pg'+id+')" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<rect x="53" y="30" width="14" height="15" rx="2" fill="#c9c9d1" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<rect x="56" y="26" width="8" height="5" rx="1" fill="#8f8f99" stroke="'+INK+'" stroke-width="1.5"/>';
-   s+='<rect x="46" y="56" width="28" height="20" rx="2" fill="#f2efe6" stroke="'+INK+'" stroke-width="1.5"/>';
-   s+='<text x="51" y="64" font-family="Space Mono" font-size="7" font-weight="700" fill="'+INK+'">DIORR</text><text x="48.5" y="72" font-family="Space Mono" font-size="5" fill="'+INK+'" opacity=".7">SAUVAGE</text>';
- }
- if(t==='watch'){
-   s+='<rect x="50" y="12" width="20" height="24" rx="5" fill="#28477e" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<rect x="50" y="84" width="20" height="24" rx="5" fill="#28477e" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<circle cx="60" cy="60" r="19" fill="#e9e4d2" stroke="'+INK+'" stroke-width="3"/>';
-   s+='<circle cx="60" cy="60" r="19" fill="none" stroke="#c9a227" stroke-width="2.5"/>';
-   s+='<g stroke="'+INK+'" stroke-width="1.5"><line x1="60" y1="43" x2="60" y2="47"/><line x1="60" y1="73" x2="60" y2="77"/><line x1="43" y1="60" x2="47" y2="60"/><line x1="73" y1="60" x2="77" y2="60"/></g>';
-   s+='<circle cx="60" cy="52" r="1" fill="'+INK+'"/><circle cx="68" cy="60" r="1" fill="'+INK+'"/><circle cx="60" cy="68" r="1" fill="'+INK+'"/><circle cx="52" cy="60" r="1" fill="'+INK+'"/>';
-   s+='<line x1="60" y1="60" x2="53" y2="54" stroke="'+INK+'" stroke-width="2.5"/><line x1="60" y1="60" x2="66" y2="47" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<text x="49" y="71" font-family="Space Mono" font-size="4.5" fill="'+INK+'">ROLEKS</text><rect x="74" y="57" width="5" height="6" rx="1" fill="#c9c9d1" stroke="'+INK+'" stroke-width="1"/>';
- }
- if(t==='glasses'){
-   s+='<g fill="#5d6b52" opacity=".85" stroke="#c9a227" stroke-width="2.5"><path d="M24 42 C24 62 36 72 46 69 C55 66 56 50 54 42 Z"/><path d="M96 42 C96 62 84 72 74 69 C65 66 64 50 66 42 Z"/></g>';
-   s+='<path d="M54 46 Q60 40 66 46 M50 40 Q60 34 70 40" fill="none" stroke="#c9a227" stroke-width="2.5"/>';
-   s+='<path d="M24 44 L12 38 M96 44 L108 38" stroke="#c9a227" stroke-width="3"/>';
- }
- if(t==='puffer'){
-   const base=(id==='monkler')?'#1a1a1f':'#23303c';
-   s+='<path d="M38 30 L26 38 L22 56 L30 55 L30 82 L90 82 L90 55 L98 56 L94 38 L82 30 Q60 26 38 30 Z" fill="'+base+'" stroke="'+INK+'" stroke-width="2"/>';
+ else if(t==='puffer'){
+   s+=P('M38 30 L26 38 L22 56 L30 55 L30 82 L90 82 L90 55 L98 56 L94 38 L82 30 Q60 26 38 30 Z',c1);
    s+='<g stroke="'+INK+'" stroke-width="1.5" opacity=".7"><path d="M31 40 L89 40"/><path d="M31 48 L89 48"/><path d="M31 56 L89 56"/><path d="M31 64 L89 64"/><path d="M31 72 L89 72"/></g>';
-   s+='<path d="M48 28 Q60 22 72 28 L72 35 Q60 31 48 35 Z" fill="'+base+'" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M60 34 L60 82" stroke="#c9c9d1" stroke-width="2.5"/>';
+   s+=P('M48 28 Q60 22 72 28 L72 35 Q60 31 48 35 Z',c1);
+   s+='<path d="M60 34 L60 82" stroke="'+c2+'" stroke-width="2.5"/>';
    s+='<g><rect x="66" y="42" width="9" height="3" fill="#c0391b"/><rect x="66" y="45" width="9" height="3" fill="#f2efe6"/><rect x="66" y="48" width="9" height="3" fill="#28477e"/></g>';
  }
- if(t==='figure'){
-   s+='<path d="M46 36 L49 12 L60 32 Z" fill="#9aa89f" stroke="'+INK+'" stroke-width="2"/><path d="M74 36 L71 12 L60 32 Z" fill="#9aa89f" stroke="'+INK+'" stroke-width="2"/>';
+ else if(t==='tee'){
+   s+=P('M40 30 L28 38 L24 52 L34 54 L34 84 L86 84 L86 54 L96 52 L92 38 L80 30 Q60 38 40 30 Z',c1);
+   s+='<path d="M46 31 Q60 40 74 31" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+   s+=RX(48,46,24,16,c2,2);
+   s+=TX(52,57,it.brand.split(' ')[0].slice(0,6),6,'#f2efe6');
+   s+='<path d="M34 56 L34 60 M86 56 L86 60" stroke="'+INK+'" stroke-width="1.5"/>';
+ }
+ else if(t==='pants'){
+   s+=P('M40 24 L80 24 L86 84 L64 84 L60 50 L56 84 L34 84 Z',c1);
+   s+=RX(40,24,40,7,c2,2);
+   s+='<path d="M60 31 L60 44" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<path d="M44 34 L52 40 M76 34 L68 40" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+   s+='<path d="M36 80 L36 84 M84 80 L84 84" stroke="'+INK+'" stroke-width="2"/>';
+ }
+ else if(t==='trench'){
+   s+=P('M44 22 L30 32 L26 84 L48 84 L48 50 L72 50 L72 84 L94 84 L90 32 L76 22 Q60 30 44 22 Z',c1);
+   s+=P('M44 22 L58 44 L48 50 L44 38 Z',c2);
+   s+=P('M76 22 L62 44 L72 50 L76 38 Z',c2);
+   s+=RX(36,46,48,7,c2,2);
+   s+=RX(56,44,8,11,'#c9a227',1);
+   s+='<circle cx="52" cy="60" r="1.8" fill="'+INK+'"/><circle cx="52" cy="70" r="1.8" fill="'+INK+'"/>';
+ }
+ else if(t==='scarf'){
+   if(it.style==='thin'){
+     s+=P('M14 44 L106 44 L106 60 L14 60 Z',c1);
+     s+='<circle cx="20" cy="52" r="7" fill="'+c2+'"/><circle cx="100" cy="52" r="7" fill="'+c2+'"/>';
+     s+='<circle cx="40" cy="52" r="2" fill="'+c2+'"/><circle cx="52" cy="52" r="2" fill="'+c2+'"/><circle cx="64" cy="52" r="2" fill="'+c2+'"/><circle cx="76" cy="52" r="2" fill="'+c2+'"/>';
+   }else{
+     s+=RX(30,22,60,56,c1,3);
+     if(it.style==='check'){
+       s+='<path d="M50 22 L50 78 M70 22 L70 78 M30 40 L90 40 M30 58 L90 58" stroke="'+c2+'" stroke-width="4" fill="none"/>';
+       s+='<path d="M60 22 L60 78 M30 49 L90 49" stroke="'+(it.c3||c2)+'" stroke-width="2" fill="none"/>';
+     }else{
+       s+='<circle cx="42" cy="32" r="2.5" fill="'+c2+'"/><circle cx="60" cy="32" r="2.5" fill="'+c2+'"/><circle cx="78" cy="32" r="2.5" fill="'+c2+'"/><circle cx="51" cy="46" r="2.5" fill="'+c2+'"/><circle cx="69" cy="46" r="2.5" fill="'+c2+'"/><circle cx="42" cy="60" r="2.5" fill="'+c2+'"/><circle cx="60" cy="60" r="2.5" fill="'+c2+'"/><circle cx="78" cy="60" r="2.5" fill="'+c2+'"/>';
+     }
+     s+='<path d="M36 78 L36 92 M48 78 L48 92 M60 78 L60 92 M72 78 L72 92 M84 78 L84 92" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+   }
+ }
+ else if(t==='perfume'){
+   s+='<defs><linearGradient id="pg'+it.id+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>';
+   s+=RX(40,46,40,42,'url(#pg'+it.id+')',4);
+   s+=RX(53,30,14,15,'#c9c9d1',2);
+   s+=RX(56,26,8,5,'#8f8f99',1);
+   s+=RX(46,56,28,20,'#f2efe6',2);
+   s+=TX(50,64,it.brand.slice(0,7),6.5);
+   s+=TX(48,71,'EDP',5,INK,.7);
+ }
+ else if(t==='figure'){
+   s+=P('M46 36 L49 12 L60 32 Z','#9aa89f');
+   s+=P('M74 36 L71 12 L60 32 Z','#9aa89f');
    s+='<ellipse cx="60" cy="50" rx="23" ry="20" fill="#9aa89f" stroke="'+INK+'" stroke-width="2"/>';
    s+='<ellipse cx="52" cy="46" rx="5.5" ry="7" fill="#fff" stroke="'+INK+'" stroke-width="1.5"/><ellipse cx="68" cy="46" rx="5.5" ry="7" fill="#fff" stroke="'+INK+'" stroke-width="1.5"/>';
    s+='<circle cx="53" cy="48" r="2.4" fill="'+INK+'"/><circle cx="67" cy="48" r="2.4" fill="'+INK+'"/>';
    s+='<path d="M48 58 Q60 68 72 58 L72 62 Q60 73 48 62 Z" fill="#fff" stroke="'+INK+'" stroke-width="1.5"/><path d="M54 60 L54 67 M60 61 L60 70 M66 60 L66 67" stroke="'+INK+'" stroke-width="1"/>';
-   s+='<rect x="50" y="68" width="20" height="18" rx="7" fill="#8a9a90" stroke="'+INK+'" stroke-width="2"/>';
+   s+=RX(50,68,20,18,'#8a9a90',7);
  }
- if(t==='buds'){
-   s+='<rect x="34" y="56" width="52" height="34" rx="11" fill="#f2efe6" stroke="'+INK+'" stroke-width="2"/>';
-   s+='<path d="M34 68 L86 68" stroke="'+INK+'" stroke-width="1.5"/><circle cx="79" cy="62" r="2" fill="#2f7d4f"/>';
+ else if(t==='plush'){
+   s+='<circle cx="42" cy="26" r="9" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/><circle cx="78" cy="26" r="9" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<circle cx="60" cy="42" r="20" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<ellipse cx="60" cy="48" rx="9" ry="7" fill="'+c2+'" stroke="'+INK+'" stroke-width="1.5"/>';
+   s+='<ellipse cx="60" cy="73" rx="17" ry="15" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<ellipse cx="60" cy="73" rx="9" ry="8" fill="'+c2+'" stroke="'+INK+'" stroke-width="1.5"/>';
+   s+='<circle cx="38" cy="66" r="7" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/><circle cx="82" cy="66" r="7" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<circle cx="53" cy="38" r="2.2" fill="'+INK+'"/><circle cx="67" cy="38" r="2.2" fill="'+INK+'"/>';
+   s+='<path d="M56 46 L60 49 L64 46" stroke="'+INK+'" stroke-width="1.5" fill="none"/>';
+ }
+ else if(t==='candle'){
+   s+=RX(38,40,44,46,c1,4);
+   s+='<path d="M38 48 L82 48" stroke="'+INK+'" stroke-width="2"/>';
+   s+=RX(44,54,32,18,'#f2efe6',2);
+   s+=TX(48,63,it.brand.slice(0,7),6);
+   s+='<path d="M60 40 L60 32" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<ellipse cx="60" cy="27" rx="4" ry="6" fill="#e8a020" stroke="'+INK+'" stroke-width="1.5"/>';
+ }
+ else if(t==='lamp'){
+   s+=P('M40 42 Q40 16 60 16 Q80 16 80 42 Z',c1);
+   s+='<path d="M45 42 Q45 24 60 24 Q75 24 75 42" fill="none" stroke="'+INK+'" stroke-width="1.5" opacity=".5"/>';
+   s+=RX(56,42,8,26,c2,2);
+   s+='<ellipse cx="60" cy="74" rx="16" ry="5" fill="'+c2+'" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<path d="M64 70 Q78 76 84 84" fill="none" stroke="'+INK+'" stroke-width="2"/>';
+ }
+ else if(t==='vase'){
+   s+=P('M48 30 Q34 46 40 62 Q44 76 60 76 Q76 76 80 62 Q86 46 72 30 L70 22 L50 22 Z',c1);
+   s+=RX(50,16,20,8,c1,2);
+   s+='<path d="M44 52 Q52 46 60 52 Q68 58 76 52" stroke="'+c2+'" stroke-width="2" fill="none"/>';
+   s+='<path d="M46 62 Q54 56 62 62 Q70 68 78 62" stroke="'+c2+'" stroke-width="2" fill="none"/>';
+   s+='<circle cx="60" cy="40" r="3" fill="'+c2+'"/>';
+ }
+ else if(t==='lego'){
+   s+=RX(28,56,36,16,c1,2);
+   s+=RX(32,50,8,6,c1,1);s+=RX(44,50,8,6,c1,1);s+=RX(56,50,8,6,c1,1);
+   s+=RX(56,34,34,16,c2,2);
+   s+=RX(60,28,8,6,c2,1);s+=RX(72,28,8,6,c2,1);s+=RX(84,28,8,6,c2,1);
+   s+=TX(30,66,'LEGOO',5,'#f2efe6');
+ }
+ else if(t==='buds'){
+   s+=RX(34,56,52,34,'#f2efe6',11);
+   s+='<path d="M34 68 L86 68" stroke="'+INK+'" stroke-width="1.5"/>';
+   s+='<circle cx="79" cy="62" r="2" fill="'+c2+'"/>';
    s+='<g stroke="'+INK+'" stroke-width="1.5"><circle cx="47" cy="40" r="7" fill="#fbf6ea"/><rect x="44" y="44" width="6" height="13" rx="3" fill="#fbf6ea"/><circle cx="73" cy="40" r="7" fill="#fbf6ea"/><rect x="70" y="44" width="6" height="13" rx="3" fill="#fbf6ea"/></g>';
-   s+='<text x="41" y="80" font-family="Space Mono" font-size="6" fill="'+INK+'" opacity=".7">AIRPADS</text>';
+   s+=TX(41,80,it.brand.slice(0,7),6,INK,.7);
+ }
+ else if(t==='glasses'){
+   s+='<g fill="'+c2+'" opacity=".85" stroke="'+c1+'" stroke-width="2.5"><path d="M24 42 C24 62 36 72 46 69 C55 66 56 50 54 42 Z"/><path d="M96 42 C96 62 84 72 74 69 C65 66 64 50 66 42 Z"/></g>';
+   s+='<path d="M54 46 Q60 40 66 46 M50 40 Q60 34 70 40" fill="none" stroke="'+c1+'" stroke-width="2.5"/>';
+   s+='<path d="M24 44 L12 38 M96 44 L108 38" stroke="'+c1+'" stroke-width="3"/>';
+ }
+ else if(t==='watch'){
+   if(it.gsq){
+     s+=RX(50,10,20,22,c1,5);
+     s+=RX(50,68,20,22,c1,5);
+     s+=RX(42,32,36,36,c1,6);
+     s+=RX(48,38,24,16,'#c9d4c9',2);
+     s+='<path d="M52 43 L58 43 M62 43 L68 43 M52 47 L56 47 M60 47 L68 47" stroke="'+INK+'" stroke-width="2" fill="none"/>';
+     s+=TX(46,62,it.brand.slice(0,7),5,c2);
+     s+=RX(76,44,4,12,c2,1);
+   }else{
+     s+=RX(50,12,20,24,c2,5);
+     s+=RX(50,84,20,12,c2,5);
+     s+='<circle cx="60" cy="60" r="19" fill="'+c1+'" stroke="'+INK+'" stroke-width="3"/>';
+     s+='<circle cx="60" cy="60" r="19" fill="none" stroke="'+c2+'" stroke-width="2.5"/>';
+     s+='<g stroke="'+INK+'" stroke-width="1.5"><line x1="60" y1="43" x2="60" y2="47"/><line x1="60" y1="73" x2="60" y2="77"/><line x1="43" y1="60" x2="47" y2="60"/><line x1="73" y1="60" x2="77" y2="60"/></g>';
+     s+='<circle cx="60" cy="52" r="1" fill="'+INK+'"/><circle cx="68" cy="60" r="1" fill="'+INK+'"/><circle cx="60" cy="68" r="1" fill="'+INK+'"/><circle cx="52" cy="60" r="1" fill="'+INK+'"/>';
+     s+='<line x1="60" y1="60" x2="53" y2="54" stroke="'+INK+'" stroke-width="2.5"/><line x1="60" y1="60" x2="66" y2="47" stroke="'+INK+'" stroke-width="2"/>';
+     s+=TX(46,72,it.brand.slice(0,7),4.5,INK,.9);
+     s+=RX(74,57,5,6,'#c9c9d1',1);
+   }
+ }
+ else if(t==='belt'){
+   s+=RX(12,44,74,12,c1,2);
+   s+='<circle cx="24" cy="50" r="1.6" fill="'+INK+'"/><circle cx="32" cy="50" r="1.6" fill="'+INK+'"/><circle cx="40" cy="50" r="1.6" fill="'+INK+'"/>';
+   s+=RX(88,38,20,24,c2,3);
+   s+=RX(92,42,12,16,'#f7f1e3',1);
+   s+='<path d="M86 44 L106 50 L86 56 Z" fill="'+c1+'" stroke="'+INK+'" stroke-width="2"/>';
+ }
+ else if(t==='bagLV'){
+   s+='<defs><pattern id="lv'+it.id+'" width="14" height="14" patternUnits="userSpaceOnUse"><rect width="14" height="14" fill="'+c1+'"/><text x="1" y="9" font-family="Space Mono" font-size="7" font-weight="700" fill="'+c2+'">LV</text><text x="8" y="15" font-family="Space Mono" font-size="7" font-weight="700" fill="'+c2+'">LV</text></pattern></defs>';
+   s+='<path d="M34 44 L86 44 L92 80 L28 80 Z" fill="url(#lv'+it.id+')" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<path d="M40 44 C40 26 80 26 80 44" fill="none" stroke="'+INK+'" stroke-width="4"/>';
+   s+='<path d="M30 50 L90 50" stroke="'+c2+'" stroke-width="2"/>';
+   s+=RX(56,48,8,6,'#c9a227',1);
+ }
+ else if(t==='bagFlap'){
+   s+=P('M34 38 L86 38 L92 82 L28 82 Z',c1);
+   s+=P('M34 38 L86 38 L88 52 L32 52 Z','rgba(255,255,255,.08)');
+   s+='<path d="M36 38 C36 20 84 20 84 38" fill="none" stroke="'+c2+'" stroke-width="3"/>';
+   s+='<circle cx="36" cy="41" r="3" fill="'+c2+'"/><circle cx="84" cy="41" r="3" fill="'+c2+'"/>';
+   s+='<g stroke="'+c2+'" stroke-width="2" fill="none"><path d="M56 60 a4 4 0 1 1 8 0"/><path d="M64 60 a4 4 0 1 1 -8 0"/></g>';
+ }
+ else if(t==='tote'){
+   s+=P('M32 40 L88 40 L94 82 L26 82 Z',c1);
+   s+='<path d="M52 40 L54 82 M68 40 L66 82" stroke="'+c2+'" stroke-width="4" fill="none"/>';
+   s+='<path d="M60 40 L60 82" stroke="'+(it.c3||c2)+'" stroke-width="2" fill="none"/>';
+   s+='<path d="M40 40 C40 22 56 22 56 40 M64 40 C64 22 80 22 80 40" fill="none" stroke="'+INK+'" stroke-width="4"/>';
+ }
+ else if(t==='backpack'){
+   s+=RX(36,26,48,58,c1,10);
+   s+='<path d="M52 26 Q60 16 68 26" fill="none" stroke="'+INK+'" stroke-width="4"/>';
+   s+=RX(46,54,28,22,c2,6);
+   s+='<path d="M46 62 L74 62" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<path d="M36 34 Q26 44 30 58 M84 34 Q94 44 90 58" fill="none" stroke="'+INK+'" stroke-width="3"/>';
+ }
+ else if(t==='wallet'){
+   s+=RX(30,36,60,40,c1,5);
+   s+='<path d="M30 48 L90 48" stroke="'+INK+'" stroke-width="2"/>';
+   s+='<path d="M38 56 L58 56 M38 63 L58 63 M66 56 L86 56 M66 63 L86 63" stroke="'+INK+'" stroke-width="1.5" fill="none"/>';
+   if(it.id==='lvwallet'){s+='<circle cx="40" cy="42" r="2" fill="'+c2+'"/><circle cx="52" cy="42" r="2" fill="'+c2+'"/><circle cx="64" cy="42" r="2" fill="'+c2+'"/><circle cx="76" cy="42" r="2" fill="'+c2+'"/>'}
  }
  return '<svg viewBox="0 0 120 100">'+s+'</svg>';
 }
+function svP(id){return svItem(CATALOG.find(x=>x.id===id))}
 function barcode(str,h){h=h||26;let s='',x=4;const rr=mulberry32([].slice.call(String(str)).reduce((a,c)=>a+c.charCodeAt(0),7));
  while(x<116){const w=1+Math.floor(rr()*3);if(rr()>.35)s+='<rect x="'+x+'" y="0" width="'+w+'" height="'+Math.floor(h*0.62)+'" fill="'+INK+'"/>';x+=w+1+Math.floor(rr()*2)}
  return '<svg viewBox="0 0 120 '+h+'" style="width:100%;height:'+h+'px;display:block">'+s+'<text x="4" y="'+(h-4)+'" font-family="Space Mono" font-size="6" fill="'+INK+'">'+esc(str)+'</text></svg>'}
@@ -630,6 +807,16 @@ function boxSVG(sz,fillPct){const f=Math.max(.08,Math.min(1,fillPct||.3));
  <g transform="translate(80,70) rotate(-90)"><text font-family="Space Mono" font-size="9" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="2">RIZZITGO·TAPE</text></g>\
  <text x="26" y="103" font-family="Space Mono" font-size="10" font-weight="700" fill="'+INK+'">BOX '+esc(sz)+'</text>\
  <rect x="122" y="34" width="8" height="'+Math.max(4,Math.round(72*f))+'" fill="'+(f>.95?'#c0391b':'#2f7d4f')+'" stroke="'+INK+'" stroke-width="1.5"/></svg>'}
+
+/* ---------- PROMO: link al sito personale ---------- */
+function promoCard(){
+ return '<a class="promo" href="'+PORTFOLIO+'" target="_blank" rel="noopener">'+
+  '<div class="pTag">SPONSOR · RIZZITGO</div>'+
+  '<div class="pt">Ti è piaciuto fare l\'agente?</div>'+
+  '<div class="ps">Allora passa al gioco vero: ordina il tuo prossimo haul dal mio sito personale — prodotti reali, QC reali, spedizioni reali (dogana permitting).</div>'+
+  '<span class="pbtn"><i data-lucide="external-link"></i>ORDINA DAVVERO →</span>'+
+  '<div class="pu">'+PORTFOLIO+'</div></a>';
+}
 
 /* ---------- STATO ---------- */
 const S={day:1,hours:12,money:0,phase:'title',cur:null,orders:[],flashOrders:[],unread:0,overtimeCount:0,finished:false,lastFinal:null,
@@ -660,7 +847,7 @@ setInterval(()=>{S.unread=0;updFab()},4000);
 function toast(txt,cls){const t=document.createElement('div');t.className='toast '+(cls||'');t.textContent=txt;
  document.getElementById('toasts').appendChild(t);setTimeout(()=>t.remove(),2600)}
 
-/* ---------- COSTRUZIONE SETTIMANA ---------- */
+/* ---------- COSTRUZIONE SETTIMANA RANDOM ---------- */
 function addrFor(geo,i){
  const P={ITALIA:['Via @N Casalone 12, 20121 Milano, IT'],
   UK:['14 Brick Lane, London E2 7@N, GB','Studio 4, Hackney Walk, London E8 3@N, GB'],
@@ -682,7 +869,7 @@ function mkOrder(sc,day,isFlash){
  items.forEach(o=>{est+=o.ref.price[sc.expect];
   const db=sc.serv.includes('debox')&&o.ref.deboxable,vac=sc.serv.includes('vacuum')&&o.ref.soft;
   vol+=o.ref.vol*(db?.45:1)*(vac?.5:1); wt+=o.ref.wt*(db?.78:1)});
- const line=LINES.find(l=>l.id===sc.pref);
+ const line=LINES.find(l=>l.id===sc.pref)||LINES[0];
  const bx=BOXES.find(b=>b.vol>=vol*1.3)||BOXES[3];
  const bill=Math.max(wt+bx.wt,bx.vol*.25);
  const shipEst=Math.round(line.base+line.rate*Math.max(bill,line.min||0));
@@ -692,13 +879,48 @@ function mkOrder(sc,day,isFlash){
  return {day,cli:sc.cli,sc,items,budget,shipCover:shipEst,addrs,reqIdx:sc.addr===2?(sc.req||1):0,
   services:{},photos:false,box:null,addrIdx:-1,lineId:null,sealed:false,shipped:false,cancelled:false,
   spent:0,rev:0,isFlash:!!isFlash,arrDay:0,arrived:false,truckStarted:false}}
-function buildWeek(){S.orders=SCEN.map((sc,i)=>mkOrder(sc,i+1,false))}
+function genWeek(){
+ const ckeys=shuffle(Object.keys(CLIENTS).slice());
+ const pool=shuffle(CATALOG.slice());
+ const flashDays=[];while(flashDays.length<2){const d=ri(2,6);if(!flashDays.includes(d))flashDays.push(d)}
+ S.orders=[];
+ for(let d=1;d<=7;d++){
+  const ck=ckeys[(d-1)%ckeys.length];
+  const c=CLIENTS[ck];
+  let n=(d===7)?ri(3,4):ri(1,3);
+  if(c.pers==='broke'||c.pers==='chill')n=Math.min(n,2);
+  const ids=pool.splice(0,n).map(x=>x.id);
+  const refs=ids.map(id=>CATALOG.find(x=>x.id===id));
+  let expect;
+  if(c.pers==='qcnerd'||c.pers==='flexer')expect='top';
+  else if(c.pers==='broke')expect='low';
+  else if(c.pers==='reseller')expect='mid';
+  else expect=pick(['low','mid','mid','mid','top']);
+  const serv=[];
+  serv.push(expect==='top'?'photoHD':(RNG()<.3?'photoStd':'photoHD'));
+  if(refs.some(r=>r.deboxable)&&RNG()<.75)serv.push('debox');
+  if(refs.some(r=>r.soft)&&RNG()<.65)serv.push('vacuum');
+  if(refs.some(r=>r.fragile)&&RNG()<.8)serv.push('protect');
+  if(RNG()<.35)serv.push('detag');
+  const liq=refs.some(r=>r.liquid),batt=refs.some(r=>r.battery);
+  const cands=LINES.filter(l=>(!liq||l.liq)&&(!batt||l.batt));
+  let pref;
+  if(c.pers==='broke')pref='gd';
+  else if(c.pers==='reseller'||c.pers==='flexer')pref=pick(['dle','yan','yan']);
+  else pref=pick(cands).id;
+  if(!cands.some(l=>l.id===pref))pref=pick(cands).id;
+  const two=(c.pers==='reseller')||RNG()<.2;
+  S.orders.push(mkOrder({cli:ck,items:ids,expect,serv,pref,addr:two?2:1,req:1,
+   anote:pick(['ship to STUDIO','STUDIO, non casa','secondo indirizzo, non casa']),
+   flash:flashDays.includes(d)},d,false));
+ }
+}
 
 /* ---------- RENDER ---------- */
 function renderHUD(){
  document.getElementById('vDay').textContent=S.day+'/7';
- const h=document.getElementById('vHrs');
- h.textContent=h>=0?fmtH(S.hours):('+'+fmtH(-S.hours)+' STRA');
+ const hv=document.getElementById('vHrs');
+ hv.textContent=(S.hours>=0?fmtH(S.hours):('+'+fmtH(-S.hours)+' STRA'));
  const hm=document.getElementById('hMoney');hm.classList.toggle('neg',S.money<0);
  document.getElementById('vMoney').textContent=fmt(S.money)}
 function renderStepper(){const st=document.getElementById('stepper');const idx=PHASES.findIndex(p=>p[0]===S.phase);
@@ -716,12 +938,12 @@ function renderPanel(){
    '<div class="ph"><h2>Nuovo ordine</h2><span class="sub">fondo verificato ✓ utente pagato ✓</span>'+(o.isFlash?'<span class="flashtag"><i data-lucide="flame"></i>ORDINE LAMPO</span>':'')+'</div>'+
    '<div class="cli"><div class="avat" style="background:'+c.col+'">'+c.av+'</div><div><div class="un">'+esc(c.u)+'</div><div class="geo mono">'+esc(c.geo)+' · '+esc(c.pers.toUpperCase())+'</div></div></div>'+
    '<hr class="hr">'+
-   o.items.map(it=>'<div class="itemrow"><div class="art">'+svP(it.ref.id)+'</div><div><div class="nm">'+esc(it.ref.brand)+' — '+esc(it.ref.name)+'</div><div class="bd">'+esc(it.ref.blurb||'')+'</div></div></div>').join('')+
+   o.items.map(it=>'<div class="itemrow"><div class="art">'+svItem(it.ref)+'</div><div><div class="nm">'+esc(it.ref.brand)+' — '+esc(it.ref.name)+'</div><div class="bd">'+esc(it.ref.cat)+' · '+esc(it.ref.blurb||'')+'</div></div></div>').join('')+
    '<div style="margin:10px 0;display:flex;gap:6px;flex-wrap:wrap">'+
     '<span class="chip req"><i data-lucide="badge-check"></i>SERVIZI: '+o.sc.serv.map(k=>SERVICES[k].t).join(' · ')+'</span>'+
     (o.sc.addr===2?'<span class="chip req"><i data-lucide="map-pin"></i>SPEDIZIONE: '+esc(o.sc.anote||'secondo indirizzo')+'</span>':'')+
     '<span class="chip"><i data-lucide="gem"></i>ASPETTATIVA: <span class="tag '+o.sc.expect+'" style="margin-left:4px">'+o.sc.expect.toUpperCase()+'</span></span>'+
-    '<span class="chip"><i data-lucide="truck"></i>LINEA VOGLIA: '+esc(LINES.find(l=>l.id===o.sc.pref).n)+'</span>'+
+    '<span class="chip"><i data-lucide="truck"></i>LINEA VOGLIA: '+esc((LINES.find(l=>l.id===o.sc.pref)||LINES[0]).n)+'</span>'+
    '</div>'+
    '<div class="kv" style="font-size:14px"><span>BUDGET DEL CLIENTE (già pagato a te)</span><b style="color:var(--stamp)">'+fmt(o.budget)+'</b></div>'+
    '<p class="note" style="margin:8px 0 14px">Tutto ciò che avanzi dopo prodotti, servizi e spedizione è il tuo margine. Ma occhio: batch sotto aspettativa = disputa e rimborso parziale.</p>'+
@@ -731,7 +953,7 @@ function renderPanel(){
   p.innerHTML=panelHTML(
    '<div class="ph"><h2>Sourcing</h2><span class="sub">scegli seller &amp; batch per ogni item</span></div>'+
    o.items.map((it,i)=>'<div style="margin-bottom:16px">'+
-     '<div class="itemrow" style="margin-bottom:8px"><div class="art">'+svP(it.ref.id)+'</div><div><div class="nm">'+esc(it.ref.brand)+' — '+esc(it.ref.name)+'</div><div class="bd">listino: budget '+fmt(it.ref.price.low)+' · mid '+fmt(it.ref.price.mid)+' · top '+fmt(it.ref.price.top)+'</div></div></div>'+
+     '<div class="itemrow" style="margin-bottom:8px"><div class="art">'+svItem(it.ref)+'</div><div><div class="nm">'+esc(it.ref.brand)+' — '+esc(it.ref.name)+'</div><div class="bd">'+esc(it.ref.cat)+' · listino: budget '+fmt(it.ref.price.low)+' · mid '+fmt(it.ref.price.mid)+' · top '+fmt(it.ref.price.top)+'</div></div></div>'+
      it.sellers.map((s,t)=>'<div class="seller '+(it.chosen===t?'sel':'')+'" onclick="selSeller('+i+','+t+')">'+
         '<span class="tag '+s.tier+'">'+TIERS[t].tag+'</span>'+
         '<div><div class="snm">'+esc(s.name)+'</div><div class="sbl">'+esc(TIERS[t].blurb)+'</div></div>'+
@@ -789,7 +1011,7 @@ function renderPanel(){
  if(ph==='pack'){
   p.innerHTML=panelHTML(
    '<div class="ph"><h2>Creazione del pacco</h2><span class="sub">scegli la scatola giusta</span></div>'+
-   '<div class="packviz" id="pv">'+o.items.map(it=>'<div class="mini">'+svP(it.ref.id)+'</div>').join('')+'</div>'+
+   '<div class="packviz" id="pv">'+o.items.map(it=>'<div class="mini">'+svItem(it.ref)+'</div>').join('')+'</div>'+
    '<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0">'+
     BOXES.map(b=>'<div class="boxopt '+(o.box===b.s?'sel':'')+'" onclick="selBox(\''+b.s+'\')"><div class="bs">'+b.s+'</div><div class="bv">'+b.vol+'L · '+b.wt+'kg</div></div>').join('')+
    '</div>'+
@@ -803,7 +1025,7 @@ function renderPanel(){
   const bill=billable();
   p.innerHTML=panelHTML(
    '<div class="ph"><h2>Spedizione</h2><span class="sub">indirizzo giusto · linea giusta</span></div>'+
-   '<p class="note" style="margin-bottom:10px">Copertura spedizione del cliente: <b>'+fmt(o.shipCover)+'</b> (preventivo sulla linea che voleva: '+esc(LINES.find(l=>l.id===o.sc.pref).n)+'). Differenze a tuo carico… o a tuo favore.</p>'+
+   '<p class="note" style="margin-bottom:10px">Copertura spedizione del cliente: <b>'+fmt(o.shipCover)+'</b> (preventivo sulla linea che voleva: '+esc((LINES.find(l=>l.id===o.sc.pref)||LINES[0]).n)+'). Differenze a tuo carico… o a tuo favore.</p>'+
    '<div style="margin-bottom:12px">'+
     '<div class="mono" style="font-size:10px;letter-spacing:1px;margin-bottom:6px">INDIRIZZI DI DESTINAZIONE '+(o.addrs.length>1?'(OCCHIO: quale voleva?)':'')+'</div>'+
     o.addrs.map((a,i)=>'<div class="seller '+(o.addrIdx===i?'sel':'')+'" onclick="selAddr('+i+')" style="margin-bottom:6px">'+
@@ -848,7 +1070,7 @@ function renderPanel(){
 function start(){reseed();
  S.day=1;S.hours=12;S.money=0;S.phase='order';S.cur=null;S.orders=[];S.flashOrders=[];S.unread=0;S.overtimeCount=0;S.finished=false;S.lastFinal=null;
  S.stats={ship:0,seized:0,duty:0,dmg:0,ret:0,late:0,defShip:0,defNoticed:0,checks:0};
- buildWeek();
+ genWeek();
  document.getElementById('ovl').innerHTML='';document.getElementById('ovl2').innerHTML='';
  const fx=document.getElementById('fx');fx.classList.remove('on');fx.innerHTML='';
  document.getElementById('chatlog').innerHTML='';
@@ -870,7 +1092,6 @@ function confirmSourcing(){const o=S.cur;if(!o)return;let tot=0,hrs=0;
  S.money-=tot;o.spent+=tot;spend(.5);AU.ok();toast('Ordini inviati ai seller: -'+fmt(tot));
  addChat('ag','Ordini piazzati ✓ — '+o.items.map(it=>it.sellers[it.chosen].name).join(', '));
  S.phase='transit';renderAll()}
-/* --- transito: arrivo "una sola volta", senza doppi roll --- */
 function arrive(o){if(!o||o.arrived||S.cur!==o)return;o.arrived=true;
  rollArrivals(o);S.phase='qc';renderAll();AU.chime()}
 function runTransit(){const o=S.cur;if(!o||o.arrived||S.phase!=='transit')return;
@@ -884,21 +1105,21 @@ function runTransit(){const o=S.cur;if(!o||o.arrived||S.phase!=='transit')return
    arrive(o)},2800)}
 function skipTransit(){const o=S.cur;if(!o||o.arrived)return;
  addChat('sys','Colli arrivati al RIZZITGO Hub (attesa saltata).');arrive(o)}
-function rollArrivals(o){o.items.forEach(it=>{const tier=tierOf(it);  /* FIX: tierOf, non TIERS[str] */
+function rollArrivals(o){o.items.forEach(it=>{const tier=tierOf(it);
   it.wrong=RNG()<tier.wrong;
   let defs=0;
   SPOTS[it.ref.type].slice(1).forEach(sp=>{if(defs<2&&RNG()<tier.risk){it.defects.push(sp.k);it.defText[sp.k]=pick(DEF[sp.k]);defs++}})})}
 function qcItemHTML(it,i){const spots=SPOTS[it.ref.type];const allDone=spots.slice(1).every(sp=>it.checked[sp.k]);
- return '<div style="border:2px solid '+(allDone?'var(--ok)':'var(--ink')+';border:2px solid '+(allDone?'var(--ok)':'var(--ink)')+';border-radius:10px;padding:10px;margin-bottom:14px;background:#fff9ec">'+
+ return '<div style="border:2px solid '+(allDone?'var(--ok)':'var(--ink)')+';border-radius:10px;padding:10px;margin-bottom:14px;background:#fff9ec">'+
   '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px">'+
-    '<div style="width:64px;flex:0 0 64px;border:1.5px solid var(--ink);border-radius:6px;padding:3px;background:var(--paper-d)">'+svP(it.ref.id)+'</div>'+
+    '<div style="width:64px;flex:0 0 64px;border:1.5px solid var(--ink);border-radius:6px;padding:3px;background:var(--paper-d)">'+svItem(it.ref)+'</div>'+
     '<div style="min-width:0;flex:1"><div class="nm" style="font-weight:900;font-size:13px">'+esc(it.ref.brand)+' — '+esc(it.ref.name)+'</div>'+
-    '<div class="mono" style="font-size:9px;color:var(--ink-soft)">SELLER: '+esc(it.sellers[it.chosen].name)+' · BATCH '+tierOf(it).tag+'</div></div>'+
+    '<div class="mono" style="font-size:9px;color:var(--ink-soft)">SELLER: '+esc(it.sellers[it.chosen].name)+' · BATCH '+tierOf(it).tag+' · '+esc(it.ref.cat)+'</div></div>'+
     '<button class="btn sm '+(it.checked.order?'ghost':'')+'" style="margin-left:auto" onclick="checkSpot('+i+',\'order\')" '+(it.checked.order?'disabled':'')+'>'+
       '<i data-lucide="search"></i>'+(it.checked.order?(it.wrong?'⚠ ERRATO':'✓ Corrisponde'):'Confronta con ordine')+'</button>'+
   '</div>'+
   (it.wrong&&it.wrongShown?'<div class="qcres">'+esc(dtx(it,'order'))+' <button class="btn sm red" onclick="swapWrong('+i+')">SOSTITUZIONE +3h (colpa seller, gratis)</button></div>':'')+
-  '<div class="qcwrap">'+((it.wrong&&it.wrongShown)?'':'<div class="art">'+svP(it.ref.id)+'</div>')+
+  '<div class="qcwrap">'+((it.wrong&&it.wrongShown)?'':'<div class="art">'+svItem(it.ref)+'</div>')+
    spots.slice(1).map(sp=>{const st=it.checked[sp.k];const bad=st&&it.defects.includes(sp.k);
      return '<button class="hotspot '+(st?(bad?'bad':'done'):'')+'" style="left:'+sp.x+'%;top:'+sp.y+'%" onclick="checkSpot('+i+',\''+sp.k+'\')" title="'+esc(sp.l)+'" '+(st?'disabled':'')+'>'+(st?(bad?'!':'✓'):'?')+'</button>'}).join('')+
   '</div>'+
@@ -926,7 +1147,7 @@ function swapWrong(i){const it=S.cur.items[i];if(!it)return;
  AU.chime();toast('Il seller ha rimandato l\'item giusto, imbarcatissimo.');renderPanel()}
 function swapDefect(i,k){const it=S.cur.items[i];if(!it)return;
  o_spend(30);spend(2);it.swapped[k]=true;it.defects=it.defects.filter(d=>d!==k);
- const tier=tierOf(it);                                  /* FIX: tierOf */
+ const tier=tierOf(it);
  if(RNG()<tier.risk/2){const other=SPOTS[it.ref.type].slice(1).map(s=>s.k).filter(x=>!it.defects.includes(x)&&!it.swapped[x]);
   if(other.length){const nk=pick(other);it.defects.push(nk);it.defText[nk]=pick(DEF[nk])}}
  it.checked[k]=true;AU.chime();toast('Pezzo sostituito dal seller. Nuovo QC disponibile.');renderPanel()}
@@ -1006,11 +1227,15 @@ function shipNow(){const o=S.cur;if(!o||!o.lineId||o.addrIdx<0)return;
   addChat('ag','Pacco affrancato con '+l.n+' ✓ tracking RZT'+ri(100000,999999));
   typing(()=>addChat('cl',pick(['Tracking received. Let\'s gooo.','Yesss. Postato sul mio canale haul.','Grazie agent! Ci vediamo alla prossima drop.','Tracking attivo. Che la dogana ci sia amica.'])),700);
   S.phase='done';renderAll()})}
-function startFlash(){const fid=S.cur.sc.flash;if(!fid)return;
- const o=mkOrder({cli:FLASH[fid],items:[fid],expect:'low',serv:['photoStd'],pref:'gd',addr:1},S.day,true);
- S.flashOrders.push(o);          /* FIX: l'ordine lampo non si perde più nel resoconto */
- S.cur=o;S.phase='order';
- const c=CLIENTS[o.cli];typing(()=>addChat('cl',c.greet),400);renderAll()}
+function startFlash(){
+ const cheap=CATALOG.filter(x=>x.price.top<=340);
+ const ref=pick(cheap);
+ const cands=LINES.filter(l=>(!ref.liquid||l.liq)&&(!ref.battery||l.batt));
+ const pref=pick(cands).id;
+ const ck=pick(Object.keys(CLIENTS));
+ const o=mkOrder({cli:ck,items:[ref.id],expect:pick(['low','mid']),serv:['photoStd'],pref,addr:1},S.day,true);
+ S.flashOrders.push(o);S.cur=o;S.phase='order';
+ typing(()=>addChat('cl',CLIENTS[ck].greet),400);renderAll()}
 
 /* ---------- FINE GIORNO / SETTIMANA ---------- */
 function closeDay(){
@@ -1040,7 +1265,7 @@ function dayEndOverlay(){
   '<div class="kv"><span>Ordini completati oggi</span><b>'+doneToday+'</b></div>'+
   '<div class="kv"><span>Ore consumate</span><b>'+fmtH(12-S.hours)+(S.hours<0?' (straordinario!)':'')+'</b></div>'+
   '<div class="kv"><span>Cassa cumulata</span><b style="color:'+(S.money>=0?'var(--ok)':'var(--bad)')+'">'+fmt(S.money)+'</b></div>'+
-  '<p class="note" style="margin:12px 0">'+(S.day<7?'Domani nuovi clienti: qualcuno porterà vincoli su batterie, liquidi e… sbirri della dogana.':'Ultima porta: il resoconto di fine settimana.')+'</p>'+
+  '<p class="note" style="margin:12px 0">'+(S.day<7?'Domani nuovi clienti e nuovi prodotti: la settimana è sorteggiata a ogni partita.':'Ultima porta: il resoconto di fine settimana.')+'</p>'+
   '<button class="btn red" onclick="nextDay()"><i data-lucide="moon"></i>Dormi → Giorno '+(S.day+1)+'</button>'+
  '</div></div></div>';icons();AU.stamp()}
 function nextDay(){closeOvl();closeOvl2();S.day++;S.hours=12;S.cur=null;S.phase='order';
@@ -1054,7 +1279,7 @@ function tierScore(o){let pts=0;const rank={low:0,mid:1,top:2};
   if(d===0)pts+=.6;else if(d>0)pts+=.8;else pts+=(e==='top'&&t==='low')?-2:-1.2});
  return pts}
 function finishWeek(){closeOvl();closeOvl2();S.finished=true;
- const all=S.orders.concat(S.flashOrders);   /* FIX: include gli ordini lampo */
+ const all=S.orders.concat(S.flashOrders);
  all.forEach(o=>{if(!o.shipped&&!o.cancelled)o.cancelled=true;
   o.wrongAny=o.items.some(it=>it.wrong);o.rev=o.rev||0;o.spent=o.spent||0});
  const reviews=[];
@@ -1090,7 +1315,6 @@ function finishWeek(){closeOvl();closeOvl2();S.finished=true;
    if(wrongAddr)pts-=2;
    stars=Math.max(1,Math.min(5,Math.round((3+pts)*2)/2));
    p=o.rev-o.spent;
-   /* FIX: ogni penalità colpisce anche la cassa, così il profitto finale è coerente */
    if(customs==='seized'){p-=o.rev;S.money-=o.rev;S.stats.seized++;stars=1;fac='sequestro doganale'}
    if(customs==='duty')S.stats.duty++;
    if(damaged){const dm=Math.round(o.budget*.4);p-=dm;S.money-=dm;S.stats.dmg++;fac=fac||'pacco danneggiato'}
@@ -1143,8 +1367,7 @@ function finalOverlay(reviews,profit){
   (badges.length?'<h3 style="font-weight:900;margin:12px 0 8px">Timbri conquistati</h3>'+
    '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:6px">'+badges.map(b=>'<span class="stampbox" style="font-size:11px">'+b+'</span>').join('')+'</div>':'')+
   '<hr class="hr">'+
-  '<div class="qrcard">'+qrFrame(104,true)+'<div><div class="qt">Vuoi fare anche tu un haul?</div>'+
-   '<div class="qs">Passa da <b>RIZZITGO</b>, l\'agent sponsor di questo gioco.<br>Inquadra il QR con il telefono → pagina affiliata del creatore. Ogni sostegno è membro del magazzino.</div></div></div>'+
+  promoCard()+
   '<div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">'+
    '<button class="btn red" onclick="replay()"><i data-lucide="rotate-ccw"></i>Altra settimana</button>'+
    '<button class="btn ghost" onclick="closeOvl()"><i data-lucide="package"></i>Rivedi il magazzino</button></div>'+
@@ -1154,8 +1377,8 @@ function reviewText(r){const o=r.o;
  if(o.cancelled)return pick(['Ordine annullato e budget restituito, ma il mio fit-check è morto. Mai più.','Niente pacco, niente scuse vere. 1 stella dovere.']);
  if(r.customs==='seized')return pick(['Package SEIZED alla dogana. Budget cremato. 1 stella e un pensiero.','La linea che "dichiara tutto" ha dichiarato tutto. RIP. Mai più.']);
  if(r.wrongAddr)return pick(["Il pacco è finito all'indirizzo SBAGLIATO. Come si fa??",'Spedito dove non dovevi. Ora mia moglie sa tutto. Grazie eh.']);
- if(o.wrongAny)return pick(['Mi è arrivato l\'ITEM SBAGLIATO. Come confondi una Low con una High??']);
- if(r.damaged)return pick(['Arrivato danneggiato: senza bolla, il vetro era "un\'ipotesi". Deluso.','Pacco ammacciato come le mie aspettative. Protezione: parola che dovresti cercare.']);
+ if(o.wrongAny)return pick(['Mi è arrivato l\'ITEM SBAGLIATO. Come si fa a confondere due prodotti??']);
+ if(r.damaged)return pick(['Arrivato danneggiato: senza bolla, il vetro era "un\'ipotesi". Deluso.','Pacco ammaccato come le mie aspettative. Protezione: parola che dovresti cercare.']);
  if(r.stars>=4.5)return pick(['W agent. Foto QC ottime, nastro ovunque, arrivo in tempi. 5/5 senza pensieri.','Unboxing da video. Tutto intatto, tutto pulito. Sei il mio agente fisso adesso.','Imballo da banca, timing da treno svizzero. Confirmed.']);
  if(r.stars>=3.5)return pick(['Solido. Piccole cose, ma lo rifarei. 4 stelle.','Buon lavoro, shipping un filo lento ma item puliti. Si riparte presto.']);
  if(r.stars>=2.5)return pick(['Mid experience. Niente di rotto, niente di memorabile. 3 stelle di garanzia.']);
@@ -1189,31 +1412,24 @@ function fxLabel(o,cb){const fx=document.getElementById('fx');const trk='RZT'+ri
  setTimeout(()=>{AU.stamp()},500);
  setTimeout(()=>{fx.classList.remove('on');fx.innerHTML='';cb()},1400)}
 
-/* ---------- MODALI (su #ovl2: non cancellano mai la schermata sotto) ---------- */
+/* ---------- MODALI ---------- */
 function openOrderModal(){const o=S.cur;if(!o)return;
  document.getElementById('ovl2').innerHTML='<div class="ovl" onclick="if(event.target===this)closeOvl2()"><div class="card"><div class="pbody">'+
   '<h2 style="font-weight:900">Richiamo ordine — '+esc(CLIENTS[o.cli].u)+'</h2>'+
   '<hr class="hr">'+
   o.addrs.map(a=>'<div class="kv"><span>'+esc(a.lab)+'</span><b class="mono" style="font-size:10px">'+esc(a.txt)+'</b></div>').join('')+
   '<div class="kv"><span>INDIRIZZO RICHIESTO DAL CLIENTE</span><b>'+esc(o.addrs[o.reqIdx].lab)+'</b></div>'+
-  '<div class="kv"><span>Linea desiderata</span><b>'+esc(LINES.find(l=>l.id===o.sc.pref).n)+'</b></div>'+
+  '<div class="kv"><span>Linea desiderata</span><b>'+esc((LINES.find(l=>l.id===o.sc.pref)||LINES[0]).n)+'</b></div>'+
   '<div class="kv"><span>Aspettativa batch</span><b>'+o.sc.expect.toUpperCase()+'</b></div>'+
   '<div class="kv" style="border:none"><span>Servizi richiesti</span><b>'+o.sc.serv.map(k=>SERVICES[k].t).join(' · ')+'</b></div>'+
   '<p class="note" style="margin:10px 0">Rileggi anche la chat: i clienti ricordano tutto. Anche troppo.</p>'+
   '<button class="btn ghost" onclick="closeOvl2()">Chiudi</button></div></div></div>';icons()}
-function openQR(){
- document.getElementById('ovl2').innerHTML='<div class="ovl" onclick="if(event.target===this)closeOvl2()"><div class="card"><div class="pbody">'+
-  '<div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>'+'RIZZITGO SPONSOR UFFICIALE · '.repeat(8)+'</span></div>'+
-  '<h2 style="font-weight:900;font-size:22px">Il mio link affiliato</h2>'+
-  '<p class="note" style="margin:8px 0 14px">Questo gioco è sponsorizzato da <b>RIZZITGO</b>. Inquadra il QR con la fotocamera per andare alla pagina affiliata del creatore (link bitly).</p>'+
-  '<div class="qrcard">'+qrFrame(170,true)+'<div><div class="qt">SCANSIONA IL QR</div><div class="qs">Inquadra con la fotocamera del telefono.<br>Supporta il creatore, sostieni il magazzino.</div></div></div>'+
-  '<p class="note" style="margin-top:12px">Nota tecnica: se il QR non compare, l\'host dell\'immagine (link temporaneo) è scaduto — apri il sorgente del gioco, cerca <b>QR_SOURCES</b> in cima allo script e incolla un link permanente al tuo QR.</p>'+
-  '<button class="btn ghost" style="margin-top:14px" onclick="closeOvl2()">Chiudi</button></div></div></div>';icons()}
 function openGuide(){
  document.getElementById('ovl2').innerHTML='<div class="ovl" onclick="if(event.target===this)closeOvl2()"><div class="card"><div class="pbody">'+
   '<div class="tapebar" style="margin:-20px -20px 14px;border-radius:6px 6px 0 0"><span>'+'MANUALE AGENTE · RIZZITGO · '.repeat(8)+'</span></div>'+
   '<h2 style="font-weight:900;font-size:22px">Come si lavora da Rizzitgo</h2>'+
   '<ul class="rules" style="margin-top:12px">'+
+   '<li><i data-lucide="shuffle"></i><span><b>Catalogo random.</b> A ogni partita cambiano clienti, prodotti e richieste: 50+ referenze tra scarpe, abbigliamento, profumi, decorazioni, cinture, orologi, portafogli…</span></li>'+
    '<li><i data-lucide="clipboard-check"></i><span><b>Ordine.</b> Il cliente ha GIÀ pagato. Budget, lista, servizi richiesti e aspettativa di batch sono nel contratto.</span></li>'+
    '<li><i data-lucide="search"></i><span><b>Sourcing.</b> Scegli seller/batch per ogni item: più spendi, meglio esce (di solito). Ciò che avanzi è margine.</span></li>'+
    '<li><i data-lucide="truck"></i><span><b>Transito.</b> I colli arrivano al magazzino. Ogni azione consuma ore: finiscono? Paghi straordinari.</span></li>'+
@@ -1235,6 +1451,7 @@ function titleScreen(){
     '<h1 class="bigtitle" style="margin:10px 0 2px">Rizzitgo<br>Reps Agent<br>Simulator</h1>'+
     '<p class="mono" style="font-size:11px;color:var(--ink-soft);margin-bottom:14px">Una settimana nel magazzino di Guangzhou.<br>Tu compri, controlli, imballi e spedisci.<br>Loro, dall\'altra parte del mondo, giudicano.</p>'+
     '<ul class="rules">'+
+     '<li><i data-lucide="shuffle"></i><span>Cataloglo randomizzato: oltre 50 prodotti — scarpe, vestiti, sciarpe, profumi, decorazioni, cinture, orologi, portafogli…</span></li>'+
      '<li><i data-lucide="scan-line"></i><span>Quality check veri: clicca i punti e trova i difetti prima che li trovi il cliente.</span></li>'+
      '<li><i data-lucide="package-open"></i><span>Debox, sottovuoto, bolla: i servizi salvano volumi, pacchi e recensioni.</span></li>'+
      '<li><i data-lucide="truck"></i><span>5 linee di spedizione, vincoli su batterie e liquidi, dogane con senso dell\'umorismo variabile.</span></li>'+
@@ -1243,11 +1460,8 @@ function titleScreen(){
     '<button class="btn red" style="margin-top:16px" onclick="start()"><i data-lucide="play"></i>Timbra il cartellino</button>'+
     '<button class="btn ghost sm" style="margin-left:8px" onclick="openGuide()">Guida</button>'+
    '</div>'+
-   '<div style="flex:0 1 250px;min-width:220px">'+
-    '<div class="qrcard" style="flex-direction:column;text-align:center;gap:10px">'+
-     qrFrame(150,true)+
-     '<div><div class="qt">Sostieni il creatore</div><div class="qs">Inquadra il QR → pagina affiliata<br>(link bitly) · gioco 100% gratuito</div></div>'+
-    '</div>'+
+   '<div style="flex:0 1 260px;min-width:230px">'+
+    promoCard()+
     '<p class="note" style="margin-top:10px;text-align:center">Parodia e finzione: marchi "quasi" veri,<br>agent quasi serio, dogana quasi reale.</p>'+
    '</div>'+
   '</div>'+
@@ -1255,8 +1469,6 @@ function titleScreen(){
 
 /* ---------- INIT ---------- */
 (function(){
- const slot=document.getElementById('footQRSlot');
- if(slot)slot.innerHTML=qrFrame(26,false);
  renderHUD();renderStepper();titleScreen();
 })();
 document.addEventListener('click',()=>{AU.c()},{once:true});
